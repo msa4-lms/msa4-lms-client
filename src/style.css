@@ -1,0 +1,16 @@
+:root {
+  --primary-color: #4f46e5;
+  --secondary-color: #64748b;
+  --bg-color: #f8fafc;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--bg-color);
+  font-family: 'Pretendard', sans-serif;
+}
