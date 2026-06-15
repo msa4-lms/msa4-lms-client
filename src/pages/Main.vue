@@ -12,6 +12,13 @@ const menuItems = [
     color: '#e8f0fe'
   },
   {
+    title: '수강 내역',
+    description: '이번 학기 내가 신청한 수강 목록과 총 학점을 확인합니다.',
+    icon: '📋',
+    path: '/enrollments',
+    color: '#fff9db'
+  },
+  {
     title: '수강 신청',
     description: '원하는 강의를 신청하고 내 수강 목록을 관리합니다.',
     icon: '📝',

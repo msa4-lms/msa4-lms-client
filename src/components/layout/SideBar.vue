@@ -1,8 +1,9 @@
 <template>
   <aside class="sidebar">
     <nav class="sidebar-nav">
-      <router-link to="/" class="nav-item">대시보드</router-link>
+      <router-link to="/main" class="nav-item">대시보드</router-link>
       <router-link to="/lectures" class="nav-item">강의 조회</router-link>
+      <router-link to="/enrollments" class="nav-item">수강 내역</router-link>
       <router-link to="/registration" class="nav-item">수강 신청</router-link>
       <router-link to="/grade" class="nav-item">성적 조회</router-link>
     </nav>
