@@ -17,7 +17,7 @@ export const useAuthStore = defineStore('authStore', () => {
 
   const login = async (loginForm) => {
     try {
-      const url = '/api/auth/login';
+      const url = '/api/login';
       
       const res = await myAxios.post(url, loginForm);
       if (res.data.code === '00') {
@@ -35,7 +35,7 @@ export const useAuthStore = defineStore('authStore', () => {
 
   const logout = async () => {
     try {
-      const url = '/api/auth/logout';
+      const url = '/api/logout';
       await myAxios.post(url);
     } catch (error) {
       console.error(error);

@@ -22,7 +22,8 @@ const handleLogin = async () => {
   try {
     await authStore.login({
       userNo: userNo.value,
-      password: password.value
+      password: password.value,
+      role: 'STUDENT'
     });
 
     // 로그인 성공 시 메인 페이지로 이동

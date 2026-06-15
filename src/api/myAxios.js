@@ -4,7 +4,7 @@ import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "../store/auth/useAuthStore";
 
 const myAxios = axios.create({
-  baseURL: import.meta.env.VITE_API_BASE_URL,
+  baseURL: import.meta.env.VITE_API_BASE_URL || '',
   headers: {
     'Content-Type': 'application/json',
   },

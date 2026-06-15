@@ -1,28 +1,16 @@
 <script setup>
 import { onMounted } from 'vue';
 import { useEnrollmentStore } from '../../store/enrollment/useEnrollmentStore';
-
-/**
-      * [스크립트 설정]
-      * 1. enrollmentStore: Pinia를 사용하여 수강 신청 관련 상태와 로직을 전역적으로 관리합니다.
-      * 2. days: 시간표 헤더와 반복 로직에 사용할 요일 배열입니다.
-      * 3. mockStudentId: 현재는 로그인 기능 대신 테스트용 학번을 사용 중입니다. 
-      * enrollments의 student_id에 적힌 것들중 하나를 고르면 홈페이지에 반영됩니다.
-      */
+import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const enrollmentStore = useEnrollmentStore();
+const authStore = useAuthStore();
 const days = ['월', '화', '수', '목', '금'];
-const mockStudentId = 1000;   //테스트할 때 501부터 10500까지 범위를 지킬 것!! 
 
-
-/**
-    onMounted (생명주기 훅)
-      * 왜 쓰나요?: 컴포넌트가 화면에 그려지자마자 데이터를 불러와야 하기 때문입니다.
-      * 얻는 것: 사용자는 기다릴 필요 없이 화면 접속과 동시에 자신의 시간표를 보게 됩니다.
-      * 백엔드 서버로부터 현재 학생의 수강 내역을 비동기로 받아옵니다.
-      */
 onMounted(async () => {
-  await enrollmentStore.fetchMyEnrollments(mockStudentId);
+  if (authStore.userInfo && authStore.userInfo.id) {
+    await enrollmentStore.fetchMyEnrollments(authStore.userInfo.id);
+  }
 });
 
 /**
