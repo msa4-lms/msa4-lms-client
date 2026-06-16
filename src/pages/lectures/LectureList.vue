@@ -90,7 +90,7 @@ onMounted(() => {
             <td class="course-name">{{ lecture.courseName }}</td>
             <td>{{ lecture.credits }}</td>
             <td>{{ lecture.professorName }}</td>
-            <td>{{ lecture.room }}</td>
+            <td>{{ lecture.classroom }}</td>
             <td>{{ lecture.schedule }}</td>
             <td>{{ lecture.capacity }}명</td>
           </tr>

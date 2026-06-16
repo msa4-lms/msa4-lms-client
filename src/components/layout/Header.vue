@@ -1,27 +1,46 @@
 <script setup>
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
-const logout = () => {
-  console.log('로그아웃 클릭');
+const goHome = () => {
+  if (authStore.isLoggedIn) {
+    router.push('/main');
+  } else {
+    router.push('/');
+  }
+};
+
+const logout = async () => {
+  await authStore.logout();
+  router.push('/');
 };
 
 const login = () => {
-  console.log('로그인 클릭');
+  router.push('/');
 };
 </script>
 
 <template>
   <header class="header">
-    <div class="header-left" @click="router.push('/')">
+    <div class="header-left" @click="goHome">
       <img :src="'/로고.png'" alt="로고" class="logo" />
       <img :src="'/이름.png'" alt="대학이름" class="logo-name" />
     </div>
 
     <div class="header-right">
-      <button @click="login" class="btn-login">로그인</button>
-      <button @click="logout" class="btn-logout">로그아웃</button>
+      <template v-if="!authStore.isLoggedIn">
+        <button @click="login" class="btn-login">로그인</button>
+      </template>
+      <template v-else>
+        <div class="user-info">
+          <span class="user-name"><strong>{{ authStore.userInfo?.name }}</strong>님 환영합니다</span>
+          <span class="user-role">[{{ authStore.userInfo?.role }}]</span>
+        </div>
+        <button @click="logout" class="btn-logout">로그아웃</button>
+      </template>
     </div>
   </header>
 </template>
@@ -57,7 +76,22 @@ const login = () => {
 
 .header-right {
   display: flex;
-  gap: 12px;
+  align-items: center;
+  gap: 20px;
+}
+
+.user-info {
+  font-size: 0.9rem;
+  color: #333;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.user-role {
+  color: #1a73e8;
+  font-size: 0.8rem;
+  font-weight: bold;
 }
 
 .btn-login, .btn-logout {

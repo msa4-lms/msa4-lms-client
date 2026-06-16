@@ -74,7 +74,7 @@ const getSchedule = (day, period) => {
 
               <!-- 과목명이 있을 경우 과목명과 강의실 정보를 카드 형태로 출력합니다. -->
               <span class="course-name">{{ getSchedule(day, period).courseName }}</span>
-              <span class="room">{{ getSchedule(day, period).room }}</span>
+              <span class="classroom">{{ getSchedule(day, period).classroom }}</span>
             </div>
           </div>
         </template>
@@ -102,7 +102,7 @@ const getSchedule = (day, period) => {
             <td>{{ item.courseCode }}</td>
             <td>{{ item.courseName }}</td>
             <td>{{ item.professorName }}</td>
-            <td>{{ item.room }}</td>
+            <td>{{ item.classroom }}</td>
             <td>{{ item.schedule }}</td>
             <td>{{ item.credits }}</td>
             <td>{{ item.status }}</td>
@@ -185,7 +185,7 @@ const getSchedule = (day, period) => {
   margin-bottom: 4px;
 }
 
-.room {
+.classroom {
   font-size: 0.75rem;
   color: #666;
 }
