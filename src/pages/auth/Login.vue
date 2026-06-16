@@ -4,8 +4,6 @@ import { useRouter } from "vue-router";
 import loginValidator from "../../util/validator/domain/loginValidator";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 
-import { useAuthStore } from "../../store/auth/useAuthStore";
-
 const router = useRouter();
 const authStore = useAuthStore();
 const loginType = ref("student");
@@ -13,16 +11,15 @@ const rememberId = ref(false);
 const showPassword = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref("");
-const authStore = useAuthStore();
 
 const loginForm = reactive({
-  userNo: "",
+  loginId: "",
   password: "",
 });
 
 const changeLoginType = (type) => {
   loginType.value = type;
-  loginForm.userNo = "";
+  loginForm.loginId = "";
   loginForm.password = "";
   errorMessage.value = "";
 };
@@ -56,9 +53,9 @@ const loginContent = computed(() =>
 const handleLogin = async () => {
   errorMessage.value = "";
 
-  const userNoMessage = loginValidator.userNo(loginForm.userNo);
-  if (userNoMessage) {
-    errorMessage.value = userNoMessage;
+  const loginIdMessage = loginValidator.userNo(loginForm.loginId);
+  if (loginIdMessage) {
+    errorMessage.value = loginIdMessage;
     return;
   }
 
@@ -72,13 +69,8 @@ const handleLogin = async () => {
 
   try {
     await authStore.login({
-<<<<<<< HEAD
-      userNo: loginForm.userNo,
+      loginId: loginForm.loginId,
       password: loginForm.password,
-=======
-      userNo: userId.value,
-      password: password.value,
->>>>>>> b3df1e9d3fa6e1b38ae7d77be4e8a80897283dba
       role: loginType.value.toUpperCase(),
     });
 
@@ -187,7 +179,7 @@ const handleLogin = async () => {
             </svg>
             <input
               id="userId"
-              v-model.trim="loginForm.userNo"
+              v-model.trim="loginForm.loginId"
               type="text"
               autocomplete="username"
               :placeholder="loginContent.idPlaceholder"

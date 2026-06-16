@@ -2,7 +2,7 @@ export const userNo = (val) => {
   const regex = /^[A-Za-z0-9]{4,20}$/;
 
   if (!val) {
-    return "아이디디 확인은 필수입니다";
+    return "아이디 확인은 필수입니다";
   }
 
   if (!regex.test(val)) {

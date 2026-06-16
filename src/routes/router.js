@@ -67,12 +67,12 @@ router.beforeEach(async (to, from, next) => {
 
   if (!authStore.isLoggedIn) {
     try {
-      await authStore.reissue;
+      await authStore.reissue();
     } catch (error) {}
   }
 
   if (to.meta.isAuthenticated && !authStore.isLoggedIn) {
-    return next("/login");
+    return next("/");
   }
 
   if (to.meta.isGuestOnly && authStore.isLoggedIn) {

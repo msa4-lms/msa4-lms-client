@@ -51,7 +51,8 @@ export const useAuthStore = defineStore("authStore", () => {
 
       const res = await myAxios.post(url);
       const data = res.data.data;
-      accessToken.value = data.user;
+      accessToken.value = data.accessToken;
+      userInfo.value = data.user;
       isLoggedIn.value = true;
     } catch (error) {
       clearAuthStore();
