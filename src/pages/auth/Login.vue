@@ -1,16 +1,28 @@
 <script setup>
-import { computed, ref } from "vue";
+import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
-import myAxios from "../../api/myAxios";
+import loginValidator from "../../util/validator/domain/loginValidator";
+import { useAuthStore } from "../../store/auth/useAuthStore";
 
 const router = useRouter();
 const loginType = ref("student");
-const userId = ref("");
-const password = ref("");
 const rememberId = ref(false);
 const showPassword = ref(false);
 const isLoading = ref(false);
 const errorMessage = ref("");
+const authStore = useAuthStore();
+
+const loginForm = reactive({
+  userNo: "",
+  password: "",
+});
+
+const changeLoginType = (type) => {
+  loginType.value = type;
+  loginForm.userNo = "";
+  loginForm.password = "";
+  errorMessage.value = "";
+};
 
 const loginContent = computed(() =>
   loginType.value === "student"
@@ -38,34 +50,31 @@ const loginContent = computed(() =>
       }
 );
 
-const changeLoginType = (type) => {
-  loginType.value = type;
-  userId.value = "";
-  password.value = "";
-  errorMessage.value = "";
-};
-
 const handleLogin = async () => {
   errorMessage.value = "";
 
-  if (!userId.value || !password.value) {
-    errorMessage.value = `${loginContent.value.idLabel}과 비밀번호를 모두 입력해 주세요.`;
+  const userNoMessage = loginValidator.userNo(loginForm.userNo);
+  if (userNoMessage) {
+    errorMessage.value = userNoMessage;
+    return;
+  }
 
+  const passwordMessage = loginValidator.password(loginForm.password);
+  if (passwordMessage) {
+    errorMessage.value = passwordMessage;
     return;
   }
 
   isLoading.value = true;
 
   try {
-    const response = await myAxios.post("/api/login", {
-      userNo: userId.value,
-      password: password.value,
+    await authStore.login({
+      userNo: loginForm.userNo,
+      password: loginForm.password,
       role: loginType.value.toUpperCase(),
     });
 
-    console.log(response.data);
-
-    router.push("/home");
+    router.replace("/main");
   } catch (error) {
     errorMessage.value = "로그인에 실패했습니다.";
   } finally {
@@ -170,7 +179,7 @@ const handleLogin = async () => {
             </svg>
             <input
               id="userId"
-              v-model.trim="userId"
+              v-model.trim="loginForm.userNo"
               type="text"
               autocomplete="username"
               :placeholder="loginContent.idPlaceholder"
@@ -187,7 +196,7 @@ const handleLogin = async () => {
             </svg>
             <input
               id="password"
-              v-model="password"
+              v-model="loginForm.password"
               :type="showPassword ? 'text' : 'password'"
               autocomplete="current-password"
               placeholder="비밀번호를 입력해 주세요"
