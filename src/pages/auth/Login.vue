@@ -53,7 +53,11 @@ const loginContent = computed(() =>
 const handleLogin = async () => {
   errorMessage.value = "";
 
+<<<<<<< HEAD
   const loginIdMessage = loginValidator.userNo(loginForm.loginId);
+=======
+  const loginIdMessage = loginValidator.loginId(loginForm.loginId);
+>>>>>>> f0159c288ab002574f04618cffd115636f50fac1
   if (loginIdMessage) {
     errorMessage.value = loginIdMessage;
     return;
@@ -91,10 +95,7 @@ const handleLogin = async () => {
 
       <div class="brand-content">
         <div class="logo-frame">
-          <img
-            src="/로고2.png"
-            alt="미래대학교 로고"
-          />
+          <img src="/로고2.png" alt="미래대학교 로고" />
         </div>
 
         <div class="brand-text">
@@ -178,7 +179,7 @@ const handleLogin = async () => {
               />
             </svg>
             <input
-              id="userId"
+              id="loginId"
               v-model.trim="loginForm.loginId"
               type="text"
               autocomplete="username"

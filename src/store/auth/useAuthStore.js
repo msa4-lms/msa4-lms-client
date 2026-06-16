@@ -20,10 +20,15 @@ export const useAuthStore = defineStore("authStore", () => {
       const url = "/api/login";
 
       const res = await myAxios.post(url, loginForm);
-      if (res.data.code === "00") {
+      if (!res.data.code || res.data.code === "00") {
         const data = res.data.data;
         accessToken.value = data.accessToken;
-        userInfo.value = data.user;
+        userInfo.value = data.user || {
+          userId: data.userId,
+          loginId: data.loginId,
+          name: data.name,
+          role: data.role,
+        };
         isLoggedIn.value = true;
       } else {
         throw new Error(res.data.message || "로그인 실패");
@@ -52,7 +57,13 @@ export const useAuthStore = defineStore("authStore", () => {
       const res = await myAxios.post(url);
       const data = res.data.data;
       accessToken.value = data.accessToken;
-      userInfo.value = data.user;
+      userInfo.value = data.user ||
+        userInfo.value || {
+          userId: data.userId,
+          loginId: data.loginId,
+          name: data.name,
+          role: data.role,
+        };
       isLoggedIn.value = true;
     } catch (error) {
       clearAuthStore();
