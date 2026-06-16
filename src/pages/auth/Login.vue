@@ -53,11 +53,7 @@ const loginContent = computed(() =>
 const handleLogin = async () => {
   errorMessage.value = "";
 
-<<<<<<< HEAD
-  const loginIdMessage = loginValidator.userNo(loginForm.loginId);
-=======
   const loginIdMessage = loginValidator.loginId(loginForm.loginId);
->>>>>>> f0159c288ab002574f04618cffd115636f50fac1
   if (loginIdMessage) {
     errorMessage.value = loginIdMessage;
     return;

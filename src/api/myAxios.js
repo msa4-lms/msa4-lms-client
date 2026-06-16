@@ -50,6 +50,12 @@ myAxios.interceptors.response.use(
     const authStore = useAuthStore();
     const status = error.response ? error.response.status : null;
     const errorData = error.response ? error.response.data : null;
+    const originalUrl = error.config ? error.config.url : "";
+
+    // reissue-token 요청이 실패한 경우는 조용히 넘김 (무한 루프 방지)
+    if (originalUrl.includes("/api/reissue-token") && status === 401) {
+      return Promise.reject(error);
+    }
 
     if (status === 401 || status === 403) {
       // 인증 및 권한 에러 처리
