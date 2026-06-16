@@ -13,10 +13,10 @@ const myAxios = axios.create({
 
 myAxios.interceptors.request.use(async (config) => {
   const authStore = useAuthStore();
-  const accessToken = authStore.accessToken;
+  let accessToken = authStore.accessToken;
   const denyUrl = /^\/api\/reissue-token$/;
 
-  if (!denyUrl.test(config.url) && authStore.isLoggedIn) {
+  if (accessToken && !denyUrl.test(config.url) && authStore.isLoggedIn) {
     const claims = jwtDecode(accessToken);
     const now = dayjs().unix();
     const expTime = dayjs.unix(claims.exp).add(-5, "minute").unix();
@@ -31,7 +31,11 @@ myAxios.interceptors.request.use(async (config) => {
     }
   }
 
-  config.headers.Authorization = `Bearer ${accessToken}`;
+  if (accessToken) {
+    config.headers.Authorization = `Bearer ${accessToken}`;
+  } else {
+    delete config.headers.Authorization;
+  }
 
   return config;
 });

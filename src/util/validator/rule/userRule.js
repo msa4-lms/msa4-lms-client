@@ -1,4 +1,4 @@
-export const userNo = (val) => {
+export const loginId = (val) => {
   const regex = /^[A-Za-z0-9]{4,20}$/;
 
   if (!val) {

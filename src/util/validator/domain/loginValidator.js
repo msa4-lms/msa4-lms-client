@@ -1,6 +1,6 @@
-import { password, userNo } from "../rule/userRule";
+import { password, loginId } from "../rule/userRule";
 
 export default {
-  userNo,
+  loginId,
   password,
 };
