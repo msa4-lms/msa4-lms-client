@@ -3,7 +3,10 @@ import { computed, ref } from "vue";
 import { useRouter } from "vue-router";
 import myAxios from "../../api/myAxios";
 
+import { useAuthStore } from "../../store/auth/useAuthStore";
+
 const router = useRouter();
+const authStore = useAuthStore();
 const loginType = ref("student");
 const userId = ref("");
 const password = ref("");
@@ -57,17 +60,15 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   try {
-    const response = await myAxios.post("/api/login", {
+    await authStore.login({
       userNo: userId.value,
       password: password.value,
       role: loginType.value.toUpperCase(),
     });
 
-    console.log(response.data);
-
-    router.push("/home");
+    router.replace("/main");
   } catch (error) {
-    errorMessage.value = "로그인에 실패했습니다.";
+    errorMessage.value = error.message || "로그인에 실패했습니다.";
   } finally {
     isLoading.value = false;
   }
@@ -83,7 +84,7 @@ const handleLogin = async () => {
       <div class="brand-content">
         <div class="logo-frame">
           <img
-            src="../../assets/mirae-university-logo.png"
+            src="/로고2.png"
             alt="미래대학교 로고"
           />
         </div>
