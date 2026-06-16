@@ -1,45 +1,74 @@
 <script setup>
+import { computed } from 'vue';
 import { useRouter } from 'vue-router';
+import { useAuthStore } from '../store/auth/useAuthStore';
 
 const router = useRouter();
+const authStore = useAuthStore();
 
-const menuItems = [
+const allMenuItems = [
   {
     title: '강의 조회',
     description: '개설된 모든 강의를 검색하고 상세 정보를 확인합니다.',
     icon: '📚',
     path: '/lectures',
-    color: '#e8f0fe'
+    color: '#e8f0fe',
+    roles: ['STUDENT', 'PROFESSOR', 'ADMIN']
   },
   {
     title: '수강 내역',
     description: '이번 학기 내가 신청한 수강 목록과 총 학점을 확인합니다.',
     icon: '📋',
     path: '/enrollments',
-    color: '#fff9db'
+    color: '#fff9db',
+    roles: ['STUDENT']
   },
   {
     title: '수강 신청',
     description: '원하는 강의를 신청하고 내 수강 목록을 관리합니다.',
     icon: '📝',
     path: '/registration',
-    color: '#e6fffa'
+    color: '#e6fffa',
+    roles: ['STUDENT']
   },
   {
     title: '성적 조회',
     description: '이번 학기 및 지난 학기의 성적을 확인합니다.',
     icon: '📊',
     path: '/grade',
-    color: '#fff5f5'
+    color: '#fff5f5',
+    roles: ['STUDENT']
+  },
+  {
+    title: '강의 관리',
+    description: '내 강의 목록을 관리하고 성적을 입력합니다.',
+    icon: '👨‍🏫',
+    path: '/lectures/manage',
+    color: '#e8f0fe',
+    roles: ['PROFESSOR']
+  },
+  {
+    title: '학생 관리',
+    description: '수강 학생 목록을 확인하고 관리합니다.',
+    icon: '👥',
+    path: '/students',
+    color: '#fff9db',
+    roles: ['PROFESSOR', 'ADMIN']
   },
   {
     title: '내 정보',
     description: '개인 정보 및 비밀번호를 관리합니다.',
     icon: '👤',
     path: '/profile',
-    color: '#f3f0ff'
+    color: '#f3f0ff',
+    roles: ['STUDENT', 'PROFESSOR', 'ADMIN']
   }
 ];
+
+const menuItems = computed(() => {
+  const userRole = authStore.userInfo?.role || 'STUDENT';
+  return allMenuItems.filter(item => item.roles.includes(userRole));
+});
 
 const navigateTo = (path) => {
   router.push(path);

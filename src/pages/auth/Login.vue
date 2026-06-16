@@ -4,7 +4,10 @@ import { useRouter } from "vue-router";
 import loginValidator from "../../util/validator/domain/loginValidator";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 
+import { useAuthStore } from "../../store/auth/useAuthStore";
+
 const router = useRouter();
+const authStore = useAuthStore();
 const loginType = ref("student");
 const rememberId = ref(false);
 const showPassword = ref(false);
@@ -69,14 +72,19 @@ const handleLogin = async () => {
 
   try {
     await authStore.login({
+<<<<<<< HEAD
       userNo: loginForm.userNo,
       password: loginForm.password,
+=======
+      userNo: userId.value,
+      password: password.value,
+>>>>>>> b3df1e9d3fa6e1b38ae7d77be4e8a80897283dba
       role: loginType.value.toUpperCase(),
     });
 
     router.replace("/main");
   } catch (error) {
-    errorMessage.value = "로그인에 실패했습니다.";
+    errorMessage.value = error.message || "로그인에 실패했습니다.";
   } finally {
     isLoading.value = false;
   }
@@ -92,7 +100,7 @@ const handleLogin = async () => {
       <div class="brand-content">
         <div class="logo-frame">
           <img
-            src="../../assets/mirae-university-logo.png"
+            src="/로고2.png"
             alt="미래대학교 로고"
           />
         </div>
