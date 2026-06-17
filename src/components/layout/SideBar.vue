@@ -15,7 +15,7 @@ const authStore = useAuthStore();
         <router-link to="/enrollments" class="nav-item">수강 내역</router-link>
         <router-link to="/registration" class="nav-item">수강 신청</router-link>
         <router-link to="/grade" class="nav-item">성적 조회</router-link>
-        <router-link to="/attendance" class="nav-item">출결 조회</router-link>
+        <router-link to="/attendance" class="nav-item">출결 현황</router-link>
         <router-link to="/profile" class="nav-item">내 정보</router-link>
       </template>
 
