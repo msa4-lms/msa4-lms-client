@@ -4,8 +4,10 @@ import AttendancePage from "../pages/academic/AttendancePage.vue";
 import Login from "../pages/auth/Login.vue";
 import Main from "../pages/Main.vue";
 import LectureList from "../pages/lectures/LectureList.vue";
+import LectureEnrollment from "../pages/enrollment/LectureEnrollment.vue";
 import EnrollmentList from "../pages/enrollment/EnrollmentList.vue";
 import { useAuthStore } from "../store/auth/useAuthStore.js";
+import ProfileRouter from "../pages/profile/ProfileRouter.vue";
 
 const setMeta = (isAuthenticated, isGuestOnly) => {
   return {
@@ -42,7 +44,7 @@ const routes = [
   {
     path: "/registration",
     name: "Registration",
-    component: LectureList, // 수강 신청은 강의 목록에서 진행하므로 우선 연결
+    component: LectureEnrollment,
     meta: setMeta(true, false),
   },
   {
@@ -54,7 +56,7 @@ const routes = [
   {
     path: "/profile",
     name: "Profile",
-    component: Main, // 미구현 상태이므로 메인으로 연결
+    component: ProfileRouter,
     meta: setMeta(true, false),
   },
   {

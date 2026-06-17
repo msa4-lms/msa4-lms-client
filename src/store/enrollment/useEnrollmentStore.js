@@ -12,7 +12,7 @@ export const useEnrollmentStore = defineStore('enrollment', () => { // [4]
    * [6] 액션(Action): 백엔드 API를 호출하여 데이터를 가져옵니다.
    * @param {number} studentId - 학생 식별 번호
    */
-  const fetchMyEnrollments = async (studentId) => {
+  const fetchMyEnrollments = async () => {
     const now = new Date();
     const year = now.getFullYear();
     const month = now.getMonth() + 1;
@@ -22,7 +22,6 @@ export const useEnrollmentStore = defineStore('enrollment', () => { // [4]
       // 백엔드 컨트롤러(@GetMapping("/my"))에 요청을 보냅니다.
       const res = await myAxios.get(`/api/enrollments/my`, {
         params: { 
-          studentId,
           year,
           semester
         } 
@@ -38,10 +37,49 @@ export const useEnrollmentStore = defineStore('enrollment', () => { // [4]
     }
   };
 
+  /**
+   * 수강 신청
+   */
+  const applyEnrollment = async (lectureId) => {
+    try {
+      const res = await myAxios.post('/api/enrollments', {
+        lectureId
+      });
+      if (res.data.code === '00') {
+        alert('수강 신청이 완료되었습니다.');
+        await fetchMyEnrollments();
+      }
+    } catch (error) {
+      console.error('수강 신청 실패:', error);
+    }
+  };
+
+  /**
+   * 수강 취소
+   */
+  const cancelEnrollment = async (lectureId) => {
+    if (!confirm('정말 수강을 취소하시겠습니까?')) return;
+    
+    try {
+      const res = await myAxios.delete('/api/enrollments', {
+        params: { lectureId }
+      });
+      if (res.data.code === '00') {
+        alert('수강 취소가 완료되었습니다.');
+        await fetchMyEnrollments();
+      }
+    } catch (error) {
+      console.error('수강 취소 실패:', error);
+      alert('수강 취소에 실패했습니다.');
+    }
+  };
+
   // [8] 컴포넌트에서 사용할 수 있도록 외부로 공개합니다.
   return { 
     myEnrollments, 
     totalCredits, 
-    fetchMyEnrollments 
+    fetchMyEnrollments,
+    applyEnrollment,
+    cancelEnrollment
   };
 });

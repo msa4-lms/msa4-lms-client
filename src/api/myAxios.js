@@ -13,10 +13,15 @@ const myAxios = axios.create({
 
 myAxios.interceptors.request.use(async (config) => {
   const authStore = useAuthStore();
-  let accessToken = authStore.accessToken; 
-  const denyUrl = /^\/api\/reissue-token$/;
+  let accessToken = authStore.accessToken;
+  const isReissueUrl = /^\/api\/reissue-token$/.test(config.url || "");
 
-  if (accessToken && !denyUrl.test(config.url) && authStore.isLoggedIn) {
+  if (isReissueUrl) {
+    delete config.headers.Authorization;
+    return config;
+  }
+
+  if (accessToken && authStore.isLoggedIn) {
     const claims = jwtDecode(accessToken);
     const now = dayjs().unix();
     const expTime = dayjs.unix(claims.exp).add(-5, "minute").unix();
@@ -27,6 +32,8 @@ myAxios.interceptors.request.use(async (config) => {
         accessToken = authStore.accessToken;
       } catch (error) {
         console.error(error?.response);
+        authStore.clearAuthStore();
+        throw error;
       }
     }
   }
@@ -60,14 +67,14 @@ myAxios.interceptors.response.use(
     if (status === 401 || status === 403) {
       // 인증 및 권한 에러 처리
       alert(errorData?.data || "접근 권한이 없거나 세션이 만료되었습니다.");
-      authStore.logout();
+      authStore.clearAuthStore();
       window.location.href = "/";
     } else if (status === 400) {
       // 잘못된 요청 (Validation 에러 등)
       let msg = errorData?.message || "잘못된 요청입니다.";
-      if (errorData?.data && typeof errorData.data === 'object') {
+      if (errorData?.data && typeof errorData.data === "object") {
         msg += "\n" + Object.values(errorData.data).join("\n");
-      } else if (errorData?.data) {
+      } else if (errorData?.data && errorData.data !== errorData.message) {
         msg += "\n" + errorData.data;
       }
       alert(msg);
