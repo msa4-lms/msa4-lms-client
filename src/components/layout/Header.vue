@@ -1,25 +1,25 @@
 <script setup>
-import { useRouter } from 'vue-router';
-import { useAuthStore } from '../../store/auth/useAuthStore';
+import { useRouter } from "vue-router";
+import { useAuthStore } from "../../store/auth/useAuthStore";
 
 const router = useRouter();
 const authStore = useAuthStore();
 
 const goHome = () => {
   if (authStore.isLoggedIn) {
-    router.push('/main');
+    router.push("/main");
   } else {
-    router.push('/');
+    router.push("/");
   }
 };
 
 const logout = async () => {
   await authStore.logout();
-  router.push('/');
+  router.push("/");
 };
 
 const login = () => {
-  router.push('/');
+  router.push("/");
 };
 </script>
 
@@ -31,12 +31,12 @@ const login = () => {
     </div>
 
     <div class="header-right">
-      <template v-if="!authStore.isLoggedIn">
-        <button @click="login" class="btn-login">로그인</button>
-      </template>
-      <template v-else>
+      <template v-if="authStore.isLoggedIn">
         <div class="user-info">
-          <span class="user-name"><strong>{{ authStore.userInfo?.name }}</strong>님 환영합니다</span>
+          <span class="user-name"
+            ><strong>{{ authStore.userInfo?.name }}</strong
+            >님 환영합니다</span
+          >
           <span class="user-role">[{{ authStore.userInfo?.role }}]</span>
         </div>
         <button @click="logout" class="btn-logout">로그아웃</button>
@@ -53,7 +53,7 @@ const login = () => {
   justify-content: space-between;
   align-items: center;
   padding: 0 24px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   position: sticky;
   top: 0;
   z-index: 100;
@@ -94,7 +94,8 @@ const login = () => {
   font-weight: bold;
 }
 
-.btn-login, .btn-logout {
+.btn-login,
+.btn-logout {
   padding: 8px 16px;
   border-radius: 4px;
   border: 1px solid #ddd;

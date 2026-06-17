@@ -4,6 +4,10 @@
   --accent-color: #60a5fa;
   --secondary-color: #64748b;
   --bg-color: #f8fafc;
+  --personal-color-gray: #b1b1b1;
+  --personal-color-white: #ffffff;
+  --personal-color-black: #000000;
+  --personal-color-red: #ef4444;
   color-scheme: light;
   font-synthesis: none;
 }

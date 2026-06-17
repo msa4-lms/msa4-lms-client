@@ -71,12 +71,28 @@ export const useAuthStore = defineStore("authStore", () => {
     }
   };
 
+  // 비밀번호 변경
+  const passwordChange = async (data) => {
+    try {
+      const url = "/api/password";
+
+      await myAxios.post(url, data);
+
+      return;
+    } catch (error) {
+      console.error(error);
+      throw error;
+    }
+  };
+
   return {
     isLoggedIn,
     accessToken,
     userInfo,
+    clearAuthStore,
     login,
     logout,
     reissue,
+    passwordChange,
   };
 });
