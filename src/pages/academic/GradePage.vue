@@ -7,9 +7,8 @@ const academicStore = useAcademicStore();
 const authStore = useAuthStore();
 
 onMounted(() => {
-  // 로그인한 사용자의 PK를 사용하여 성적 조회
-  if (authStore.userInfo && authStore.userInfo.id) {
-    academicStore.fetchGrades(authStore.userInfo.id);
+  if (authStore.isLoggedIn) {
+    academicStore.fetchGrades();
   }
 });
 </script>

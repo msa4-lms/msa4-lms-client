@@ -1,11 +1,26 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref } from 'vue';
 import { useEnrollmentStore } from '../../store/enrollment/useEnrollmentStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
 const days = ['월', '화', '수', '목', '금'];
+
+const historyParams = ref({
+  year: 2026,
+  semester: 1
+});
+
+const onSearchHistory = () => {
+  enrollmentStore.fetchMyEnrollments(historyParams.value.year, historyParams.value.semester);
+};
+
+const handleCancel = async (lectureId) => {
+  await enrollmentStore.cancelEnrollment(lectureId);
+  // 취소 후 현재 필터링된 과거 학기 데이터 다시 로드
+  onSearchHistory();
+};
 
 // 1. 교시별 표준 시간 매핑 (50분 수업 / 10분 휴식)
 const timeSlots = {
@@ -22,7 +37,7 @@ const timeSlots = {
 
 onMounted(async () => {
   if (authStore.isLoggedIn) {
-    await enrollmentStore.fetchMyEnrollments();
+    await enrollmentStore.fetchMyEnrollments(historyParams.value.year, historyParams.value.semester);
   }
 });
 
@@ -65,6 +80,27 @@ const formatSchedule = (schedule) => {
 <template>
   <div class="enrollment-container">
     <h2>내 수강 내역 및 시간표</h2>
+
+    <!-- 학기 선택 필터 추가 -->
+    <div class="history-filter">
+      <div class="filter-group">
+        <label>조회 연도</label>
+        <select v-model="historyParams.year">
+          <option :value="2026">2026년</option>
+          <option :value="2025">2025년</option>
+          <option :value="2024">2024년</option>
+          <option :value="2023">2023년</option>
+        </select>
+      </div>
+      <div class="filter-group">
+        <label>학기</label>
+        <select v-model="historyParams.semester">
+          <option :value="1">1학기</option>
+          <option :value="2">2학기</option>
+        </select>
+      </div>
+      <button class="btn-history-search" @click="onSearchHistory">조회</button>
+    </div>
     
     <div class="summary-card">
       <p>신청 과목 합계 학점: <strong>{{ enrollmentStore.totalCredits }}</strong> 학점</p>
@@ -128,7 +164,7 @@ const formatSchedule = (schedule) => {
             </td>
             <td>{{ item.credits }}학점</td>
             <td>
-              <button class="btn-cancel" @click="enrollmentStore.cancelEnrollment(item.lectureId)">취소</button>
+              <button class="btn-cancel" @click="handleCancel(item.lectureId)">취소</button>
             </td>
           </tr>
           <tr v-if="enrollmentStore.myEnrollments.length === 0">
@@ -142,6 +178,46 @@ const formatSchedule = (schedule) => {
 
 <style scoped>
 .enrollment-container { padding: 20px; max-width: 1400px; margin: 0 auto; }
+
+.history-filter {
+  display: flex;
+  gap: 15px;
+  align-items: flex-end;
+  background-color: white;
+  padding: 15px;
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  margin-bottom: 20px;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter-group label {
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: #666;
+}
+
+.filter-group select {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #ddd;
+}
+
+.btn-history-search {
+  padding: 8px 20px;
+  background-color: #0B3D91;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  height: 35px;
+}
+
 .summary-card { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #0B3D91; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
 
 .timetable-grid {

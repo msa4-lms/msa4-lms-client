@@ -11,11 +11,9 @@ export const useAcademicStore = defineStore("academic", () => {
   const attendanceList = ref([]);
 
   // 성적 조회
-  const fetchGrades = async (studentId) => {
+  const fetchGrades = async () => {
     try {
-      const res = await myAxios.get(`/api/academic/grades`, {
-        params: { studentId },
-      });
+      const res = await myAxios.get(`/api/academic/grades`);
       if (res.data.code === "00") {
         gradeSummary.value = res.data.data;
       }
@@ -25,11 +23,9 @@ export const useAcademicStore = defineStore("academic", () => {
   };
 
   // 출결 조회
-  const fetchAttendance = async (studentId) => {
+  const fetchAttendance = async () => {
     try {
-      const res = await myAxios.get(`/api/academic/attendance`, {
-        params: { studentId },
-      });
+      const res = await myAxios.get(`/api/academic/attendance`);
       if (res.data.code === "00") {
         attendanceList.value = res.data.data;
       }

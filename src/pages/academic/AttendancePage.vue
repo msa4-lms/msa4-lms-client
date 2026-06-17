@@ -7,8 +7,8 @@ const academicStore = useAcademicStore();
 const authStore = useAuthStore();
 
 onMounted(() => {
-  if (authStore.userInfo && authStore.userInfo.id) {
-    academicStore.fetchAttendance(authStore.userInfo.id);
+  if (authStore.isLoggedIn) {
+    academicStore.fetchAttendance();
   }
 });
 </script>

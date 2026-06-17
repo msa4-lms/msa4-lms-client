@@ -60,14 +60,10 @@ const routes = [
     meta: setMeta(true, false),
   },
   {
-    path: '/academic/grades',
-    name: 'GradePage',
-    component: GradePage,
-  },
-  {
-    path: '/academic/attendance',
+    path: '/attendance',
     name: 'AttendancePage',
     component: AttendancePage,
+    meta: setMeta(true, false),
   },
 ];
 
@@ -85,12 +81,14 @@ router.beforeEach(async (to, from, next) => {
     } catch (error) {}
   }
 
+  // 인증이 필요한 페이지인데 로그인 안된 경우 -> 로그인 페이지로
   if (to.meta.isAuthenticated && !authStore.isLoggedIn) {
     return next("/");
   }
 
+  // 로그인 상태에서 게스트 전용 페이지(로그인 등)에 접근 시 -> 메인으로
   if (to.meta.isGuestOnly && authStore.isLoggedIn) {
-    return next("/");
+    return next("/main");
   }
 
   next();
