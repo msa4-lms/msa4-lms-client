@@ -91,7 +91,7 @@ const handleLogin = async () => {
 
       <div class="brand-content">
         <div class="logo-frame">
-          <img src="/로고2.png" alt="미래대학교 로고" />
+          <div class="temp-logo">MU</div>
         </div>
 
         <div class="brand-text">
@@ -688,5 +688,11 @@ form > label {
   .support-box a {
     display: none;
   }
+}
+.temp-logo {
+  font-size: 48px;
+  font-weight: 900;
+  color: #0b3d91;
+  letter-spacing: -2px;
 }
 </style>
