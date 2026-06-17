@@ -47,7 +47,7 @@ const updatePassword = async () => {
 
     await authStore.logout();
 
-    router.push("/login");
+    router.push("/");
   } catch (error) {
     console.error(error);
   }
