@@ -74,7 +74,7 @@ myAxios.interceptors.response.use(
       let msg = errorData?.message || "잘못된 요청입니다.";
       if (errorData?.data && typeof errorData.data === "object") {
         msg += "\n" + Object.values(errorData.data).join("\n");
-      } else if (errorData?.data) {
+      } else if (errorData?.data && errorData.data !== errorData.message) {
         msg += "\n" + errorData.data;
       }
       alert(msg);

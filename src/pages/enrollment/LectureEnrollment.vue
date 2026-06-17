@@ -1,8 +1,12 @@
 <script setup>
 import { onMounted, ref, computed } from 'vue';
 import { useLectureStore } from '../../store/lecture/useLectureStore';
+import { useEnrollmentStore } from '../../store/enrollment/useEnrollmentStore';
+import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const lectureStore = useLectureStore();
+const enrollmentStore = useEnrollmentStore();
+const authStore = useAuthStore();
 
 const now = new Date();
 const currentYear = now.getFullYear();
@@ -33,6 +37,19 @@ const totalPages = computed(() => {
     return Math.ceil(lectureStore.totalCount / searchParams.value.size);
 });
 
+const apply = (lectureId) => {
+    if (!authStore.isLoggedIn) {
+        alert('로그인이 필요한 서비스입니다.');
+        return;
+    }
+    
+    if (!confirm('해당 강의를 수강 신청하시겠습니까?')) {
+        return;
+    }
+    
+    enrollmentStore.applyEnrollment(authStore.userInfo.id, lectureId);
+};
+
 /**
  * [시간 포맷터] 쉼표로 구분된 시간을 줄바꿈 배열로 변환
  */
@@ -49,7 +66,7 @@ onMounted(() => {
 <template>
   <div class="lecture-list-container">
     <div class="page-header">
-      <h2>강의 조회</h2>
+      <h2>수강 신청</h2>
     </div>
 
     <!-- 검색 바 -->
@@ -100,14 +117,15 @@ onMounted(() => {
             <th class="col-classroom">강의실</th>
             <th class="col-time">시간</th>
             <th class="col-capacity">정원</th>
+            <th>신청</th>
           </tr>
         </thead>
         <tbody>
           <tr v-if="lectureStore.loading">
-            <td colspan="8" class="loading-text">데이터를 불러오는 중입니다...</td>
+            <td colspan="9" class="loading-text">데이터를 불러오는 중입니다...</td>
           </tr>
           <tr v-else-if="lectureStore.lectures.length === 0">
-            <td colspan="8" class="empty-text">조회된 강의가 없습니다.</td>
+            <td colspan="9" class="empty-text">조회된 강의가 없습니다.</td>
           </tr>
           <tr v-for="lecture in lectureStore.lectures" :key="lecture.id">
             <td>{{ lecture.courseCode }}</td>
@@ -122,6 +140,9 @@ onMounted(() => {
               </div>
             </td>
             <td>{{ lecture.capacity }}명</td>
+            <td>
+              <button class="btn-apply" @click="apply(lecture.id)">신청</button>
+            </td>
           </tr>
         </tbody>
       </table>
@@ -205,6 +226,21 @@ onMounted(() => {
 
 .btn-search:hover {
   background-color: #1557b0;
+}
+
+.btn-apply {
+  padding: 6px 12px;
+  background-color: #34a853;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.btn-apply:hover {
+  background-color: #2d8e47;
 }
 
 /* 테이블 스타일 */
