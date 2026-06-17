@@ -62,12 +62,12 @@ myAxios.interceptors.response.use(
       alert(errorData?.data || "접근 권한이 없거나 세션이 만료되었습니다.");
       authStore.logout();
       window.location.href = "/";
-    } else if (status === 400) {
-      // 잘못된 요청 (Validation 에러 등)
-      let msg = errorData?.message || "잘못된 요청입니다.";
+    } else if (status === 400 || status === 409 || status === 404) {
+      // 잘못된 요청, 중복 데이터, 찾을 수 없는 데이터 처리
+      let msg = errorData?.message || "요청을 처리할 수 없습니다.";
       if (errorData?.data && typeof errorData.data === 'object') {
         msg += "\n" + Object.values(errorData.data).join("\n");
-      } else if (errorData?.data) {
+      } else if (errorData?.data && errorData.data !== errorData.message) {
         msg += "\n" + errorData.data;
       }
       alert(msg);

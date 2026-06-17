@@ -38,10 +38,53 @@ export const useEnrollmentStore = defineStore('enrollment', () => { // [4]
     }
   };
 
+  /**
+   * 수강 신청
+   */
+  const applyEnrollment = async (studentId, lectureId) => {
+    try {
+      const res = await myAxios.post('/api/enrollments', {
+        studentId,
+        lectureId
+      });
+      if (res.data.code === '00') {
+        alert('수강 신청이 완료되었습니다.');
+        await fetchMyEnrollments(studentId);
+      }
+    } catch (error) {
+      console.error('수강 신청 실패:', error);
+      // GlobalErrorHandler에서 이미 처리하거나, 
+      // 여기서만 띄우려면 Axios 인터셉터 설정을 확인해야 합니다.
+      // 현재 두 번 뜨는 이유는 에러 처리기가 겹치기 때문입니다.
+    }
+  };
+
+  /**
+   * 수강 취소
+   */
+  const cancelEnrollment = async (studentId, lectureId) => {
+    if (!confirm('정말 수강을 취소하시겠습니까?')) return;
+    
+    try {
+      const res = await myAxios.delete('/api/enrollments', {
+        params: { studentId, lectureId }
+      });
+      if (res.data.code === '00') {
+        alert('수강 취소가 완료되었습니다.');
+        await fetchMyEnrollments(studentId);
+      }
+    } catch (error) {
+      console.error('수강 취소 실패:', error);
+      alert('수강 취소에 실패했습니다.');
+    }
+  };
+
   // [8] 컴포넌트에서 사용할 수 있도록 외부로 공개합니다.
   return { 
     myEnrollments, 
     totalCredits, 
-    fetchMyEnrollments 
+    fetchMyEnrollments,
+    applyEnrollment,
+    cancelEnrollment
   };
 });
