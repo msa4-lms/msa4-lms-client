@@ -5,6 +5,7 @@ import LectureList from "../pages/lectures/LectureList.vue";
 import LectureEnrollment from "../pages/enrollment/LectureEnrollment.vue";
 import EnrollmentList from "../pages/enrollment/EnrollmentList.vue";
 import { useAuthStore } from "../store/auth/useAuthStore.js";
+import ProfileRouter from "../pages/profile/ProfileRouter.vue";
 
 const setMeta = (isAuthenticated, isGuestOnly) => {
   return {
@@ -53,7 +54,7 @@ const routes = [
   {
     path: "/profile",
     name: "Profile",
-    component: Main, // 미구현 상태이므로 메인으로 연결
+    component: ProfileRouter, // 미구현 상태이므로 메인으로 연결
     meta: setMeta(true, false),
   },
 ];
