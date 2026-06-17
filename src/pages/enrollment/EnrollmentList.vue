@@ -21,8 +21,8 @@ const timeSlots = {
 };
 
 onMounted(async () => {
-  if (authStore.userInfo && authStore.userInfo.id) {
-    await enrollmentStore.fetchMyEnrollments(authStore.userInfo.id);
+  if (authStore.isLoggedIn) {
+    await enrollmentStore.fetchMyEnrollments();
   }
 });
 
@@ -128,7 +128,7 @@ const formatSchedule = (schedule) => {
             </td>
             <td>{{ item.credits }}학점</td>
             <td>
-              <button class="btn-cancel" @click="enrollmentStore.cancelEnrollment(authStore.userInfo.id, item.lectureId)">취소</button>
+              <button class="btn-cancel" @click="enrollmentStore.cancelEnrollment(item.lectureId)">취소</button>
             </td>
           </tr>
           <tr v-if="enrollmentStore.myEnrollments.length === 0">

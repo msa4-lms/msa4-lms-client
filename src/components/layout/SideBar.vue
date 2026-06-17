@@ -15,17 +15,20 @@ const authStore = useAuthStore();
         <router-link to="/enrollments" class="nav-item">수강 내역</router-link>
         <router-link to="/registration" class="nav-item">수강 신청</router-link>
         <router-link to="/grade" class="nav-item">성적 조회</router-link>
+        <router-link to="/profile" class="nav-item">내 정보</router-link>
       </template>
 
       <!-- 교수 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
         <router-link to="/lectures/manage" class="nav-item">강의 관리</router-link>
         <router-link to="/students" class="nav-item">학생 관리</router-link>
+        <router-link to="/profile" class="nav-item">내 정보</router-link>
       </template>
 
       <!-- 관리자 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'ADMIN'">
         <router-link to="/students" class="nav-item">사용자 관리</router-link>
+        <router-link to="/profile" class="nav-item">내 정보</router-link>
       </template>
     </nav>
   </aside>

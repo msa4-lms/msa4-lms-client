@@ -54,7 +54,7 @@ const routes = [
   {
     path: "/profile",
     name: "Profile",
-    component: ProfileRouter, // 미구현 상태이므로 메인으로 연결
+    component: ProfileRouter,
     meta: setMeta(true, false),
   },
 ];

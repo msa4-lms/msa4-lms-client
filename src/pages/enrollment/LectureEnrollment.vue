@@ -47,7 +47,7 @@ const apply = (lectureId) => {
         return;
     }
     
-    enrollmentStore.applyEnrollment(authStore.userInfo.id, lectureId);
+    enrollmentStore.applyEnrollment(lectureId);
 };
 
 /**
@@ -58,8 +58,15 @@ const formatSchedule = (schedule) => {
   return schedule.split(',').map(s => s.trim());
 };
 
+const isApplied = (lectureId) => {
+    return enrollmentStore.myEnrollments.some(e => e.lectureId === lectureId);
+};
+
 onMounted(() => {
     lectureStore.fetchLectures(searchParams.value);
+    if (authStore.isLoggedIn) {
+        enrollmentStore.fetchMyEnrollments();
+    }
 });
 </script>
 
@@ -141,7 +148,14 @@ onMounted(() => {
             </td>
             <td>{{ lecture.capacity }}명</td>
             <td>
-              <button class="btn-apply" @click="apply(lecture.id)">신청</button>
+              <button 
+                class="btn-apply" 
+                :class="{ 'btn-applied': isApplied(lecture.id) }"
+                :disabled="isApplied(lecture.id)" 
+                @click="apply(lecture.id)"
+              >
+                {{ isApplied(lecture.id) ? '신청완료' : '신청' }}
+              </button>
             </td>
           </tr>
         </tbody>
@@ -241,6 +255,15 @@ onMounted(() => {
 
 .btn-apply:hover {
   background-color: #2d8e47;
+}
+
+.btn-apply.btn-applied {
+  background-color: #6c757d;
+  cursor: default;
+}
+
+.btn-apply.btn-applied:hover {
+  background-color: #6c757d;
 }
 
 /* 테이블 스타일 */
