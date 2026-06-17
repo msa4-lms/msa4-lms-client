@@ -1,4 +1,6 @@
 import { createRouter, createWebHistory } from "vue-router";
+import GradePage from "../pages/academic/GradePage.vue";
+import AttendancePage from "../pages/academic/AttendancePage.vue";
 import Login from "../pages/auth/Login.vue";
 import Main from "../pages/Main.vue";
 import LectureList from "../pages/lectures/LectureList.vue";
@@ -48,7 +50,7 @@ const routes = [
   {
     path: "/grade",
     name: "Grade",
-    component: Main, // 미구현 상태이므로 메인으로 연결
+    component: GradePage,
     meta: setMeta(true, false),
   },
   {
@@ -56,6 +58,16 @@ const routes = [
     name: "Profile",
     component: ProfileRouter,
     meta: setMeta(true, false),
+  },
+  {
+    path: '/academic/grades',
+    name: 'GradePage',
+    component: GradePage,
+  },
+  {
+    path: '/academic/attendance',
+    name: 'AttendancePage',
+    component: AttendancePage,
   },
 ];
 

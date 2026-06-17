@@ -79,8 +79,9 @@ myAxios.interceptors.response.use(
       }
       alert(msg);
     } else if (status === 500) {
-      // 서버 에러
-      alert("서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.");
+      // 서버 에러 - 백엔드에서 보낸 상세 에러가 있다면 표시
+      const detailMsg = errorData?.data || "서버 내부 오류가 발생했습니다.";
+      alert(`서버 오류: ${detailMsg}\n잠시 후 다시 시도해주세요.`);
     } else {
       // 네트워크 에러 등 기타 상황
       console.error("API 통신 에러:", error);

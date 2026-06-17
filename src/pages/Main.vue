@@ -40,6 +40,14 @@ const allMenuItems = [
     roles: ['STUDENT']
   },
   {
+    title: '출결 현황',
+    description: '과목별 출석, 결석, 지각 내역을 실시간으로 확인합니다.',
+    icon: '📅',
+    path: '/academic/attendance',
+    color: '#eef2ff',
+    roles: ['STUDENT']
+  },
+  {
     title: '강의 관리',
     description: '내 강의 목록을 관리하고 성적을 입력합니다.',
     icon: '👨‍🏫',
