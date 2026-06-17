@@ -43,7 +43,7 @@ const allMenuItems = [
     title: '출결 현황',
     description: '과목별 출석, 결석, 지각 내역을 실시간으로 확인합니다.',
     icon: '📅',
-    path: '/academic/attendance',
+    path: '/attendance',
     color: '#eef2ff',
     roles: ['STUDENT']
   },

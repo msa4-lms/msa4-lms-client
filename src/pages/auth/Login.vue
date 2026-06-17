@@ -104,7 +104,7 @@ const handleLogin = async () => {
       </div>
 
       <footer>
-        <span>© 2026 Mirae University</span>
+        <span>© 2000 Mirae University</span>
         <span>학사정보시스템 문의 02-1234-5678</span>
       </footer>
     </section>

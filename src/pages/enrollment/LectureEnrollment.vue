@@ -8,17 +8,13 @@ const lectureStore = useLectureStore();
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
 
-const now = new Date();
-const currentYear = now.getFullYear();
-const currentMonth = now.getMonth() + 1;
-const currentSemester = currentMonth >= 1 && currentMonth <= 6 ? 1 : 2;
-
+// 수강신청 전용 검색 파라미터 (현재 학기 2026-1 고정)
 const searchParams = ref({
     courseName: '',
     professorName: '',
     departmentName: '',
-    year: currentYear,
-    semester: currentSemester,
+    year: 2026, 
+    semester: 1,
     page: 1,
     size: 10
 });
@@ -37,7 +33,7 @@ const totalPages = computed(() => {
     return Math.ceil(lectureStore.totalCount / searchParams.value.size);
 });
 
-const apply = (lectureId) => {
+const apply = async (lectureId) => {
     if (!authStore.isLoggedIn) {
         alert('로그인이 필요한 서비스입니다.');
         return;
@@ -47,7 +43,7 @@ const apply = (lectureId) => {
         return;
     }
     
-    enrollmentStore.applyEnrollment(lectureId);
+    await enrollmentStore.applyEnrollment(lectureId);
 };
 
 /**
@@ -65,7 +61,8 @@ const isApplied = (lectureId) => {
 onMounted(() => {
     lectureStore.fetchLectures(searchParams.value);
     if (authStore.isLoggedIn) {
-        enrollmentStore.fetchMyEnrollments();
+        // 수강신청 화면 진입 시 현재 학기 내역 로드
+        enrollmentStore.fetchMyEnrollments(searchParams.value.year, searchParams.value.semester);
     }
 });
 </script>
@@ -76,7 +73,7 @@ onMounted(() => {
       <h2>수강 신청</h2>
     </div>
 
-    <!-- 검색 바 -->
+    <!-- 검색 바 (연도/학기 선택 삭제) -->
     <div class="search-section">
       <div class="search-row">
         <div class="search-group">
@@ -91,21 +88,9 @@ onMounted(() => {
           <label>교수명</label>
           <input v-model="searchParams.professorName" type="text" placeholder="교수명 입력" @keyup.enter="onSearch">
         </div>
-        <div class="search-group">
-          <label>연도</label>
-          <select v-model="searchParams.year">
-            <option :value="2026">2026년</option>
-            <option :value="2025">2025년</option>
-            <option :value="2024">2024년</option>
-            <option :value="2023">2023년</option>
-          </select>
-        </div>
-        <div class="search-group">
-          <label>학기</label>
-          <select v-model="searchParams.semester">
-            <option :value="1">1학기</option>
-            <option :value="2">2학기</option>
-          </select>
+        <div class="current-semester-info">
+          <span class="label">대상 학기</span>
+          <span class="value">{{ searchParams.year }}년 {{ searchParams.semester }}학기</span>
         </div>
         <button class="btn-search" @click="onSearch">조회</button>
       </div>
@@ -220,11 +205,32 @@ onMounted(() => {
   color: #4f566b;
 }
 
-.search-group input, .search-group select {
+.search-group input {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.9rem;
+}
+
+.current-semester-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: flex-end;
+  padding-bottom: 2px;
+}
+
+.current-semester-info .label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4f566b;
+}
+
+.current-semester-info .value {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #0B3D91;
+  padding: 8px 0;
 }
 
 .btn-search {

@@ -1,45 +1,36 @@
-import { defineStore } from 'pinia'; // [1]
+import { defineStore } from 'pinia';
 import { ref } from 'vue'; 
-import myAxios from '../../api/myAxios'; // [3]
+import myAxios from '../../api/myAxios';
 
-export const useEnrollmentStore = defineStore('enrollment', () => { // [4]
-  
-  // [5] 상태(State): 화면에서 사용할 데이터들
+export const useEnrollmentStore = defineStore('enrollment', () => { 
+
   const myEnrollments = ref([]); // 수강 신청 과목 리스트
   const totalCredits = ref(0);   // 이번 학기 총 신청 학점 합계
+  const currentViewYear = ref(new Date().getFullYear());
+  const currentViewSemester = ref(new Date().getMonth() + 1 >= 1 && new Date().getMonth() + 1 <= 6 ? 1 : 2);
 
-  /**
-   * [6] 액션(Action): 백엔드 API를 호출하여 데이터를 가져옵니다.
-   * @param {number} studentId - 학생 식별 번호
-   */
-  const fetchMyEnrollments = async () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth() + 1;
-    const semester = month >= 1 && month <= 6 ? 1 : 2;
+  const fetchMyEnrollments = async (year, semester) => {
+    // 파라미터가 있으면 저장, 없으면 현재 저장된 값 사용
+    if (year) currentViewYear.value = year;
+    if (semester) currentViewSemester.value = semester;
 
     try {
-      // 백엔드 컨트롤러(@GetMapping("/my"))에 요청을 보냅니다.
       const res = await myAxios.get(`/api/enrollments/my`, {
         params: { 
-          year,
-          semester
+          year: currentViewYear.value,
+          semester: currentViewSemester.value
         } 
       });
 
-      // [7] 백엔드에서 받은 GlobalRes의 data 필드에서 정보를 꺼내 저장합니다.
       myEnrollments.value = res.data.data.enrollments;
       totalCredits.value = res.data.data.totalCredits;
-      
-      console.log('수강 내역 로드 완료:', myEnrollments.value);
+
+      console.log(`${currentViewYear.value}년 ${currentViewSemester.value}학기 수강 내역 로드 완료`);
     } catch (error) {
       console.error('수강 내역을 불러오는 중 오류가 발생했습니다:', error);
     }
   };
 
-  /**
-   * 수강 신청
-   */
   const applyEnrollment = async (lectureId) => {
     try {
       const res = await myAxios.post('/api/enrollments', {
@@ -47,26 +38,23 @@ export const useEnrollmentStore = defineStore('enrollment', () => { // [4]
       });
       if (res.data.code === '00') {
         alert('수강 신청이 완료되었습니다.');
-        await fetchMyEnrollments();
+        await fetchMyEnrollments(currentViewYear.value, currentViewSemester.value);
       }
     } catch (error) {
       console.error('수강 신청 실패:', error);
     }
   };
 
-  /**
-   * 수강 취소
-   */
   const cancelEnrollment = async (lectureId) => {
     if (!confirm('정말 수강을 취소하시겠습니까?')) return;
-    
+
     try {
       const res = await myAxios.delete('/api/enrollments', {
         params: { lectureId }
       });
       if (res.data.code === '00') {
         alert('수강 취소가 완료되었습니다.');
-        await fetchMyEnrollments();
+        await fetchMyEnrollments(currentViewYear.value, currentViewSemester.value);
       }
     } catch (error) {
       console.error('수강 취소 실패:', error);
@@ -74,10 +62,11 @@ export const useEnrollmentStore = defineStore('enrollment', () => { // [4]
     }
   };
 
-  // [8] 컴포넌트에서 사용할 수 있도록 외부로 공개합니다.
   return { 
     myEnrollments, 
     totalCredits, 
+    currentViewYear,
+    currentViewSemester,
     fetchMyEnrollments,
     applyEnrollment,
     cancelEnrollment
