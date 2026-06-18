@@ -91,7 +91,7 @@ const handleLogin = async () => {
 
       <div class="brand-content">
         <div class="logo-frame">
-          <div class="temp-logo">MU</div>
+          <img src="/로고2.png" alt="미래대학교 로고" />
         </div>
 
         <div class="brand-text">
