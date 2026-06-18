@@ -14,7 +14,7 @@ const myAxios = axios.create({
 myAxios.interceptors.request.use(async (config) => {
   const authStore = useAuthStore();
   let accessToken = authStore.accessToken;
-  const isReissueUrl = /^\/api\/reissue-token$/.test(config.url || "");
+  const isReissueUrl = /^\/api\/auth\/reissue-token$/.test(config.url || "");
 
   if (isReissueUrl) {
     delete config.headers.Authorization;
@@ -60,7 +60,7 @@ myAxios.interceptors.response.use(
     const originalUrl = error.config ? error.config.url : "";
 
     // reissue-token 요청이 실패한 경우는 조용히 넘김 (무한 루프 방지)
-    if (originalUrl.includes("/api/reissue-token") && status === 401) {
+    if (originalUrl.includes("/api/auth/reissue-token") && status === 401) {
       return Promise.reject(error);
     }
 

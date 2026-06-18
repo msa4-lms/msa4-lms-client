@@ -17,7 +17,7 @@ export const useAuthStore = defineStore("authStore", () => {
 
   const login = async (loginForm) => {
     try {
-      const url = "/api/login";
+      const url = "/api/auth/login";
 
       const res = await myAxios.post(url, loginForm);
       if (!res.data.code || res.data.code === "00") {
@@ -40,7 +40,7 @@ export const useAuthStore = defineStore("authStore", () => {
 
   const logout = async () => {
     try {
-      const url = "/api/logout";
+      const url = "/api/auth/logout";
       await myAxios.post(url);
     } catch (error) {
       console.error(error);
@@ -52,7 +52,7 @@ export const useAuthStore = defineStore("authStore", () => {
   // reissue
   const reissue = async () => {
     try {
-      const url = "/api/reissue-token";
+      const url = "/api/auth/reissue-token";
 
       const res = await myAxios.post(url);
       const data = res.data.data;
@@ -74,7 +74,7 @@ export const useAuthStore = defineStore("authStore", () => {
   // 비밀번호 변경
   const passwordChange = async (data) => {
     try {
-      const url = "/api/password";
+      const url = "/api/auth/password";
 
       await myAxios.post(url, data);
 
