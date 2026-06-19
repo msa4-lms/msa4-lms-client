@@ -8,18 +8,26 @@ const props = defineProps({
   size: String, // 'big', 'middle', 'small'
   color: String, // 'deep-blue', 'white', 'gray'
   content: String,
+  disabled: Boolean,
 });
+
+const emit = defineEmits(["click"]);
 </script>
 
 <template>
-  <button :type="props.btnType" :class="[props.color, props.size]">
+  <button
+    :type="props.btnType"
+    :class="[props.color, props.size]"
+    :disabled="props.disabled"
+    @click="emit('click')"
+  >
     {{ props.content }}
   </button>
 </template>
 
 <style scoped>
 button {
-  border-radius: 10px;
+  border-radius: 4px;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -35,23 +43,23 @@ button:hover {
 }
 
 .big {
-  width: 320px;
-  height: 48px;
+  width: 180px;
+  height: 40px;
   font-size: 16px;
-  font-weight: 600;
+  font-weight: 500;
 }
 
 .middle {
-  width: 180px;
-  height: 40px;
-  font-size: 14px;
+  width: 120px;
+  height: 38px;
+  font-size: 15px;
   font-weight: 500;
 }
 
 .small {
-  width: 90px;
-  height: 36px;
-  font-size: 13px;
+  width: 62px;
+  height: 38px;
+  font-size: 14px;
   font-weight: 500;
 }
 
@@ -77,6 +85,11 @@ button:hover {
 
 .red {
   background-color: var(--personal-color-red);
+  color: var(--personal-color-white);
+}
+
+.green {
+  background-color: var(--personal-color-green);
   color: var(--personal-color-white);
 }
 </style>
