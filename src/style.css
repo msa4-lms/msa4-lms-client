@@ -8,6 +8,8 @@
   --personal-color-white: #ffffff;
   --personal-color-black: #000000;
   --personal-color-red: #ef4444;
+  --personal-color-green: #3a9d4f;
+  --primary-text-color: #1a1f36;
   color-scheme: light;
   font-synthesis: none;
 }

@@ -1,6 +1,7 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue';
-import { useLectureStore } from '../../store/lecture/useLectureStore';
+import { onMounted, ref, computed } from "vue";
+import { useLectureStore } from "../../store/lecture/useLectureStore";
+import MyButton from "../../components/button/MyButton.vue";
 
 const lectureStore = useLectureStore();
 
@@ -10,27 +11,27 @@ const currentMonth = now.getMonth() + 1;
 const currentSemester = currentMonth >= 1 && currentMonth <= 6 ? 1 : 2;
 
 const searchParams = ref({
-    courseName: '',
-    professorName: '',
-    departmentName: '',
-    year: currentYear,
-    semester: currentSemester,
-    page: 1,
-    size: 10
+  courseName: "",
+  professorName: "",
+  departmentName: "",
+  year: currentYear,
+  semester: currentSemester,
+  page: 1,
+  size: 10,
 });
 
 const onSearch = () => {
-    searchParams.value.page = 1;
-    lectureStore.fetchLectures(searchParams.value);
+  searchParams.value.page = 1;
+  lectureStore.fetchLectures(searchParams.value);
 };
 
 const goToPage = (p) => {
-    searchParams.value.page = p;
-    lectureStore.fetchLectures(searchParams.value);
+  searchParams.value.page = p;
+  lectureStore.fetchLectures(searchParams.value);
 };
 
 const totalPages = computed(() => {
-    return Math.ceil(lectureStore.totalCount / searchParams.value.size);
+  return Math.ceil(lectureStore.totalCount / searchParams.value.size);
 });
 
 /**
@@ -38,11 +39,11 @@ const totalPages = computed(() => {
  */
 const formatSchedule = (schedule) => {
   if (!schedule) return [];
-  return schedule.split(',').map(s => s.trim());
+  return schedule.split(",").map((s) => s.trim());
 };
 
 onMounted(() => {
-    lectureStore.fetchLectures(searchParams.value);
+  lectureStore.fetchLectures(searchParams.value);
 });
 </script>
 
@@ -57,15 +58,30 @@ onMounted(() => {
       <div class="search-row">
         <div class="search-group">
           <label>학과</label>
-          <input v-model="searchParams.departmentName" type="text" placeholder="학과명 입력" @keyup.enter="onSearch">
+          <input
+            v-model="searchParams.departmentName"
+            type="text"
+            placeholder="학과명 입력"
+            @keyup.enter="onSearch"
+          />
         </div>
         <div class="search-group">
           <label>강의명</label>
-          <input v-model="searchParams.courseName" type="text" placeholder="강의명 입력" @keyup.enter="onSearch">
+          <input
+            v-model="searchParams.courseName"
+            type="text"
+            placeholder="강의명 입력"
+            @keyup.enter="onSearch"
+          />
         </div>
         <div class="search-group">
           <label>교수명</label>
-          <input v-model="searchParams.professorName" type="text" placeholder="교수명 입력" @keyup.enter="onSearch">
+          <input
+            v-model="searchParams.professorName"
+            type="text"
+            placeholder="교수명 입력"
+            @keyup.enter="onSearch"
+          />
         </div>
         <div class="search-group">
           <label>연도</label>
@@ -83,7 +99,13 @@ onMounted(() => {
             <option :value="2">2학기</option>
           </select>
         </div>
-        <button class="btn-search" @click="onSearch">조회</button>
+        <MyButton
+          btnType="submit"
+          color="deep-blue"
+          size="small"
+          content="조회"
+          @click="onSearch"
+        />
       </div>
     </div>
 
@@ -104,7 +126,9 @@ onMounted(() => {
         </thead>
         <tbody>
           <tr v-if="lectureStore.loading">
-            <td colspan="8" class="loading-text">데이터를 불러오는 중입니다...</td>
+            <td colspan="8" class="loading-text">
+              데이터를 불러오는 중입니다...
+            </td>
           </tr>
           <tr v-else-if="lectureStore.lectures.length === 0">
             <td colspan="8" class="empty-text">조회된 강의가 없습니다.</td>
@@ -117,7 +141,10 @@ onMounted(() => {
             <td>{{ lecture.professorName }}</td>
             <td class="classroom-text">{{ lecture.classroom }}</td>
             <td class="time-text">
-              <div v-for="(time, idx) in formatSchedule(lecture.schedule)" :key="idx">
+              <div
+                v-for="(time, idx) in formatSchedule(lecture.schedule)"
+                :key="idx"
+              >
                 {{ time }}
               </div>
             </td>
@@ -129,9 +156,9 @@ onMounted(() => {
 
     <!-- 페이지네이션 -->
     <div class="pagination" v-if="totalPages > 0">
-      <button 
-        v-for="p in totalPages" 
-        :key="p" 
+      <button
+        v-for="p in totalPages"
+        :key="p"
         :class="{ active: searchParams.page === p }"
         @click="goToPage(p)"
       >
@@ -185,7 +212,8 @@ onMounted(() => {
   color: #4f566b;
 }
 
-.search-group input, .search-group select {
+.search-group input,
+.search-group select {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
@@ -236,15 +264,30 @@ onMounted(() => {
   border-bottom: 1px solid #edf2f7;
 }
 
-.col-classroom { width: 15%; }
-.col-time { width: 22%; }
-.col-capacity { width: 80px; }
+.col-classroom {
+  width: 15%;
+}
+.col-time {
+  width: 22%;
+}
+.col-capacity {
+  width: 80px;
+}
 
-.classroom-text { font-size: 0.85rem; }
-.time-text { font-size: 0.85rem; color: #1a73e8; line-height: 1.5; }
-.course-name { font-weight: 600; color: #1a1f36; }
+.classroom-text {
+  font-size: 0.85rem;
+}
+.time-text {
+  font-size: 0.85rem;
+  color: var(--primary-text-color);
+  line-height: 1.5;
+}
+.course-name {
+  color: var(--primary-text-color);
+}
 
-.loading-text, .empty-text {
+.loading-text,
+.empty-text {
   text-align: center;
   padding: 40px !important;
   color: #697386;
@@ -268,9 +311,8 @@ onMounted(() => {
 }
 
 .pagination button.active {
-  background-color: #1a73e8;
+  background-color: var(--primary-color);
   color: white;
-  border-color: #1a73e8;
   font-weight: 600;
 }
 
