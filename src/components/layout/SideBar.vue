@@ -1,30 +1,135 @@
 <script setup>
+import { ref } from 'vue';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const authStore = useAuthStore();
+
+const activeMenus = ref({
+  studentAcademic: false,
+  studentCourse: false,
+  studentGrade: false,
+  studentAttendance: false,
+  professorTeacher: false,
+  professorCourse: false,
+  professorGrade: false,
+  professorAttendance: false
+});
+
+const toggleMenu = (menuKey) => {
+  activeMenus.value[menuKey] = !activeMenus.value[menuKey];
+};
+
+const alertReady = () => {
+  alert('준비 중인 서비스입니다.');
+};
 </script>
 
 <template>
   <aside class="sidebar">
     <nav class="sidebar-nav">
-      <router-link to="/main" class="nav-item">대시보드</router-link>
-      <router-link to="/lectures" class="nav-item">강의 조회</router-link>
+      <!-- 대시보드(홈) 공통 링크 -->
+      <router-link to="/main" class="nav-item main-link">대시보드</router-link>
       
       <!-- 학생 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
-        <router-link to="/enrollments" class="nav-item">수강 내역</router-link>
-        <router-link to="/registration" class="nav-item">수강 신청</router-link>
-        <router-link to="/grade" class="nav-item">성적 조회</router-link>
-        <router-link to="/attendance" class="nav-item">출결 현황</router-link>
-        <router-link to="/profile" class="nav-item">내 정보</router-link>
+        <!-- 학사관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('studentAcademic')">
+            <span>학사관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.studentAcademic }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.studentAcademic">
+            <router-link to="/profile" class="submenu-item">학적조회</router-link>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">휴/복학 신청</a>
+          </div>
+        </div>
+
+        <!-- 수강 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('studentCourse')">
+            <span>수강 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.studentCourse }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.studentCourse">
+            <router-link to="/enrollments" class="submenu-item">시간표 조회</router-link>
+            <router-link to="/registration" class="submenu-item">수강 신청</router-link>
+          </div>
+        </div>
+
+        <!-- 성적 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('studentGrade')">
+            <span>성적 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.studentGrade }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.studentGrade">
+            <router-link to="/grade" class="submenu-item">성적 조회</router-link>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 이의 신청</a>
+          </div>
+        </div>
+
+        <!-- 출결 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('studentAttendance')">
+            <span>출결 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.studentAttendance }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.studentAttendance">
+            <router-link to="/attendance" class="submenu-item">출결 조회</router-link>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">공결 신청</a>
+          </div>
+        </div>
       </template>
 
       <!-- 교수 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
-        <router-link to="/lectures/manage" class="nav-item">강의 관리</router-link>
-        <router-link to="/students" class="nav-item">학생 관리</router-link>
-        <router-link to="/attendance" class="nav-item">출결 관리</router-link>
-        <router-link to="/profile" class="nav-item">내 정보</router-link>
+        <!-- 교사관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorTeacher')">
+            <span>교사관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorTeacher }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorTeacher">
+            <router-link to="/profile" class="submenu-item">교적 조회</router-link>
+          </div>
+        </div>
+
+        <!-- 강의 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorCourse')">
+            <span>강의 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorCourse }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorCourse">
+            <a href="#" class="submenu-item" @click.prevent="alertReady">강의 개설 (수강 계획서)</a>
+            <router-link to="/lectures" class="submenu-item">강의 조회 (시간표, 폐강)</router-link>
+          </div>
+        </div>
+
+        <!-- 성적 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorGrade')">
+            <span>성적 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorGrade }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorGrade">
+            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 입력</a>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 정정</a>
+          </div>
+        </div>
+
+        <!-- 출결 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorAttendance')">
+            <span>출결 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorAttendance }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorAttendance">
+            <a href="#" class="submenu-item" @click.prevent="alertReady">출결 승인</a>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">출결 확인</a>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">출석부</a>
+          </div>
+        </div>
       </template>
 
       <!-- 관리자 전용 메뉴 -->
@@ -40,34 +145,104 @@ const authStore = useAuthStore();
 .sidebar {
   width: 240px;
   background-color: #fff;
-  border-right: 1px solid #eee;
-  padding-top: 20px;
+  border-right: 1px solid #edf2f7;
+  padding-top: 15px;
   height: calc(100vh - 64px);
   position: sticky;
   top: 64px;
+  box-sizing: border-box;
 }
 
 .sidebar-nav {
   display: flex;
   flex-direction: column;
+  gap: 4px;
+}
+
+/* 메인 링크 */
+.main-link {
+  border-left: 4px solid transparent;
 }
 
 .nav-item {
-  padding: 14px 24px;
+  padding: 12px 24px;
   text-decoration: none;
-  color: #5f6368;
-  font-weight: 500;
-  transition: background 0.2s;
+  color: #4a5568;
+  font-weight: 600;
+  font-size: 0.95rem;
+  transition: all 0.2s;
+  display: block;
 }
 
 .nav-item:hover {
-  background-color: #f8f9fa;
+  background-color: #f7fafc;
+  color: #1a73e8;
+}
+
+/* 메뉴 그룹 */
+.menu-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.menu-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 12px 24px;
+  cursor: pointer;
+  font-weight: 600;
+  color: #4a5568;
+  font-size: 0.95rem;
+  user-select: none;
+  transition: all 0.2s;
+}
+
+.menu-header:hover {
+  background-color: #f7fafc;
+  color: #1a73e8;
+}
+
+.chevron {
+  font-size: 0.7rem;
+  transition: transform 0.2s ease;
+  color: #a0aec0;
+}
+
+.chevron.rotated {
+  transform: rotate(-180deg);
+}
+
+/* 서브메뉴 */
+.submenu-list {
+  background-color: #f7fafc;
+  border-top: 1px solid #edf2f7;
+  border-bottom: 1px solid #edf2f7;
+  transition: max-height 0.3s ease;
+}
+
+.submenu-item {
+  display: block;
+  padding: 10px 24px 10px 38px;
+  text-decoration: none;
+  color: #718096;
+  font-size: 0.88rem;
+  font-weight: 500;
+  transition: all 0.2s;
+}
+
+.submenu-item:hover {
+  background-color: #edf2f7;
   color: #1a73e8;
 }
 
 .router-link-active {
   background-color: #e8f0fe;
   color: #1a73e8;
-  border-right: 4px solid #1a73e8;
+  font-weight: 600;
+}
+
+.router-link-active.main-link {
+  border-left: 4px solid #1a73e8;
 }
 </style>
