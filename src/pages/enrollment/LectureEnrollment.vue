@@ -1,12 +1,12 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { useAuthStore } from "../../store/auth/useAuthStore";
-import { useEnrollmentStore } from "../../store/enrollment/useEnrollmentStore";
-import { useLectureStore } from "../../store/lecture/useLectureStore";
-import MyButton from "../../components/button/MyButton.vue";
-import MyInput from "../../components/input/MyInput.vue";
-import MyPagination from "../../components/pagination/MyPagination.vue";
-import MyTable from "../../components/table/MyTable.vue";
+import { onMounted, ref, computed } from 'vue';
+import { useLectureStore } from '../../store/lecture/useLectureStore';
+import { useEnrollmentStore } from '../../store/enrollment/useEnrollmentStore';
+import { useAuthStore } from '../../store/auth/useAuthStore';
+import MyButton from '../../components/button/MyButton.vue';
+import MyInput from '../../components/input/MyInput.vue';
+import MyPagination from '../../components/pagination/MyPagination.vue';
+import MyTable from '../../components/table/MyTable.vue';
 
 const lectureStore = useLectureStore();
 const enrollmentStore = useEnrollmentStore();
@@ -39,13 +39,11 @@ const lectureColumns = [
 const filteredDepartments = computed(() => {
   if (!searchParams.value.collegeName) {
     const allDepartments = [];
-
     lectureStore.colleges.forEach((college) => {
       if (college.departments) {
         allDepartments.push(...college.departments);
       }
     });
-
     return Array.from(
       new Map(allDepartments.map((department) => [department.name, department])).values()
     ).sort((a, b) => a.name.localeCompare(b.name));
@@ -54,7 +52,6 @@ const filteredDepartments = computed(() => {
   const matchedCollege = lectureStore.colleges.find(
     (college) => college.name === searchParams.value.collegeName
   );
-
   return matchedCollege ? matchedCollege.departments || [] : [];
 });
 
@@ -73,7 +70,6 @@ const onCollegeChange = () => {
   } else {
     searchParams.value.departmentName = "";
   }
-
   onSearch();
 };
 
@@ -150,7 +146,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="lecture-list-container">
+  <div class="lms-container">
     <div class="page-header">
       <h2>수강 신청</h2>
     </div>
@@ -263,58 +259,13 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.lecture-list-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 50px;
-}
+.col-classroom { width: 15%; }
+.col-time { width: 22%; }
+.col-capacity { width: 80px; }
 
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h2 {
-  color: #1a1f36;
-  font-size: 1.5rem;
-}
-
-.search-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-  margin-bottom: 24px;
-}
-
-.search-row {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.search-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.search-group label,
-.current-semester-info .label {
-  color: #4f566b;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.search-group select {
-  min-width: 160px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  box-sizing: border-box;
-  font-size: 0.9rem;
-}
+.classroom-text { font-size: 0.85rem; }
+.time-text { font-size: 0.85rem; color: #1a73e8; line-height: 1.5; }
+.course-name { font-weight: 600; color: #1a1f36; }
 
 .current-semester-info {
   display: flex;
@@ -324,37 +275,16 @@ onMounted(async () => {
   padding-bottom: 2px;
 }
 
+.current-semester-info .label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4f566b;
+}
+
 .current-semester-info .value {
-  color: var(--primary-color);
   font-size: 0.95rem;
   font-weight: 700;
+  color: #0B3D91;
   padding: 8px 0;
-}
-
-.col-classroom {
-  width: 15%;
-}
-
-.col-time {
-  width: 22%;
-}
-
-.col-capacity {
-  width: 80px;
-}
-
-.classroom-text {
-  font-size: 0.85rem;
-}
-
-.time-text {
-  color: var(--primary-text-color);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.course-name {
-  color: #1a1f36;
-  font-weight: 600;
 }
 </style>

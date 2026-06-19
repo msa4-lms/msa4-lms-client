@@ -97,12 +97,12 @@ const formatSchedule = (schedule) => {
 </script>
 
 <template>
-  <div class="enrollment-container">
+  <div class="lms-container">
     <h2>내 수강 내역 및 시간표</h2>
 
     <!-- 학기 선택 필터 추가 -->
-    <div class="history-filter">
-      <div class="filter-group">
+    <div class="search-section">
+      <div class="search-group">
         <label>조회 연도</label>
         <select v-model="historyParams.year">
           <option :value="2026">2026년</option>
@@ -111,7 +111,7 @@ const formatSchedule = (schedule) => {
           <option :value="2023">2023년</option>
         </select>
       </div>
-      <div class="filter-group">
+      <div class="search-group">
         <label>학기</label>
         <select v-model="historyParams.semester">
           <option :value="1">1학기</option>
@@ -215,51 +215,6 @@ const formatSchedule = (schedule) => {
 </template>
 
 <style scoped>
-.enrollment-container {
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.history-filter {
-  display: flex;
-  gap: 15px;
-  align-items: flex-end;
-  background-color: white;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  margin-bottom: 20px;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.filter-group label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #666;
-}
-
-.filter-group select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
-.btn-history-search {
-  padding: 8px 20px;
-  background-color: #0b3d91;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  height: 35px;
-}
-
 .summary-card {
   background-color: #f8f9fa;
   padding: 15px;

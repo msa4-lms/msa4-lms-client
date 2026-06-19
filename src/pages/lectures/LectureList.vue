@@ -1,10 +1,10 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
-import { useLectureStore } from "../../store/lecture/useLectureStore";
-import MyButton from "../../components/button/MyButton.vue";
-import MyInput from "../../components/input/MyInput.vue";
-import MyPagination from "../../components/pagination/MyPagination.vue";
-import MyTable from "../../components/table/MyTable.vue";
+import { onMounted, ref, computed } from 'vue';
+import { useLectureStore } from '../../store/lecture/useLectureStore';
+import MyButton from '../../components/button/MyButton.vue';
+import MyInput from '../../components/input/MyInput.vue';
+import MyPagination from '../../components/pagination/MyPagination.vue';
+import MyTable from '../../components/table/MyTable.vue';
 
 const lectureStore = useLectureStore();
 
@@ -14,13 +14,13 @@ const currentMonth = now.getMonth() + 1;
 const currentSemester = currentMonth >= 1 && currentMonth <= 6 ? 1 : 2;
 
 const searchParams = ref({
-  courseName: "",
-  professorName: "",
-  departmentName: "",
-  year: currentYear,
-  semester: currentSemester,
-  page: 1,
-  size: 10,
+    courseName: '',
+    professorName: '',
+    departmentName: '',
+    year: currentYear,
+    semester: currentSemester,
+    page: 1,
+    size: 10
 });
 
 const lectureColumns = [
@@ -36,8 +36,8 @@ const lectureColumns = [
 ];
 
 const onSearch = () => {
-  searchParams.value.page = 1;
-  lectureStore.fetchLectures(searchParams.value);
+    searchParams.value.page = 1;
+    lectureStore.fetchLectures(searchParams.value);
 };
 
 const goToPage = (page) => {
@@ -62,7 +62,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="lecture-list-container">
+  <div class="lms-container">
     <div class="page-header">
       <h2>강의 조회</h2>
     </div>
@@ -159,80 +159,11 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.lecture-list-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 50px;
-}
+.col-classroom { width: 15%; }
+.col-time { width: 22%; }
+.col-capacity { width: 80px; }
 
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h2 {
-  font-size: 1.5rem;
-  color: #1a1f36;
-}
-
-.search-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-  margin-bottom: 24px;
-}
-
-.search-row {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.search-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.search-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #4f566b;
-}
-
-.search-group select {
-  min-width: 160px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  font-size: 0.9rem;
-}
-
-.col-classroom {
-  width: 15%;
-}
-
-.col-time {
-  width: 22%;
-}
-
-.col-capacity {
-  width: 80px;
-}
-
-.classroom-text {
-  font-size: 0.85rem;
-}
-
-.time-text {
-  color: var(--primary-text-color);
-  font-size: 0.85rem;
-  line-height: 1.5;
-}
-
-.course-name {
-  color: var(--primary-text-color);
-}
+.classroom-text { font-size: 0.85rem; }
+.time-text { font-size: 0.85rem; color: #1a73e8; line-height: 1.5; }
+.course-name { font-weight: 600; color: #1a1f36; }
 </style>
