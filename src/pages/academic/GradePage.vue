@@ -1,14 +1,37 @@
 <script setup>
-import { onMounted } from 'vue';
+import { onMounted, ref, computed } from 'vue';
 import { useAcademicStore } from '../../store/academic/useAcademicStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
 
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentSemester = now.getMonth() + 1 >= 1 && now.getMonth() + 1 <= 6 ? 1 : 2;
+
+// select 박스에 바인딩된 값 (사용자가 변경하는 값)
+const selectedYear = ref(currentYear);
+const selectedSemester = ref(currentSemester);
+
+// '조회' 버튼을 눌렀을 때 확정되는 값
+const searchedYear = ref(currentYear);
+const searchedSemester = ref(currentSemester);
+
+const onSearch = () => {
+  // 조회 버튼 클릭 시에만 검색된 연도/학기 상태 업데이트 및 API 호출
+  searchedYear.value = selectedYear.value;
+  searchedSemester.value = selectedSemester.value;
+  
+  academicStore.fetchGrades({
+    year: searchedYear.value,
+    semester: searchedSemester.value
+  });
+};
+
 onMounted(() => {
   if (authStore.isLoggedIn) {
-    academicStore.fetchGrades();
+    onSearch(); // 초기 마운트 시 현재 연도/학기로 조회
   }
 });
 </script>
@@ -16,16 +39,41 @@ onMounted(() => {
 <template>
   <div class="grade-view">
     <div class="header-section">
-      <h1>내 성적 조회</h1>
-      <p>확정된 성적 및 전체 평균 평점(GPA)을 확인할 수 있습니다.</p>
+      <h1>성적 조회</h1>
+      <p>원하는 연도와 학기를 선택하여 해당 학기의 성적과 평점을 확인하세요.</p>
+    </div>
+
+    <!-- 검색 바 -->
+    <div class="search-section">
+      <div class="search-row">
+        <div class="search-group">
+          <label>연도</label>
+          <!-- v-model은 selectedYear에 연결되어 화면 값만 바뀜 -->
+          <select v-model="selectedYear">
+            <option :value="2026">2026년</option>
+            <option :value="2025">2025년</option>
+            <option :value="2024">2024년</option>
+            <option :value="2023">2023년</option>
+            <option :value="2022">2022년</option>
+            <option :value="2021">2021년</option>
+          </select>
+        </div>
+        <div class="search-group">
+          <label>학기</label>
+          <select v-model="selectedSemester">
+            <option :value="1">1학기</option>
+            <option :value="2">2학기</option>
+          </select>
+        </div>
+        <button class="btn-search" @click="onSearch">조회</button>
+      </div>
     </div>
     
-    <!-- 요약 대시보드 (팀의 카드 스타일 적용) -->
+    <!-- 요약 대시보드 (조회 버튼을 눌러 확정된 searchedYear 표시) -->
     <div class="dashboard-grid">
       <div class="summary-card gpa-card">
-        <div class="card-icon">📊</div>
         <div class="card-info">
-          <span class="label">전체 평균 평점 (GPA)</span>
+          <span class="label">{{ searchedYear }}년 {{ searchedSemester }}학기 평균 평점</span>
           <div class="value-group">
             <span class="value">{{ academicStore.gradeSummary.totalGpa }}</span>
             <span class="max">/ 4.5</span>
@@ -34,9 +82,8 @@ onMounted(() => {
       </div>
 
       <div class="summary-card credits-card">
-        <div class="card-icon">🎓</div>
         <div class="card-info">
-          <span class="label">총 이수 학점</span>
+          <span class="label">{{ searchedYear }}년 {{ searchedSemester }}학기 이수 학점</span>
           <div class="value-group">
             <span class="value">{{ academicStore.gradeSummary.totalCredits }}</span>
             <span class="unit">학점</span>
@@ -45,16 +92,15 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- 상세 성적 테이블 (팀의 테이블 스타일 적용) -->
+    <!-- 상세 성적 테이블 -->
     <div class="content-card table-section">
       <div class="card-header">
-        <h3>학기별 상세 성적</h3>
+        <h3>{{ searchedYear }}년 {{ searchedSemester }}학기 상세 성적</h3>
       </div>
       <div class="table-wrapper">
         <table class="data-table">
           <thead>
             <tr>
-              <th>년도/학기</th>
               <th>과목코드</th>
               <th>과목명</th>
               <th>학점</th>
@@ -64,26 +110,24 @@ onMounted(() => {
           </thead>
           <tbody>
             <tr v-for="(grade, index) in academicStore.gradeSummary.semesterGrades" :key="index">
-              <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
               <td class="code">{{ grade.courseCode }}</td>
               <td class="name">{{ grade.courseName }}</td>
               <td class="credit">{{ grade.credits }}</td>
               <td class="grade">
-                <span :class="['grade-badge', grade.grade.startsWith('A') ? 'high' : grade.grade.startsWith('B') ? 'mid' : 'low']">
-                  {{ grade.grade }}
+                <span :class="['grade-badge', grade.grade?.startsWith('A') ? 'high' : grade.grade?.startsWith('B') ? 'mid' : 'low']">
+                  {{ grade.grade || '미입력' }}
                 </span>
               </td>
               <td class="status">
-                <span class="status-badge" :class="{ confirmed: grade.grade !== '미입력' }">
-                  {{ grade.grade !== '미입력' ? '공개(확정)' : '미공개' }}
+                <span class="status-badge" :class="{ confirmed: grade.grade && grade.grade !== '미입력' }">
+                  {{ grade.grade && grade.grade !== '미입력' ? '공개(확정)' : '미공개' }}
                 </span>
               </td>
             </tr>
-            <tr v-if="academicStore.gradeSummary.semesterGrades.length === 0">
-              <td colspan="6" class="no-data">
+            <tr v-if="!academicStore.gradeSummary.semesterGrades || academicStore.gradeSummary.semesterGrades.length === 0">
+              <td colspan="5" class="no-data">
                 <div class="empty-state">
-                  <span class="empty-icon">📂</span>
-                  <p>조회된 성적 내역이 없습니다.<br><small>성적 확정 전이거나 수강 완료된 과목이 없습니다.</small></p>
+                  <p>해당 학기에 조회된 성적 내역이 없습니다.</p>
                 </div>
               </td>
             </tr>
@@ -114,6 +158,56 @@ onMounted(() => {
   color: #697386;
 }
 
+/* 검색 섹션 */
+.search-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #edf2f7;
+  margin-bottom: 24px;
+}
+
+.search-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.search-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.search-group label {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #4f566b;
+}
+
+.search-group input, .search-group select {
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}
+
+.btn-search {
+  padding: 8px 24px;
+  background-color: #1a73e8;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-weight: 600;
+  height: 38px;
+}
+
+.btn-search:hover {
+  background-color: #1557b0;
+}
+
 .dashboard-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
@@ -123,28 +217,13 @@ onMounted(() => {
 
 .summary-card {
   background: white;
-  border-radius: 12px;
+  border-radius: 8px;
   padding: 24px;
   display: flex;
   align-items: center;
-  gap: 20px;
   border: 1px solid #edf2f7;
   box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
-
-.card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
-  background: #f8fafc;
-}
-
-.gpa-card .card-icon { background-color: #eef2ff; }
-.credits-card .card-icon { background-color: #ecfdf5; }
 
 .card-info {
   display: flex;
@@ -231,15 +310,11 @@ onMounted(() => {
 
 .grade-badge {
   display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  padding: 4px 0px;
+  font-size: 0.95rem;
   font-weight: 700;
+  color: #1e293b;
 }
-
-.grade-badge.high { background: #ecfdf5; color: #059669; }
-.grade-badge.mid { background: #eff6ff; color: #2563eb; }
-.grade-badge.low { background: #fef2f2; color: #dc2626; }
 
 .status-badge {
   display: inline-flex;
@@ -268,11 +343,6 @@ onMounted(() => {
   gap: 16px;
 }
 
-.empty-icon {
-  font-size: 40px;
-  opacity: 0.5;
-}
-
 .empty-state p {
   color: #64748b;
   line-height: 1.6;
@@ -283,3 +353,4 @@ onMounted(() => {
   color: #94a3b8;
 }
 </style>
+

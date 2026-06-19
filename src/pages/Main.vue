@@ -97,9 +97,6 @@ const navigateTo = (path) => {
         class="menu-card"
         @click="navigateTo(item.path)"
       >
-        <div class="card-icon" :style="{ backgroundColor: item.color }">
-          {{ item.icon }}
-        </div>
         <div class="card-content">
           <h3>{{ item.title }}</h3>
           <p>{{ item.description }}</p>
@@ -151,16 +148,6 @@ const navigateTo = (path) => {
   transform: translateY(-4px);
   box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
   border-color: #1a73e8;
-}
-
-.card-icon {
-  width: 48px;
-  height: 48px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 24px;
 }
 
 .card-content h3 {
