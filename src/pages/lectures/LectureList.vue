@@ -43,7 +43,9 @@ const formatSchedule = (schedule) => {
 };
 
 onMounted(() => {
-  lectureStore.fetchLectures(searchParams.value);
+    lectureStore.lectures = [];
+    lectureStore.totalCount = 0;
+    lectureStore.fetchLectures(searchParams.value);
 });
 </script>
 
@@ -118,6 +120,7 @@ onMounted(() => {
             <th>학과</th>
             <th>강의명</th>
             <th>학점</th>
+            <th>대상학년</th>
             <th>담당교수</th>
             <th class="col-classroom">강의실</th>
             <th class="col-time">시간</th>
@@ -126,18 +129,17 @@ onMounted(() => {
         </thead>
         <tbody>
           <tr v-if="lectureStore.loading">
-            <td colspan="8" class="loading-text">
-              데이터를 불러오는 중입니다...
-            </td>
+            <td colspan="9" class="loading-text">데이터를 불러오는 중입니다...</td>
           </tr>
           <tr v-else-if="lectureStore.lectures.length === 0">
-            <td colspan="8" class="empty-text">조회된 강의가 없습니다.</td>
+            <td colspan="9" class="empty-text">조회된 강의가 없습니다.</td>
           </tr>
           <tr v-for="lecture in lectureStore.lectures" :key="lecture.id">
             <td>{{ lecture.courseCode }}</td>
             <td>{{ lecture.departmentName }}</td>
             <td class="course-name">{{ lecture.courseName }}</td>
             <td>{{ lecture.credits }}</td>
+            <td>{{ lecture.targetGrade }}학년</td>
             <td>{{ lecture.professorName }}</td>
             <td class="classroom-text">{{ lecture.classroom }}</td>
             <td class="time-text">

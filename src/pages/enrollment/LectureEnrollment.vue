@@ -74,15 +74,34 @@ const isApplied = (lectureId) => {
   return enrollmentStore.myEnrollments.some((e) => e.lectureId === lectureId);
 };
 
-onMounted(() => {
-  lectureStore.fetchLectures(searchParams.value);
-  if (authStore.isLoggedIn) {
-    // 수강신청 화면 진입 시 현재 학기 내역 로드
-    enrollmentStore.fetchMyEnrollments(
-      searchParams.value.year,
-      searchParams.value.semester
-    );
-  }
+onMounted(async () => {
+    // 0. 스토어 상태 초기화하여 이전 페이지 데이터가 보이는 현상(플래시) 방지
+    lectureStore.lectures = [];
+    lectureStore.totalCount = 0;
+
+    // 1. 단과대 및 학과 데이터 로드
+    await lectureStore.fetchColleges();
+    
+    // 2. 현재 로그인한 학생의 학과 기본 설정
+    if (authStore.isLoggedIn && authStore.userInfo) {
+        const studentDeptName = authStore.userInfo.departmentName;
+        if (studentDeptName) {
+            // 해당 학과가 포함된 단과대 조회
+            const matchedCollege = lectureStore.colleges.find(c =>
+                c.departments && c.departments.some(d => d.name === studentDeptName)
+            );
+            if (matchedCollege) {
+                searchParams.value.collegeName = matchedCollege.name;
+            }
+            searchParams.value.departmentName = studentDeptName;
+        }
+    }
+
+    // 3. 디폴트 강의 조회 및 수강신청 이력 조회
+    lectureStore.fetchLectures(searchParams.value);
+    if (authStore.isLoggedIn) {
+        enrollmentStore.fetchMyEnrollments(searchParams.value.year, searchParams.value.semester);
+    }
 });
 </script>
 
@@ -95,6 +114,15 @@ onMounted(() => {
     <!-- 검색 바 (연도/학기 선택 삭제) -->
     <div class="search-section">
       <div class="search-row">
+        <div class="search-group">
+          <label>단과대</label>
+          <select v-model="searchParams.collegeName" @change="onCollegeChange">
+            <option value="">전체</option>
+            <option v-for="college in lectureStore.colleges" :key="college.id" :value="college.name">
+              {{ college.name }}
+            </option>
+          </select>
+        </div>
         <div class="search-group">
           <label>학과</label>
           <MyInput
