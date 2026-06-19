@@ -13,11 +13,43 @@ const searchParams = ref({
     courseName: '',
     professorName: '',
     departmentName: '',
+    collegeName: '',
     year: 2026, 
     semester: 1,
     page: 1,
     size: 10
 });
+
+// 단과대 변경 시 학과 목록 동적 필터링
+const filteredDepartments = computed(() => {
+    if (!searchParams.value.collegeName) {
+        // 단과대가 선택되지 않은 경우 모든 학과를 반환
+        const allDepts = [];
+        lectureStore.colleges.forEach(c => {
+            if (c.departments) {
+                allDepts.push(...c.departments);
+            }
+        });
+        return Array.from(new Map(allDepts.map(d => [d.name, d])).values())
+                    .sort((a, b) => a.name.localeCompare(b.name));
+    }
+    const matchedCollege = lectureStore.colleges.find(c => c.name === searchParams.value.collegeName);
+    return matchedCollege ? (matchedCollege.departments || []) : [];
+});
+
+const onCollegeChange = () => {
+    // 단과대 변경 시 학과 초기화 처리
+    if (searchParams.value.collegeName) {
+        const matchedCollege = lectureStore.colleges.find(c => c.name === searchParams.value.collegeName);
+        const deptNames = matchedCollege ? (matchedCollege.departments || []).map(d => d.name) : [];
+        if (!deptNames.includes(searchParams.value.departmentName)) {
+            searchParams.value.departmentName = '';
+        }
+    } else {
+        searchParams.value.departmentName = '';
+    }
+    onSearch();
+};
 
 const onSearch = () => {
     searchParams.value.page = 1;
@@ -58,10 +90,32 @@ const isApplied = (lectureId) => {
     return enrollmentStore.myEnrollments.some(e => e.lectureId === lectureId);
 };
 
-onMounted(() => {
+onMounted(async () => {
+    // 0. 스토어 상태 초기화하여 이전 페이지 데이터가 보이는 현상(플래시) 방지
+    lectureStore.lectures = [];
+    lectureStore.totalCount = 0;
+
+    // 1. 단과대 및 학과 데이터 로드
+    await lectureStore.fetchColleges();
+    
+    // 2. 현재 로그인한 학생의 학과 기본 설정
+    if (authStore.isLoggedIn && authStore.userInfo) {
+        const studentDeptName = authStore.userInfo.departmentName;
+        if (studentDeptName) {
+            // 해당 학과가 포함된 단과대 조회
+            const matchedCollege = lectureStore.colleges.find(c =>
+                c.departments && c.departments.some(d => d.name === studentDeptName)
+            );
+            if (matchedCollege) {
+                searchParams.value.collegeName = matchedCollege.name;
+            }
+            searchParams.value.departmentName = studentDeptName;
+        }
+    }
+
+    // 3. 디폴트 강의 조회 및 수강신청 이력 조회
     lectureStore.fetchLectures(searchParams.value);
     if (authStore.isLoggedIn) {
-        // 수강신청 화면 진입 시 현재 학기 내역 로드
         enrollmentStore.fetchMyEnrollments(searchParams.value.year, searchParams.value.semester);
     }
 });
@@ -77,8 +131,22 @@ onMounted(() => {
     <div class="search-section">
       <div class="search-row">
         <div class="search-group">
+          <label>단과대</label>
+          <select v-model="searchParams.collegeName" @change="onCollegeChange">
+            <option value="">전체</option>
+            <option v-for="college in lectureStore.colleges" :key="college.id" :value="college.name">
+              {{ college.name }}
+            </option>
+          </select>
+        </div>
+        <div class="search-group">
           <label>학과</label>
-          <input v-model="searchParams.departmentName" type="text" placeholder="학과명 입력" @keyup.enter="onSearch">
+          <select v-model="searchParams.departmentName" @change="onSearch">
+            <option value="">전체</option>
+            <option v-for="dept in filteredDepartments" :key="dept.id" :value="dept.name">
+              {{ dept.name }}
+            </option>
+          </select>
         </div>
         <div class="search-group">
           <label>강의명</label>
@@ -105,6 +173,7 @@ onMounted(() => {
             <th>학과</th>
             <th>강의명</th>
             <th>학점</th>
+            <th>대상학년</th>
             <th>담당교수</th>
             <th class="col-classroom">강의실</th>
             <th class="col-time">시간</th>
@@ -114,16 +183,17 @@ onMounted(() => {
         </thead>
         <tbody>
           <tr v-if="lectureStore.loading">
-            <td colspan="9" class="loading-text">데이터를 불러오는 중입니다...</td>
+            <td colspan="10" class="loading-text">데이터를 불러오는 중입니다...</td>
           </tr>
           <tr v-else-if="lectureStore.lectures.length === 0">
-            <td colspan="9" class="empty-text">조회된 강의가 없습니다.</td>
+            <td colspan="10" class="empty-text">조회된 강의가 없습니다.</td>
           </tr>
           <tr v-for="lecture in lectureStore.lectures" :key="lecture.id">
             <td>{{ lecture.courseCode }}</td>
             <td>{{ lecture.departmentName }}</td>
             <td class="course-name">{{ lecture.courseName }}</td>
             <td>{{ lecture.credits }}</td>
+            <td>{{ lecture.targetGrade }}학년</td>
             <td>{{ lecture.professorName }}</td>
             <td class="classroom-text">{{ lecture.classroom }}</td>
             <td class="time-text">
@@ -205,11 +275,15 @@ onMounted(() => {
   color: #4f566b;
 }
 
-.search-group input {
+.search-group input,
+.search-group select {
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
   font-size: 0.9rem;
+  background-color: white;
+  min-width: 160px;
+  box-sizing: border-box;
 }
 
 .current-semester-info {

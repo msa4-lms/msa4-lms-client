@@ -6,6 +6,7 @@ export const useLectureStore = defineStore('lecture', () => {
     const lectures = ref([]);
     const totalCount = ref(0);
     const loading = ref(false);
+    const colleges = ref([]);
 
     const fetchLectures = async (searchParams) => {
         loading.value = true;
@@ -22,10 +23,23 @@ export const useLectureStore = defineStore('lecture', () => {
         }
     };
 
+    const fetchColleges = async () => {
+        try {
+            const response = await myAxios.get('/api/lectures/colleges');
+            if (response.data.code === '00') {
+                colleges.value = response.data.data;
+            }
+        } catch (error) {
+            console.error('단과대 및 학과 조회 실패:', error);
+        }
+    };
+
     return {
         lectures,
         totalCount,
         loading,
+        colleges,
         fetchLectures,
+        fetchColleges,
     };
 });
