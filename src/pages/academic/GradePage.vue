@@ -26,7 +26,7 @@ const getGradeLevel = (grade) => {
 
 onMounted(() => {
   if (authStore.isLoggedIn) {
-    academicStore.fetchGrades();
+    await academicStore.fetchGrades();
   }
 });
 </script>
@@ -64,7 +64,7 @@ onMounted(() => {
 
     <div class="content-card table-section">
       <div class="card-header">
-        <h3>학기별 상세 성적</h3>
+        <h2>학기별 상세 성적</h2>
       </div>
 
       <MyTable
@@ -106,7 +106,7 @@ onMounted(() => {
 }
 
 .header-section {
-  margin-bottom: 32px;
+  margin-bottom: 28px;
 }
 
 .header-section h1 {
@@ -119,20 +119,15 @@ onMounted(() => {
   color: #697386;
 }
 
-.dashboard-grid {
+.summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  margin-bottom: 24px;
 }
 
 .summary-card {
   background: white;
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
   border: 1px solid #edf2f7;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
@@ -159,6 +154,7 @@ onMounted(() => {
 .card-info {
   display: flex;
   flex-direction: column;
+  gap: 8px;
 }
 
 .label {
@@ -189,14 +185,13 @@ onMounted(() => {
 
 .content-card {
   background: white;
-  border-radius: 12px;
   border: 1px solid #edf2f7;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
 .card-header {
-  padding: 20px 24px;
+  padding: 18px 20px;
   border-bottom: 1px solid #edf2f7;
 }
 
@@ -221,9 +216,10 @@ onMounted(() => {
 
 .grade-badge {
   display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  align-items: center;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
   font-weight: 700;
 }
 

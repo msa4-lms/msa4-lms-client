@@ -9,6 +9,9 @@ export const useAcademicStore = defineStore("academic", () => {
     semesterGrades: [],
   });
   const attendanceList = ref([]);
+  const attendanceRates = ref([]);
+  const myExcuseRequests = ref([]);
+  const pendingExcuseRequests = ref([]);
 
   // 성적 조회
   const fetchGrades = async () => {
@@ -22,7 +25,6 @@ export const useAcademicStore = defineStore("academic", () => {
     }
   };
 
-  // 출결 조회
   const fetchAttendance = async () => {
     try {
       const res = await myAxios.get(`/api/student/academic/attendance`);
@@ -34,5 +36,56 @@ export const useAcademicStore = defineStore("academic", () => {
     }
   };
 
-  return { gradeSummary, attendanceList, fetchGrades, fetchAttendance };
+  const fetchAttendanceRates = async () => {
+    const res = await myAxios.get("/api/academic/attendance-rates");
+    if (res.data.code === "00") {
+      attendanceRates.value = res.data.data;
+    }
+  };
+
+  const fetchMyExcuseRequests = async () => {
+    const res = await myAxios.get("/api/academic/excuses/my");
+    if (res.data.code === "00") {
+      myExcuseRequests.value = res.data.data;
+    }
+  };
+
+  const fetchPendingExcuseRequests = async () => {
+    const res = await myAxios.get("/api/academic/excuses/pending");
+    if (res.data.code === "00") {
+      pendingExcuseRequests.value = res.data.data;
+    }
+  };
+
+  const requestExcuse = async (payload) => {
+    const res = await myAxios.post("/api/academic/excuses", payload);
+    if (res.data.code === "00") {
+      await fetchMyExcuseRequests();
+    }
+    return res.data;
+  };
+
+  const decideExcuseRequest = async (requestId, payload) => {
+    const res = await myAxios.patch(`/api/academic/excuses/${requestId}`, payload);
+    if (res.data.code === "00") {
+      await fetchPendingExcuseRequests();
+      await fetchAttendanceRates();
+    }
+    return res.data;
+  };
+
+  return {
+    gradeSummary,
+    attendanceList,
+    attendanceRates,
+    myExcuseRequests,
+    pendingExcuseRequests,
+    fetchGrades,
+    fetchAttendance,
+    fetchAttendanceRates,
+    fetchMyExcuseRequests,
+    fetchPendingExcuseRequests,
+    requestExcuse,
+    decideExcuseRequest,
+  };
 });

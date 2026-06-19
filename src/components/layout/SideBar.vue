@@ -81,7 +81,6 @@ const alertReady = () => {
         </div>
       </template>
 
-      <!-- 교수 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
         <!-- 교사관리 -->
         <div class="menu-group">
@@ -132,7 +131,6 @@ const alertReady = () => {
         </div>
       </template>
 
-      <!-- 관리자 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'ADMIN'">
         <router-link to="/students" class="nav-item">사용자 관리</router-link>
         <router-link to="/profile" class="nav-item">내 정보</router-link>
