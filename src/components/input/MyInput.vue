@@ -1,14 +1,26 @@
 <script setup>
 const props = defineProps({
-  modelValue: String,
+  modelValue: [String, Number],
   type: {
     type: String,
     default: "text",
   },
   placeholder: String,
+  modelModifiers: {
+    type: Object,
+    default: () => ({}),
+  },
 });
 
 const emit = defineEmits(["update:modelValue", "keyup-enter"]);
+
+const updateValue = (event) => {
+  const value = props.modelModifiers.trim
+    ? event.target.value.trim()
+    : event.target.value;
+
+  emit("update:modelValue", value);
+};
 </script>
 
 <template>
@@ -16,7 +28,7 @@ const emit = defineEmits(["update:modelValue", "keyup-enter"]);
     :value="modelValue"
     :type="type"
     :placeholder="placeholder"
-    @input="emit('update:modelValue', $event.target.value)"
+    @input="updateValue"
     @keyup.enter="emit('keyup-enter')"
   />
 </template>

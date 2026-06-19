@@ -1,10 +1,28 @@
 <script setup>
-import { onMounted } from 'vue';
-import { useAcademicStore } from '../../store/academic/useAcademicStore';
-import { useAuthStore } from '../../store/auth/useAuthStore';
+import { onMounted } from "vue";
+import { useAcademicStore } from "../../store/academic/useAcademicStore";
+import { useAuthStore } from "../../store/auth/useAuthStore";
+import MyTable from "../../components/table/MyTable.vue";
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
+
+const gradeColumns = [
+  { key: "semester", label: "연도/학기" },
+  { key: "courseCode", label: "과목코드" },
+  { key: "courseName", label: "과목명" },
+  { key: "credits", label: "학점" },
+  { key: "grade", label: "등급" },
+  { key: "status", label: "상태" },
+];
+
+const isConfirmedGrade = (grade) => grade.grade !== "미입력";
+
+const getGradeLevel = (grade) => {
+  if (grade.startsWith("A")) return "high";
+  if (grade.startsWith("B")) return "mid";
+  return "low";
+};
 
 onMounted(() => {
   if (authStore.isLoggedIn) {
@@ -16,14 +34,12 @@ onMounted(() => {
 <template>
   <div class="grade-view">
     <div class="header-section">
-      <h1>내 성적 조회</h1>
+      <h1>성적 조회</h1>
       <p>확정된 성적 및 전체 평균 평점(GPA)을 확인할 수 있습니다.</p>
     </div>
-    
-    <!-- 요약 대시보드 (팀의 카드 스타일 적용) -->
+
     <div class="dashboard-grid">
       <div class="summary-card gpa-card">
-        <div class="card-icon">📊</div>
         <div class="card-info">
           <span class="label">전체 평균 평점 (GPA)</span>
           <div class="value-group">
@@ -34,62 +50,51 @@ onMounted(() => {
       </div>
 
       <div class="summary-card credits-card">
-        <div class="card-icon">🎓</div>
         <div class="card-info">
           <span class="label">총 이수 학점</span>
           <div class="value-group">
-            <span class="value">{{ academicStore.gradeSummary.totalCredits }}</span>
+            <span class="value">{{
+              academicStore.gradeSummary.totalCredits
+            }}</span>
             <span class="unit">학점</span>
           </div>
         </div>
       </div>
     </div>
 
-    <!-- 상세 성적 테이블 (팀의 테이블 스타일 적용) -->
     <div class="content-card table-section">
       <div class="card-header">
         <h3>학기별 상세 성적</h3>
       </div>
-      <div class="table-wrapper">
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>년도/학기</th>
-              <th>과목코드</th>
-              <th>과목명</th>
-              <th>학점</th>
-              <th>등급</th>
-              <th>상태</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-for="(grade, index) in academicStore.gradeSummary.semesterGrades" :key="index">
-              <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
-              <td class="code">{{ grade.courseCode }}</td>
-              <td class="name">{{ grade.courseName }}</td>
-              <td class="credit">{{ grade.credits }}</td>
-              <td class="grade">
-                <span :class="['grade-badge', grade.grade.startsWith('A') ? 'high' : grade.grade.startsWith('B') ? 'mid' : 'low']">
-                  {{ grade.grade }}
-                </span>
-              </td>
-              <td class="status">
-                <span class="status-badge" :class="{ confirmed: grade.grade !== '미입력' }">
-                  {{ grade.grade !== '미입력' ? '공개(확정)' : '미공개' }}
-                </span>
-              </td>
-            </tr>
-            <tr v-if="academicStore.gradeSummary.semesterGrades.length === 0">
-              <td colspan="6" class="no-data">
-                <div class="empty-state">
-                  <span class="empty-icon">📂</span>
-                  <p>조회된 성적 내역이 없습니다.<br><small>성적 확정 전이거나 수강 완료된 과목이 없습니다.</small></p>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+
+      <MyTable
+        :columns="gradeColumns"
+        :empty="academicStore.gradeSummary.semesterGrades.length === 0"
+        emptyMessage="조회된 성적 내역이 없습니다."
+      >
+        <tr
+          v-for="(grade, index) in academicStore.gradeSummary.semesterGrades"
+          :key="index"
+        >
+          <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
+          <td class="code">{{ grade.courseCode }}</td>
+          <td class="name">{{ grade.courseName }}</td>
+          <td class="credit">{{ grade.credits }}</td>
+          <td class="grade">
+            <span :class="['grade-badge', getGradeLevel(grade.grade)]">
+              {{ grade.grade }}
+            </span>
+          </td>
+          <td class="status">
+            <span
+              class="status-badge"
+              :class="{ confirmed: isConfirmedGrade(grade) }"
+            >
+              {{ isConfirmedGrade(grade) ? "공개(확정)" : "미공개" }}
+            </span>
+          </td>
+        </tr>
+      </MyTable>
     </div>
   </div>
 </template>
@@ -105,8 +110,8 @@ onMounted(() => {
 }
 
 .header-section h1 {
-  font-size: 1.8rem;
   color: #1a1f36;
+  font-size: 1.8rem;
   margin-bottom: 8px;
 }
 
@@ -129,22 +134,27 @@ onMounted(() => {
   align-items: center;
   gap: 20px;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .card-icon {
   width: 56px;
   height: 56px;
   border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 28px;
+  display: grid;
+  place-items: center;
   background: #f8fafc;
+  font-size: 0.85rem;
+  font-weight: 800;
 }
 
-.gpa-card .card-icon { background-color: #eef2ff; }
-.credits-card .card-icon { background-color: #ecfdf5; }
+.gpa-card .card-icon {
+  background-color: #eef2ff;
+}
+
+.credits-card .card-icon {
+  background-color: #ecfdf5;
+}
 
 .card-info {
   display: flex;
@@ -152,9 +162,9 @@ onMounted(() => {
 }
 
 .label {
+  color: #64748b;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #64748b;
   margin-bottom: 4px;
 }
 
@@ -165,14 +175,15 @@ onMounted(() => {
 }
 
 .value {
+  color: #1e293b;
   font-size: 2rem;
   font-weight: 800;
-  color: #1e293b;
 }
 
-.max, .unit {
-  font-size: 1rem;
+.max,
+.unit {
   color: #94a3b8;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -180,7 +191,8 @@ onMounted(() => {
   background: white;
   border-radius: 12px;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .card-header {
@@ -189,45 +201,23 @@ onMounted(() => {
 }
 
 .card-header h3 {
-  font-size: 1.1rem;
   color: #1a1f36;
+  font-size: 1.1rem;
 }
 
-.table-wrapper {
-  overflow-x: auto;
+.semester {
+  color: #1e293b;
+  font-weight: 600;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
+.code {
+  color: #64748b;
+  font-family: monospace;
 }
 
-.data-table th {
-  background: #f8fafc;
-  padding: 14px 24px;
-  text-align: left;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid #edf2f7;
+.credit {
+  font-weight: 500;
 }
-
-.data-table td {
-  padding: 16px 24px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #334155;
-  font-size: 0.95rem;
-}
-
-.data-table tr:last-child td {
-  border-bottom: none;
-}
-
-.semester { font-weight: 600; color: #1e293b; }
-.code { font-family: monospace; color: #64748b; }
-.credit, .point { font-weight: 500; }
 
 .grade-badge {
   display: inline-flex;
@@ -237,49 +227,33 @@ onMounted(() => {
   font-weight: 700;
 }
 
-.grade-badge.high { background: #ecfdf5; color: #059669; }
-.grade-badge.mid { background: #eff6ff; color: #2563eb; }
-.grade-badge.low { background: #fef2f2; color: #dc2626; }
+.grade-badge.high {
+  background: #ecfdf5;
+  color: #059669;
+}
+
+.grade-badge.mid {
+  background: #eff6ff;
+  color: #2563eb;
+}
+
+.grade-badge.low {
+  background: #fef2f2;
+  color: #dc2626;
+}
 
 .status-badge {
   display: inline-flex;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
   background: #f1f5f9;
   color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .status-badge.confirmed {
   background: #e0e7ff;
   color: #4338ca;
-}
-
-.no-data {
-  padding: 60px 0;
-  text-align: center;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.empty-icon {
-  font-size: 40px;
-  opacity: 0.5;
-}
-
-.empty-state p {
-  color: #64748b;
-  line-height: 1.6;
-}
-
-.empty-state small {
-  font-size: 0.8rem;
-  color: #94a3b8;
 }
 </style>
