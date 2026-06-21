@@ -8,7 +8,6 @@ const authStore = useAuthStore();
   <aside class="sidebar">
     <nav class="sidebar-nav">
       <router-link to="/main" class="nav-item">대시보드</router-link>
-      <router-link to="/lectures" class="nav-item">강의 조회</router-link>
       
       <!-- 학생 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
@@ -21,14 +20,16 @@ const authStore = useAuthStore();
 
       <!-- 교수 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
-        <router-link to="/lectures/manage" class="nav-item">강의 관리</router-link>
-        <router-link to="/students" class="nav-item">학생 관리</router-link>
+        <router-link to="/lectures" class="nav-item">강의 조회</router-link>
+        <router-link to="/professor/lectures/create" class="nav-item">강의 개설</router-link>
+        <router-link to="/professor/grades" class="nav-item">성적/학생 관리</router-link>
         <router-link to="/attendance" class="nav-item">출결 관리</router-link>
         <router-link to="/profile" class="nav-item">내 정보</router-link>
       </template>
 
       <!-- 관리자 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'ADMIN'">
+        <router-link to="/lectures" class="nav-item">강의 조회</router-link>
         <router-link to="/students" class="nav-item">사용자 관리</router-link>
         <router-link to="/profile" class="nav-item">내 정보</router-link>
       </template>
