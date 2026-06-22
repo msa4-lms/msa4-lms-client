@@ -1,14 +1,14 @@
 <template>
-  <div class="grade-manage-container">
-    <div class="glass-dashboard">
-      <div class="header-section">
-        <div>
-          <h1 class="dashboard-title">교수 성적 관리 포털</h1>
-          <p class="subtitle">담당하시는 강좌의 수강생 성적 입력, 상태 관리 및 이의신청을 처리할 수 있습니다.</p>
-        </div>
-        
-        <!-- 강좌 선택 셀렉터 -->
-        <div class="lecture-selector-group">
+  <div class="grade-manage-view">
+    <!-- 헤더 섹션 (투명 배경, 학생용 동일) -->
+    <div class="header-section">
+      <h1>{{ isCorrectionMode ? '성적 정정 관리' : '성적 입력 관리' }}</h1>
+    </div>
+
+    <!-- 강좌 검색/선택 섹션 (학생용 search-section 카드 스타일 적용) -->
+    <div class="search-section">
+      <div class="search-row">
+        <div class="search-group">
           <label for="lectureSelect">강좌 선택</label>
           <select id="lectureSelect" v-model="selectedLectureId" @change="loadGrades" class="form-select">
             <option :value="null" disabled>강좌를 선택하세요</option>
@@ -17,114 +17,127 @@
             </option>
           </select>
         </div>
-      </div>
 
-      <!-- 성적 관리 테이블 섹션 -->
-      <div v-if="selectedLectureId" class="content-section">
-        <div class="action-bar">
-          <div class="lecture-info-tags">
-            <span class="info-tag">정원: {{ currentLecture?.capacity }}명</span>
-            <span class="info-tag">학기: {{ currentLecture?.academicYear }}학년도 {{ currentLecture?.term === 'FIRST' ? '1학기' : '2학기' }}</span>
-          </div>
-
-          <div class="control-buttons">
-            <button @click="handleSave" class="btn-secondary">임시저장 (DRAFT)</button>
-            <button @click="handleSubmitGrades" class="btn-primary">성적 일괄 제출 (SUBMIT)</button>
-            <button @click="handlePublishGrades" class="btn-success">성적 전체 공개 (OPEN)</button>
-          </div>
+        <div v-if="selectedLectureId" class="current-semester-info">
+          <span class="label">강좌 정보</span>
+          <span class="value">
+            정원: {{ currentLecture?.capacity }}명 | 
+            {{ currentLecture?.academicYear }}학년도 {{ currentLecture?.term === 'FIRST' ? '1학기' : '2학기' }}
+          </span>
         </div>
+      </div>
+    </div>
 
-        <div class="table-wrapper">
-          <table class="data-table">
-            <thead>
-              <tr>
-                <th>학생 이름</th>
-                <th>학번</th>
-                <th>중간고사</th>
-                <th>기말고사</th>
-                <th>과제</th>
-                <th>출결</th>
-                <th>가중 총점</th>
-                <th>최종 등급</th>
-                <th>진행 상태</th>
-                <th>이의신청 관리</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-for="g in localGrades" :key="g.id">
-                <td class="font-bold">{{ g.studentName }}</td>
-                <td class="text-secondary">{{ g.studentLoginId }}</td>
-                <td>
-                  <input
-                    type="number"
-                    v-model.number="g.midtermScore"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    :disabled="g.status === 'FINAL'"
-                    class="table-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    v-model.number="g.finalScore"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    :disabled="g.status === 'FINAL'"
-                    class="table-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    v-model.number="g.assignmentScore"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    :disabled="g.status === 'FINAL'"
-                    class="table-input"
-                  />
-                </td>
-                <td>
-                  <input
-                    type="number"
-                    v-model.number="g.attendanceScore"
-                    min="0"
-                    max="100"
-                    step="0.01"
-                    :disabled="g.status === 'FINAL'"
-                    class="table-input"
-                  />
-                </td>
-                <td class="font-bold text-accent">{{ calculateTotal(g) }}</td>
-                <td class="font-bold text-accent">{{ determineGrade(calculateTotal(g)) }}</td>
-                <td>
-                  <span :class="['status-badge', g.status.toLowerCase()]">
-                    {{ g.status }}
-                  </span>
-                </td>
-                <td>
-                  <button
-                    v-if="g.status === 'OBJECTION'"
-                    @click="openObjectionModal(g)"
-                    class="btn-warn btn-sm"
-                  >
-                    이의신청 보기
-                  </button>
-                  <span v-else class="text-secondary">-</span>
-                </td>
-              </tr>
-              <tr v-if="localGrades.length === 0">
-                <td colspan="10" class="no-data">수강생이 존재하지 않거나 수강 내역이 없습니다.</td>
-              </tr>
-            </tbody>
-          </table>
+    <!-- 성적 관리 테이블 섹션 (하단 카드) -->
+    <div v-if="selectedLectureId" class="content-card">
+      <div class="card-header">
+        <h3>{{ isCorrectionMode ? '이의신청 수강생 목록' : '수강생 성적 입력' }}</h3>
+        <div v-if="!isCorrectionMode" class="control-buttons">
+          <MyButton color="white" size="middle" content="임시저장" :disabled="hasValidationError" @click="handleSave" />
+          <MyButton color="deep-blue" size="middle" content="성적 일괄 제출" :disabled="hasValidationError" @click="handleSubmitGrades" />
+          <MyButton color="green" size="middle" content="성적 전체 공개" :disabled="hasValidationError" @click="handlePublishGrades" />
         </div>
       </div>
 
-      <div v-else class="welcome-section">
+      <div class="card-body">
+        <div v-if="hasValidationError" class="validation-error-alert">
+          입력된 성적 중 0점 미만이거나 100점을 초과한 점수가 존재합니다. (0 ~ 100점 사이로 정상 입력하셔야 저장이 가능합니다.)
+        </div>
+
+        <MyTable
+          :columns="gradeColumns"
+          :empty="localGrades.length === 0"
+          emptyMessage="수강생이 존재하지 않거나 수강 내역이 없습니다."
+        >
+          <tr v-for="g in localGrades" :key="g.id">
+            <td class="student-name">{{ g.studentName }}</td>
+            <td class="code">{{ g.studentLoginId }}</td>
+            <td>
+              <div class="score-input-cell">
+                <MyInput
+                  type="number"
+                  v-model.number="g.midtermScore"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  :disabled="g.status === 'FINAL'"
+                  class="table-input"
+                />
+                <span class="converted-score">{{ convertScore(g.midtermScore, 'midterm') }}점</span>
+              </div>
+            </td>
+            <td>
+              <div class="score-input-cell">
+                <MyInput
+                  type="number"
+                  v-model.number="g.finalScore"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  :disabled="g.status === 'FINAL'"
+                  class="table-input"
+                />
+                <span class="converted-score">{{ convertScore(g.finalScore, 'final') }}점</span>
+              </div>
+            </td>
+            <td>
+              <div class="score-input-cell">
+                <MyInput
+                  type="number"
+                  v-model.number="g.assignmentScore"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  :disabled="g.status === 'FINAL'"
+                  class="table-input"
+                />
+                <span class="converted-score">{{ convertScore(g.assignmentScore, 'assignment') }}점</span>
+              </div>
+            </td>
+            <td>
+              <div class="score-input-cell">
+                <MyInput
+                  type="number"
+                  v-model.number="g.attendanceScore"
+                  min="0"
+                  max="100"
+                  step="0.01"
+                  :disabled="g.status === 'FINAL'"
+                  class="table-input"
+                />
+                <span class="converted-score">{{ convertScore(g.attendanceScore, 'attendance') }}점</span>
+              </div>
+            </td>
+            <td class="font-bold val-total">{{ calculateTotal(g) }}점</td>
+            <td>
+              <span :class="['grade-badge', getGradeLevel(determineGrade(calculateTotal(g)))]">
+                {{ determineGrade(calculateTotal(g)) }}
+              </span>
+            </td>
+            <td>
+              <span :class="['status-badge', g.status.toLowerCase()]">
+                {{ formatStatus(g.status) }}
+              </span>
+            </td>
+            <td v-if="isCorrectionMode">
+              <MyButton
+                v-if="g.status === 'OBJECTION'"
+                color="red"
+                size="small"
+                content="이의신청 보기"
+                @click="openObjectionModal(g)"
+              />
+              <span v-else class="text-secondary">-</span>
+            </td>
+          </tr>
+        </MyTable>
+      </div>
+    </div>
+
+    <!-- 미선택 빈 화면 상태 -->
+    <div v-else class="welcome-section">
+      <div class="empty-state">
+        <span class="empty-icon">🎓</span>
         <p>상단에서 관리하실 강좌를 선택해 주세요.</p>
       </div>
     </div>
@@ -158,31 +171,38 @@
             <div class="score-adjust-section">
               <h3>점수 재입력 (승인 시 적용)</h3>
               <div class="adjust-grid">
-                <div>
-                  <label>중간</label>
-                  <input type="number" v-model.number="adjustScores.midtermScore" min="0" max="100" class="form-input" />
+                <div class="adjust-item">
+                  <label>중간 ({{ getRatio('midterm') }}%)</label>
+                  <MyInput type="number" v-model.number="adjustScores.midtermScore" min="0" max="100" class="form-input" />
+                  <span class="converted-score-modal">{{ convertScore(adjustScores.midtermScore, 'midterm') }}점</span>
                 </div>
-                <div>
-                  <label>기말</label>
-                  <input type="number" v-model.number="adjustScores.finalScore" min="0" max="100" class="form-input" />
+                <div class="adjust-item">
+                  <label>기말 ({{ getRatio('final') }}%)</label>
+                  <MyInput type="number" v-model.number="adjustScores.finalScore" min="0" max="100" class="form-input" />
+                  <span class="converted-score-modal">{{ convertScore(adjustScores.finalScore, 'final') }}점</span>
                 </div>
-                <div>
-                  <label>과제</label>
-                  <input type="number" v-model.number="adjustScores.assignmentScore" min="0" max="100" class="form-input" />
+                <div class="adjust-item">
+                  <label>과제 ({{ getRatio('assignment') }}%)</label>
+                  <MyInput type="number" v-model.number="adjustScores.assignmentScore" min="0" max="100" class="form-input" />
+                  <span class="converted-score-modal">{{ convertScore(adjustScores.assignmentScore, 'assignment') }}점</span>
                 </div>
-                <div>
-                  <label>출결</label>
-                  <input type="number" v-model.number="adjustScores.attendanceScore" min="0" max="100" class="form-input" />
+                <div class="adjust-item">
+                  <label>출결 ({{ getRatio('attendance') }}%)</label>
+                  <MyInput type="number" v-model.number="adjustScores.attendanceScore" min="0" max="100" class="form-input" />
+                  <span class="converted-score-modal">{{ convertScore(adjustScores.attendanceScore, 'attendance') }}점</span>
                 </div>
+              </div>
+              <div v-if="hasObjectionValidationError" class="validation-error-alert modal-error">
+                 0점 이상 100점 이하로만 입력 가능합니다.
               </div>
             </div>
           </div>
         </div>
 
         <div class="modal-actions">
-          <button @click="closeObjectionModal" class="btn-secondary">취소</button>
-          <button @click="handleObjectionReject" class="btn-warn">이의 기각(반려/FINAL 확정)</button>
-          <button @click="handleObjectionApprove" class="btn-success">이의 승인(성적 조정/APPROVED)</button>
+          <MyButton color="white" size="small" content="취소" @click="closeObjectionModal" />
+          <MyButton color="red" size="small" content="이의 기각" @click="handleObjectionReject" />
+          <MyButton color="deep-blue" size="small" content="이의 승인" :disabled="hasObjectionValidationError" @click="handleObjectionApprove" />
         </div>
       </div>
     </div>
@@ -191,8 +211,15 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { useRoute } from "vue-router";
+import MyButton from "../../components/button/MyButton.vue";
+import MyInput from "../../components/input/MyInput.vue";
+import MyTable from "../../components/table/MyTable.vue";
 import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
 import { useGradeProfessorStore } from "../../store/academic/useGradeProfessorStore";
+
+const route = useRoute();
+const isCorrectionMode = computed(() => route.path.includes("correct"));
 
 const lectureStore = useLectureProfessorStore();
 const gradeStore = useGradeProfessorStore();
@@ -216,6 +243,79 @@ const currentLecture = computed(() =>
   lectures.value.find(l => l.id === selectedLectureId.value)
 );
 
+// 테이블 컬럼 정의
+const gradeColumns = computed(() => {
+  const cols = [
+    { key: "studentName", label: "학생 이름" },
+    { key: "studentLoginId", label: "학번" },
+    { key: "midtermScore", label: `중간고사 (${getRatio('midterm')}%)` },
+    { key: "finalScore", label: `기말고사 (${getRatio('final')}%)` },
+    { key: "assignmentScore", label: `과제 (${getRatio('assignment')}%)` },
+    { key: "attendanceScore", label: `출결 (${getRatio('attendance')}%)` },
+    { key: "totalScore", label: "가중 총점" },
+    { key: "grade", label: "등급" },
+    { key: "status", label: "진행 상태" },
+  ];
+  if (isCorrectionMode.value) {
+    cols.push({ key: "objection", label: "이의신청 관리" });
+  }
+  return cols;
+});
+
+const getRatio = (type) => {
+  if (!currentLecture.value) return 0;
+  const lec = currentLecture.value;
+  if (type === 'midterm') return lec.midtermRatio !== undefined ? lec.midtermRatio : 30;
+  if (type === 'final') return lec.finalRatio !== undefined ? lec.finalRatio : 30;
+  if (type === 'assignment') return lec.assignmentRatio !== undefined ? lec.assignmentRatio : 30;
+  if (type === 'attendance') return lec.attendanceRatio !== undefined ? lec.attendanceRatio : 10;
+  return 0;
+};
+
+const convertScore = (score, type) => {
+  const ratio = getRatio(type);
+  const val = parseFloat(score) || 0;
+  return ((val * ratio) / 100).toFixed(1);
+};
+
+const hasValidationError = computed(() => {
+  return localGrades.value.some(g => 
+    (g.midtermScore !== null && (g.midtermScore < 0 || g.midtermScore > 100)) ||
+    (g.finalScore !== null && (g.finalScore < 0 || g.finalScore > 100)) ||
+    (g.assignmentScore !== null && (g.assignmentScore < 0 || g.assignmentScore > 100)) ||
+    (g.attendanceScore !== null && (g.attendanceScore < 0 || g.attendanceScore > 100))
+  );
+});
+
+const hasObjectionValidationError = computed(() => {
+  const scores = adjustScores.value;
+  return (scores.midtermScore !== null && (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
+         (scores.finalScore !== null && (scores.finalScore < 0 || scores.finalScore > 100)) ||
+         (scores.assignmentScore !== null && (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
+         (scores.attendanceScore !== null && (scores.attendanceScore < 0 || scores.attendanceScore > 100));
+});
+
+// 학생 성적 등급 수준 구하기 (A계열 high, B계열 mid, 나머지 low)
+const getGradeLevel = (grade) => {
+  if (!grade) return "low";
+  if (grade.startsWith("A")) return "high";
+  if (grade.startsWith("B")) return "mid";
+  return "low";
+};
+
+// 진행 상태 표시 매핑
+const formatStatus = (status) => {
+  const map = {
+    DRAFT: "임시저장",
+    SUBMITTED: "제출완료",
+    OPENED: "공개됨",
+    OBJECTION: "이의신청",
+    APPROVED: "조정승인",
+    FINAL: "성적확정",
+  };
+  return map[status] || status;
+};
+
 onMounted(async () => {
   try {
     await lectureStore.fetchProfessorLectures();
@@ -237,7 +337,6 @@ const loadGrades = async () => {
 const calculateTotal = (g) => {
   if (!currentLecture.value) return 0;
   const lec = currentLecture.value;
-  // 기존 DB에 비율 컬럼이 없을 때를 대비한 디폴트 값 제공
   const mRatio = lec.midtermRatio !== undefined ? lec.midtermRatio : 30;
   const fRatio = lec.finalRatio !== undefined ? lec.finalRatio : 30;
   const aRatio = lec.assignmentRatio !== undefined ? lec.assignmentRatio : 30;
@@ -268,6 +367,16 @@ const determineGrade = (score) => {
 // 임시저장
 const handleSave = async () => {
   if (!selectedLectureId.value) return;
+
+  for (const g of localGrades.value) {
+    if ((g.midtermScore !== null && (g.midtermScore < 0 || g.midtermScore > 100)) ||
+        (g.finalScore !== null && (g.finalScore < 0 || g.finalScore > 100)) ||
+        (g.assignmentScore !== null && (g.assignmentScore < 0 || g.assignmentScore > 100)) ||
+        (g.attendanceScore !== null && (g.attendanceScore < 0 || g.attendanceScore > 100))) {
+      alert("성적 점수는 0점 이상 100점 이하로만 입력 가능합니다.");
+      return;
+    }
+  }
   
   const payload = localGrades.value.map(g => ({
     enrollmentId: g.enrollmentId,
@@ -351,6 +460,16 @@ const handleObjectionReject = async () => {
 // 이의신청 승인 (APPROVED 처리 및 성적 갱신)
 const handleObjectionApprove = async () => {
   if (!activeObjection.value) return;
+
+  const scores = adjustScores.value;
+  if ((scores.midtermScore !== null && (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
+      (scores.finalScore !== null && (scores.finalScore < 0 || scores.finalScore > 100)) ||
+      (scores.assignmentScore !== null && (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
+      (scores.attendanceScore !== null && (scores.attendanceScore < 0 || scores.attendanceScore > 100))) {
+    alert("성적 점수는 0점 이상 100점 이하로만 입력 가능합니다.");
+    return;
+  }
+
   try {
     await gradeStore.replyObjection(activeObjection.value.id, {
       approve: true,
@@ -373,279 +492,280 @@ const handleObjectionApprove = async () => {
 </script>
 
 <style scoped>
-.grade-manage-container {
-  padding: 2.5rem;
-  min-height: calc(100vh - 80px);
-  background-color: #F8FAFC;
-  color: #1E293B;
+.grade-manage-view {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding-bottom: 50px;
 }
 
-.glass-dashboard {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 16px;
-  padding: 2.5rem;
-  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.05), 0 8px 10px -6px rgba(0, 0, 0, 0.05);
-}
-
+/* 헤더 영역 (학생용과 완벽 일치) */
 .header-section {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #E2E8F0;
-  padding-bottom: 2rem;
-  margin-bottom: 2rem;
+  margin-bottom: 32px;
+  text-align: left;
 }
 
-.dashboard-title {
-  font-size: 2.2rem;
+.header-section h1 {
+  color: #1a1f36;
+  font-size: 1.8rem;
+  margin-bottom: 8px;
   font-weight: 700;
-  color: #0B3D91;
-  text-align: left;
 }
 
-.subtitle {
-  color: #64748B;
-  margin-top: 0.5rem;
-  text-align: left;
+.header-section p {
+  color: #697386;
+  font-size: 0.95rem;
 }
 
-.lecture-selector-group {
+/* 검색/조회 박스 (학생용 search-section 스타일 적용) */
+.search-section {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  border: 1px solid #edf2f7;
+  margin-bottom: 24px;
+}
+
+.search-row {
+  display: flex;
+  gap: 24px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.search-group {
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  gap: 6px;
+  text-align: left;
 }
 
-.lecture-selector-group label {
+.search-group label {
   font-size: 0.85rem;
-  color: #64748B;
-  margin-bottom: 0.5rem;
   font-weight: 600;
+  color: #4f566b;
 }
 
 .form-select {
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  border-radius: 8px;
-  padding: 0.6rem 1.2rem;
-  color: #1E293B;
-  outline: none;
-  font-size: 1rem;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px 12px;
+  color: #1a1f36;
+  font-size: 0.9rem;
   cursor: pointer;
   min-width: 320px;
-  transition: border-color 0.2s ease-in-out;
+  height: 38px;
+  box-sizing: border-box;
 }
 
-.form-select:focus {
-  border-color: #2563EB;
+.current-semester-info {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  justify-content: flex-end;
+  padding-bottom: 2px;
+  text-align: left;
 }
 
-.action-bar {
+.current-semester-info .label {
+  color: #4f566b;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.current-semester-info .value {
+  color: var(--primary-color);
+  font-size: 0.95rem;
+  font-weight: 700;
+  padding: 8px 0;
+}
+
+/* 성적 상세 내용 카드 */
+.content-card {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #edf2f7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.card-header {
+  padding: 20px 24px;
+  border-bottom: 1px solid #edf2f7;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 1.5rem;
 }
 
-.lecture-info-tags {
-  display: flex;
-  gap: 0.75rem;
+.card-header h3 {
+  color: #1a1f36;
+  font-size: 1.1rem;
+  font-weight: 700;
 }
 
-.info-tag {
-  background: rgba(37, 99, 235, 0.08);
-  border: 1px solid rgba(37, 99, 235, 0.2);
-  color: #2563EB;
-  padding: 0.4rem 0.8rem;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
+.card-body {
+  padding: 20px;
 }
 
 .control-buttons {
   display: flex;
-  gap: 0.75rem;
+  gap: 8px;
 }
 
-.table-wrapper {
-  overflow-x: auto;
-  border-radius: 12px;
-  border: 1px solid #E2E8F0;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.02);
+/* 학번 및 코드 스타일 (가독성 증대) */
+.code {
+  color: #64748b;
+  font-family: monospace;
+  font-weight: 500;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  background: #FFFFFF;
+.student-name {
+  color: #1a1f36;
+  font-weight: 600;
 }
 
-.data-table th, .data-table td {
-  padding: 1rem;
-  text-align: center;
-  border-bottom: 1px solid #E2E8F0;
+.val-total {
+  color: var(--primary-color);
 }
 
-.data-table th {
-  background: #F1F5F9;
-  color: #1E293B;
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
-.data-table tbody tr:hover {
-  background: #F8FAFC;
-}
-
-.table-input {
-  width: 75px;
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  border-radius: 6px;
-  padding: 0.4rem;
-  color: #1E293B;
-  text-align: center;
-  font-size: 0.95rem;
-  outline: none;
-  transition: border-color 0.2s ease-in-out;
-}
-
-.table-input:focus {
-  border-color: #2563EB;
-}
-
-.font-bold {
+/* 등급 뱃지 (학생용 GradePage 디자인 적용) */
+.grade-badge {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 20px;
+  font-size: 0.85rem;
   font-weight: 700;
 }
 
-.text-accent {
-  color: #2563EB;
+.grade-badge.high {
+  background: #ecfdf5;
+  color: #059669;
 }
 
-.text-secondary {
-  color: #64748B;
-  font-size: 0.9rem;
+.grade-badge.mid {
+  background: #eff6ff;
+  color: #2563eb;
 }
 
+.grade-badge.low {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+/* 진행 상태 뱃지 (학생용/공통 스타일 개선) */
 .status-badge {
-  padding: 0.25rem 0.6rem;
+  display: inline-flex;
+  padding: 4px 8px;
   border-radius: 4px;
-  font-size: 0.8rem;
-  font-weight: 700;
-  display: inline-block;
+  font-size: 0.75rem;
+  font-weight: 600;
+  border: 1px solid transparent;
 }
 
 .status-badge.draft {
-  background: #E2E8F0;
-  color: #64748B;
+  background: #f1f5f9;
+  color: #64748b;
 }
 
 .status-badge.submitted {
-  background: rgba(37, 99, 235, 0.1);
-  color: #2563EB;
-  border: 1px solid rgba(37, 99, 235, 0.2);
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
 }
 
 .status-badge.opened {
-  background: rgba(96, 165, 250, 0.15);
-  color: #2563EB;
-  border: 1px solid rgba(96, 165, 250, 0.3);
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
 }
 
 .status-badge.objection {
-  background: rgba(239, 68, 68, 0.1);
-  color: #EF4444;
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
 }
 
 .status-badge.approved {
-  background: rgba(34, 197, 94, 0.1);
-  color: #22C55E;
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
 }
 
 .status-badge.final {
-  background: rgba(34, 197, 94, 0.2);
-  color: #16A34A;
-  border: 1px solid rgba(34, 197, 94, 0.4);
+  background: #e0e7ff;
+  color: #4338ca;
+  border-color: #c7d2fe;
 }
 
-.btn-primary, .btn-secondary, .btn-success, .btn-warn {
-  padding: 0.6rem 1.2rem;
+/* 입력 필드 크기 및 형태 */
+.table-input {
+  width: 70px;
+  text-align: center;
+  height: 32px;
+  font-size: 0.9rem;
+}
+
+.score-input-cell {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.converted-score {
+  font-size: 0.75rem;
+  color: #64748b;
+  font-weight: 500;
+}
+
+/* 빈 화면 안내 */
+.welcome-section {
+  background: white;
+  border-radius: 12px;
+  border: 1px solid #edf2f7;
+  padding: 80px 0;
+  text-align: center;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty-icon {
+  font-size: 48px;
+  opacity: 0.5;
+}
+
+.empty-state p {
+  color: #64748b;
+  font-size: 1.05rem;
+  font-weight: 500;
+}
+
+.validation-error-alert {
+  background-color: #fef2f2;
+  border: 1px solid #fca5a5;
+  color: #dc2626;
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
   font-size: 0.9rem;
   font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  transition: all 0.2s ease-in-out;
-  border: none;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
+  text-align: left;
 }
 
-.btn-primary {
-  background: #2563EB;
-  color: #FFFFFF;
-}
-
-.btn-primary:hover {
-  background: #1D4ED8;
-}
-
-.btn-secondary {
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  color: #64748B;
-}
-
-.btn-secondary:hover {
-  background: #F1F5F9;
-  color: #1E293B;
-}
-
-.btn-success {
-  background: #0B3D91;
-  color: #FFFFFF;
-}
-
-.btn-success:hover {
-  background: #082C6B;
-}
-
-.btn-warn {
-  background: #EF4444;
-  color: #FFFFFF;
-}
-
-.btn-warn:hover {
-  background: #DC2626;
-}
-
-.btn-sm {
-  padding: 0.3rem 0.6rem;
-  font-size: 0.8rem;
-  border-radius: 4px;
-}
-
-.no-data {
-  color: #64748B;
-  font-style: italic;
-}
-
-.welcome-section {
-  padding: 5rem 0;
-  color: #64748B;
-  font-size: 1.1rem;
-}
-
-/* 모달 스타일 */
+/* 모달 디자인 (부드러운 섀도우 및 보더 처리) */
 .modal-overlay {
   position: fixed;
   top: 0;
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(15, 23, 42, 0.5);
+  background: rgba(15, 23, 42, 0.4);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -654,112 +774,138 @@ const handleObjectionApprove = async () => {
 }
 
 .modal-card {
-  background: #FFFFFF;
-  border: 1px solid #E2E8F0;
-  border-radius: 16px;
+  background: white;
+  border-radius: 12px;
   width: 100%;
-  max-width: 550px;
-  padding: 2rem;
+  max-width: 580px;
+  padding: 24px;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  color: #1E293B;
 }
 
 .modal-card h2 {
-  font-size: 1.5rem;
-  margin-bottom: 1.5rem;
-  border-bottom: 1px solid #E2E8F0;
-  padding-bottom: 0.75rem;
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #edf2f7;
+  padding-bottom: 12px;
   text-align: left;
-  color: #0B3D91;
+  color: #1a1f36;
   font-weight: 700;
 }
 
 .modal-body {
-  margin-bottom: 2rem;
+  margin-bottom: 24px;
 }
 
 .objection-info {
-  margin-bottom: 1.5rem;
+  margin-bottom: 20px;
   text-align: left;
 }
 
 .objection-info p {
-  margin-bottom: 0.5rem;
+  margin-bottom: 8px;
+  font-size: 0.95rem;
+  color: #1a1f36;
 }
 
 .reason-box {
-  background: #F8FAFC;
-  padding: 1rem;
-  border-radius: 8px;
-  margin-top: 0.5rem;
-  border: 1px solid #E2E8F0;
+  background: #f8fafc;
+  padding: 14px;
+  border-radius: 6px;
+  margin-top: 8px;
+  border: 1px solid #edf2f7;
 }
 
 .reason-text {
-  color: #64748B;
+  color: #4f566b;
   white-space: pre-wrap;
-  margin-top: 0.25rem;
-  font-size: 0.95rem;
+  margin-top: 4px;
+  font-size: 0.9rem;
+  line-height: 1.5;
 }
 
 .objection-form {
   text-align: left;
 }
 
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.form-group label {
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: #1a1f36;
+}
+
 .form-textarea {
   width: 100%;
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  border-radius: 8px;
-  padding: 0.75rem;
-  color: #1E293B;
+  background: white;
+  border: 1px solid #ddd;
+  border-radius: 6px;
+  padding: 10px 12px;
+  color: #1a1f36;
   outline: none;
   font-family: inherit;
-  transition: border-color 0.2s ease-in-out;
+  font-size: 0.9rem;
+  resize: vertical;
 }
 
 .form-textarea:focus {
-  border-color: #2563EB;
+  border-color: var(--secondary-blue);
 }
 
 .score-adjust-section {
-  margin-top: 1.5rem;
+  margin-top: 20px;
 }
 
 .score-adjust-section h3 {
-  font-size: 0.95rem;
-  color: #0B3D91;
-  margin-bottom: 0.75rem;
+  font-size: 0.9rem;
+  color: var(--primary-color);
+  margin-bottom: 12px;
   font-weight: 700;
 }
 
 .adjust-grid {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
-  gap: 0.75rem;
+  gap: 12px;
 }
 
-.form-input {
-  background: #FFFFFF;
-  border: 1px solid #CBD5E1;
-  border-radius: 6px;
-  padding: 0.5rem;
-  color: #1E293B;
+.adjust-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.adjust-item label {
+  font-size: 0.8rem;
+  color: #4f566b;
+  font-weight: 600;
   text-align: center;
-  width: 100%;
-  outline: none;
-  transition: border-color 0.2s ease-in-out;
 }
 
-.form-input:focus {
-  border-color: #2563EB;
+.adjust-grid .form-input {
+  width: 100%;
+  height: 36px;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.converted-score-modal {
+  font-size: 0.75rem;
+  color: #64748b;
+  text-align: center;
+  margin-top: 2px;
+  font-weight: 500;
 }
 
 .modal-actions {
   display: flex;
   justify-content: flex-end;
-  gap: 0.75rem;
-  border-top: 1px solid #E2E8F0;
-  padding-top: 1.5rem;
+  gap: 8px;
+  border-top: 1px solid #edf2f7;
+  padding-top: 16px;
 }
 </style>

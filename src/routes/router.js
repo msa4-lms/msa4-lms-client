@@ -74,8 +74,14 @@ const routes = [
     meta: setMeta(true, false),
   },
   {
-    path: "/professor/grades",
-    name: "ProfessorGradeManage",
+    path: "/professor/grades/input",
+    name: "ProfessorGradeInput",
+    component: ProfessorGradeManage,
+    meta: setMeta(true, false),
+  },
+  {
+    path: "/professor/grades/correct",
+    name: "ProfessorGradeCorrect",
     component: ProfessorGradeManage,
     meta: setMeta(true, false),
   },
