@@ -156,10 +156,9 @@ const academicRows = computed(() => [
   margin-bottom: 24px;
 }
 
-.page-heading h1 {
+.page-heading h2 {
   margin-bottom: 8px;
   color: var(--primary-text-color);
-  font-size: 2rem;
   letter-spacing: 0;
 }
 

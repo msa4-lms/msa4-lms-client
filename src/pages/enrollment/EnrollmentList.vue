@@ -221,6 +221,10 @@ const formatSchedule = (schedule) => {
   margin: 0 auto;
 }
 
+.enrollment-container h2 {
+  color: var(--primary-text-color);
+}
+
 .history-filter {
   display: flex;
   gap: 15px;
