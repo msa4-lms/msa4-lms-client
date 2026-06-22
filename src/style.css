@@ -31,3 +31,21 @@ button,
 input {
   font: inherit;
 }
+
+.page-header {
+  margin-bottom: 24px;
+}
+.page-header h2 {
+  color: #1a1f36;
+  font-size: 1.5rem;
+}
+
+.summary-card {
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 5px solid #0b3d91;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+

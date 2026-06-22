@@ -305,14 +305,6 @@ onMounted(async () => {
   padding-bottom: 50px;
 }
 
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h2 {
-  color: var(--primary-text-color);
-}
-
 .current-semester-info {
   display: flex;
   flex-direction: column;
@@ -368,14 +360,5 @@ h3 {
   font-size: 1.2rem;
   color: #1a1f36;
   margin-bottom: 15px;
-}
-
-.summary-card {
-  background-color: #ffffff;
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 15px;
-  border-left: 5px solid #0b3d91;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
 }
 </style>

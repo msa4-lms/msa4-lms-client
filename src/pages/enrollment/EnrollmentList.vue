@@ -4,6 +4,7 @@ import { useEnrollmentStore } from "../../store/enrollment/useEnrollmentStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyButton from "../../components/button/MyButton.vue";
 import MyTable from "../../components/table/MyTable.vue";
+import MySearchFilter from "../../components/search/MySearchFilter.vue";
 
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
@@ -96,8 +97,8 @@ const formatSchedule = (schedule) => {
     <h2>내 수강 내역 및 시간표</h2>
 
     <!-- 학기 선택 필터 추가 -->
-    <div class="history-filter">
-      <div class="filter-group">
+    <MySearchFilter @search="onSearchHistory">
+      <div class="search-group">
         <label>조회 연도</label>
         <select v-model="historyParams.year">
           <option :value="2026">2026년</option>
@@ -106,21 +107,14 @@ const formatSchedule = (schedule) => {
           <option :value="2023">2023년</option>
         </select>
       </div>
-      <div class="filter-group">
+      <div class="search-group">
         <label>학기</label>
         <select v-model="historyParams.semester">
           <option :value="1">1학기</option>
           <option :value="2">2학기</option>
         </select>
       </div>
-      <MyButton
-        btnType="submit"
-        color="deep-blue"
-        size="small"
-        content="조회"
-        @click="onSearchHistory"
-      />
-    </div>
+    </MySearchFilter>
 
     <div class="summary-card">
       <p>
@@ -212,35 +206,6 @@ const formatSchedule = (schedule) => {
   padding-bottom: 10px;
 }
 
-.history-filter {
-  display: flex;
-  gap: 15px;
-  align-items: flex-end;
-  background-color: white;
-  padding: 15px;
-  border-radius: 8px;
-  border: 1px solid #ddd;
-  margin-bottom: 20px;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 5px;
-}
-
-.filter-group label {
-  font-size: 0.8rem;
-  font-weight: 600;
-  color: #666;
-}
-
-.filter-group select {
-  padding: 8px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-}
-
 .btn-history-search {
   padding: 8px 20px;
   background-color: #0b3d91;
@@ -249,15 +214,6 @@ const formatSchedule = (schedule) => {
   border-radius: 4px;
   cursor: pointer;
   height: 35px;
-}
-
-.summary-card {
-  background-color: var(--personal-color-white);
-  padding: 15px;
-  border-radius: 8px;
-  margin-bottom: 25px;
-  border-left: 5px solid #0b3d91;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
 .timetable-grid {
