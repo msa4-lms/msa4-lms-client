@@ -24,7 +24,7 @@ const getGradeLevel = (grade) => {
   return "low";
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (authStore.isLoggedIn) {
     await academicStore.fetchGrades();
   }
@@ -32,34 +32,22 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grade-view">
-    <div class="header-section">
-      <h1>성적 조회</h1>
+  <div class="grade-page">
+    <div class="page-heading">
+      <h2>성적 조회</h2>
       <p>확정된 성적 및 전체 평균 평점(GPA)을 확인할 수 있습니다.</p>
     </div>
 
-    <div class="dashboard-grid">
-      <div class="summary-card gpa-card">
-        <div class="card-info">
-          <span class="label">전체 평균 평점 (GPA)</span>
-          <div class="value-group">
-            <span class="value">{{ academicStore.gradeSummary.totalGpa }}</span>
-            <span class="max">/ 4.5</span>
-          </div>
-        </div>
-      </div>
+    <div class="summary-grid">
+      <section class="summary-card">
+        <span>전체 평균 평점 (GPA)</span>
+        <strong>{{ academicStore.gradeSummary.totalGpa }} <small>/ 4.5</small></strong>
+      </section>
 
-      <div class="summary-card credits-card">
-        <div class="card-info">
-          <span class="label">총 이수 학점</span>
-          <div class="value-group">
-            <span class="value">{{
-              academicStore.gradeSummary.totalCredits
-            }}</span>
-            <span class="unit">학점</span>
-          </div>
-        </div>
-      </div>
+      <section class="summary-card">
+        <span>총 이수 학점</span>
+        <strong>{{ academicStore.gradeSummary.totalCredits }} <small>학점</small></strong>
+      </section>
     </div>
 
     <div class="content-card table-section">
@@ -100,93 +88,69 @@ onMounted(() => {
 </template>
 
 <style scoped>
-.grade-view {
-  max-width: 1200px;
+.grade-page {
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 20px;
+  color: var(--primary-text-color);
 }
 
-.header-section {
-  margin-bottom: 28px;
+.page-heading {
+  padding-bottom: 10px;
 }
 
-.header-section h1 {
-  color: #1a1f36;
-  font-size: 1.8rem;
+.page-heading h2 {
   margin-bottom: 8px;
+  color: var(--primary-text-color);
+  letter-spacing: 0;
+  font-size: 1.5rem;
 }
 
-.header-section p {
-  color: #697386;
+.page-heading p {
+  color: var(--primary-text-color);
+  font-size: 1rem;
 }
 
 .summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(3, minmax(0, 1fr));
   gap: 16px;
-  margin-bottom: 24px;
+  margin-bottom: 22px;
 }
 
 .summary-card {
-  background: white;
-  border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 18px 20px;
+  background: var(--personal-color-white, #fff);
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-.card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: #f8fafc;
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-
-.gpa-card .card-icon {
-  background-color: #eef2ff;
-}
-
-.credits-card .card-icon {
-  background-color: #ecfdf5;
-}
-
-.card-info {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.label {
+.summary-card span {
   color: #64748b;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
-.value-group {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
+.summary-card strong {
+  display: block;
+  margin-top: 10px;
+  color: #071f49;
+  font-size: 1.7rem;
 }
 
-.value {
-  color: #1e293b;
-  font-size: 2rem;
-  font-weight: 800;
-}
-
-.max,
-.unit {
+.summary-card strong small {
   color: #94a3b8;
   font-size: 1rem;
   font-weight: 500;
+  margin-left: 4px;
 }
 
 .content-card {
-  background: white;
-  border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: var(--personal-color-white, #fff);
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   overflow: hidden;
 }
 

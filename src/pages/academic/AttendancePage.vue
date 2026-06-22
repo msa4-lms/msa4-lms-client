@@ -2,6 +2,7 @@
 import { computed, onMounted, reactive, ref } from "vue";
 import myAxios from "../../api/myAxios";
 import { useAcademicStore } from "../../store/academic/useAcademicStore";
+import MyButton from "../../components/button/MyButton.vue";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 
 const academicStore = useAcademicStore();
@@ -67,26 +68,18 @@ const excuseForm = reactive({
   reason: "",
 });
 
+const selectedCourse = ref(null);
 const isStudent = computed(() => authStore.userInfo?.role === "STUDENT");
+
+const filteredAttendanceList = computed(() => {
+  if (!selectedCourse.value) return [];
+  return academicStore.attendanceList.filter((att) => att.courseName === selectedCourse.value);
+});
 const isProfessor = computed(() => authStore.userInfo?.role === "PROFESSOR");
 
 const targetTermText = computed(() => {
   return `${searchParams.year}${labels.yearSuffix} ${searchParams.semester}${labels.semester}`;
 });
-
-const averageRate = computed(() => {
-  const rates = academicStore.attendanceRates
-    .map((item) => Number(item.attendanceRate))
-    .filter((rate) => !Number.isNaN(rate));
-
-  if (rates.length === 0) return "-";
-
-  const sum = rates.reduce((acc, rate) => acc + rate, 0);
-  return `${(sum / rates.length).toFixed(1)}%`;
-});
-
-const failTargetCount = computed(() => academicStore.attendanceRates.filter((item) => item.failTarget).length);
-const pendingExcuseCount = computed(() => academicStore.myExcuseRequests.filter((item) => item.status === "PENDING").length);
 
 const formatRate = (rate) => {
   if (rate === null || rate === undefined) return "-";
@@ -94,21 +87,28 @@ const formatRate = (rate) => {
 };
 
 const loadEnrollments = async () => {
-  const res = await myAxios.get("/api/enrollments/my", {
-    params: {
-      year: searchParams.year,
-      semester: searchParams.semester,
-    },
-  });
-  enrollments.value = res.data.data?.enrollments || [];
+  try {
+    const res = await myAxios.get("/api/student/enrollments/my", {
+      params: {
+        year: searchParams.year,
+        semester: searchParams.semester,
+      },
+      suppressErrorAlert: true,
+    });
+    enrollments.value = res.data.data?.enrollments || [];
+  } catch (error) {
+    enrollments.value = [];
+    console.warn("수강 내역 조회 실패(백엔드 500 에러 등):", error);
+  }
 };
 
 const loadStudentData = async () => {
   loading.value = true;
+  selectedCourse.value = null;
   try {
-    await Promise.all([
+    await Promise.allSettled([
       academicStore.fetchAttendance(),
-      academicStore.fetchAttendanceRates(),
+      academicStore.fetchAttendanceRates({ year: searchParams.year, semester: searchParams.semester }),
       academicStore.fetchMyExcuseRequests(),
       loadEnrollments(),
     ]);
@@ -167,8 +167,8 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="attendance-container">
-    <div class="page-header">
+  <div class="attendance-page">
+    <div class="page-heading">
       <h2>{{ isProfessor ? labels.pageProfessor : labels.pageStudent }}</h2>
     </div>
 
@@ -195,24 +195,9 @@ onMounted(async () => {
             <span class="label">{{ labels.targetTerm }}</span>
             <span class="value">{{ targetTermText }}</span>
           </div>
-          <button class="btn-search" type="button" @click="onSearch">{{ labels.search }}</button>
+          <MyButton btnType="button" color="deep-blue" size="small" :content="labels.search" @click="onSearch" />
         </div>
       </section>
-
-      <div class="summary-grid">
-        <section class="summary-card">
-          <span>{{ labels.averageRate }}</span>
-          <strong>{{ averageRate }}</strong>
-        </section>
-        <section class="summary-card">
-          <span>{{ labels.failRisk }}</span>
-          <strong :class="{ danger: failTargetCount > 0 }">{{ failTargetCount }}</strong>
-        </section>
-        <section class="summary-card">
-          <span>{{ labels.pendingExcuse }}</span>
-          <strong>{{ pendingExcuseCount }}</strong>
-        </section>
-      </div>
 
       <section class="table-section">
         <div class="section-header">
@@ -235,7 +220,13 @@ onMounted(async () => {
             <tr v-else-if="academicStore.attendanceRates.length === 0">
               <td colspan="5" class="empty-text">{{ labels.emptyRate }}</td>
             </tr>
-            <tr v-for="rate in academicStore.attendanceRates" :key="rate.enrollmentId">
+            <tr
+              v-for="rate in academicStore.attendanceRates"
+              :key="rate.enrollmentId"
+              class="clickable-row"
+              :class="{ 'selected-row': selectedCourse === rate.courseName }"
+              @click="selectedCourse = rate.courseName"
+            >
               <td class="course-name">{{ rate.courseName }}</td>
               <td>{{ rate.attendedCount }}</td>
               <td>{{ rate.totalCount }}</td>
@@ -254,176 +245,75 @@ onMounted(async () => {
         </table>
       </section>
 
-      <section class="form-section">
-        <div class="section-header">
-          <h3>{{ labels.excuseTitle }}</h3>
-        </div>
-        <form class="excuse-row" @submit.prevent="submitExcuse">
-          <div class="filter-group subject-field">
-            <label>{{ labels.subject }}</label>
-            <select v-model="excuseForm.enrollmentId">
-              <option value="">{{ labels.select }}</option>
-              <option
-                v-for="enrollment in enrollments"
-                :key="enrollment.enrollmentId || enrollment.id"
-                :value="enrollment.enrollmentId || enrollment.id"
-              >
-                {{ enrollment.courseName }}
-              </option>
-            </select>
-          </div>
-          <div class="filter-group">
-            <label>{{ labels.date }}</label>
-            <input v-model="excuseForm.lectureDate" type="date" />
-          </div>
-          <div class="filter-group period-field">
-            <label>{{ labels.period }}</label>
-            <input v-model.number="excuseForm.period" min="1" type="number" />
-          </div>
-          <div class="filter-group reason-field">
-            <label>{{ labels.reason }}</label>
-            <input v-model="excuseForm.reason" maxlength="500" type="text" />
-          </div>
-          <button class="btn-search" type="submit">{{ labels.apply }}</button>
-        </form>
-      </section>
 
-      <div class="bottom-grid">
-        <section class="table-section">
-          <div class="section-header">
-            <h3>{{ labels.recentTitle }}</h3>
-          </div>
-          <table class="data-table compact">
-            <thead>
-              <tr>
-                <th>{{ labels.subject }}</th>
-                <th>{{ labels.date }}</th>
-                <th>{{ labels.period }}</th>
-                <th>{{ labels.status }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="academicStore.attendanceList.length === 0">
-                <td colspan="4" class="empty-text">{{ labels.emptyAttendance }}</td>
-              </tr>
-              <tr
-                v-for="att in academicStore.attendanceList"
-                :key="`${att.courseName}-${att.lectureDate}-${att.period}`"
-              >
-                <td class="course-name">{{ att.courseName }}</td>
-                <td>{{ att.lectureDate }}</td>
-                <td>{{ att.period }}</td>
-                <td>
-                  <span :class="['status-badge', att.status?.toLowerCase()]">
-                    {{ statusLabel[att.status] || att.status }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
 
-        <section class="table-section">
-          <div class="section-header">
-            <h3>{{ labels.resultTitle }}</h3>
-          </div>
-          <table class="data-table compact">
-            <thead>
-              <tr>
-                <th>{{ labels.subject }}</th>
-                <th>{{ labels.date }}</th>
-                <th>{{ labels.status }}</th>
-                <th>{{ labels.reason }}</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr v-if="academicStore.myExcuseRequests.length === 0">
-                <td colspan="4" class="empty-text">{{ labels.emptyExcuse }}</td>
-              </tr>
-              <tr v-for="request in academicStore.myExcuseRequests" :key="request.id">
-                <td class="course-name">{{ request.courseName }}</td>
-                <td>{{ request.lectureDate }}</td>
-                <td>
-                  <span :class="['status-badge', request.status?.toLowerCase()]">
-                    {{ statusLabel[request.status] || request.status }}
-                  </span>
-                </td>
-                <td>{{ request.rejectReason || request.reason }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </section>
-      </div>
-    </template>
-
-    <template v-else-if="isProfessor">
       <section class="table-section">
         <div class="section-header">
-          <h3>{{ labels.pendingApproval }}</h3>
+          <h3>{{ selectedCourse ? `${selectedCourse} 출결 내역` : '과목을 선택하면 출결 내역이 표시됩니다.' }}</h3>
         </div>
-        <table class="data-table">
+        <table class="data-table compact" v-if="selectedCourse">
           <thead>
             <tr>
-              <th>{{ labels.subject }}</th>
               <th>{{ labels.date }}</th>
               <th>{{ labels.period }}</th>
-              <th>{{ labels.reason }}</th>
               <th>{{ labels.status }}</th>
             </tr>
           </thead>
           <tbody>
-            <tr v-if="loading">
-              <td colspan="5" class="empty-text">{{ labels.loading }}</td>
+            <tr v-if="filteredAttendanceList.length === 0">
+              <td colspan="3" class="empty-text">{{ labels.emptyAttendance }}</td>
             </tr>
-            <tr v-else-if="academicStore.pendingExcuseRequests.length === 0">
-              <td colspan="5" class="empty-text">{{ labels.emptyPending }}</td>
-            </tr>
-            <tr v-for="request in academicStore.pendingExcuseRequests" :key="request.id">
-              <td class="course-name">{{ request.studentName }} · {{ request.courseName }}</td>
-              <td>{{ request.lectureDate }}</td>
-              <td>{{ request.period }}</td>
-              <td>{{ request.reason }}</td>
+            <tr
+              v-for="att in filteredAttendanceList"
+              :key="`${att.courseName}-${att.lectureDate}-${att.period}`"
+            >
+              <td>{{ att.lectureDate }}</td>
+              <td>{{ att.period }}</td>
               <td>
-                <div class="button-group">
-                  <button type="button" class="btn-approve" @click="decideExcuse(request.id, 'APPROVED')">
-                    {{ labels.approve }}
-                  </button>
-                  <button type="button" class="btn-reject" @click="decideExcuse(request.id, 'REJECTED')">
-                    {{ labels.reject }}
-                  </button>
-                </div>
+                <span :class="['status-badge', att.status?.toLowerCase()]">
+                  {{ statusLabel[att.status] || att.status }}
+                </span>
               </td>
             </tr>
           </tbody>
         </table>
+        <div v-else class="empty-state-box">
+          <p>위의 과목별 출석률 표에서 원하시는 과목을 클릭해주세요.</p>
+        </div>
       </section>
     </template>
+
+
   </div>
 </template>
 
 <style scoped>
-.attendance-container {
+.attendance-page {
   max-width: 1400px;
   margin: 0 auto;
+  padding: 20px;
   padding-bottom: 50px;
+  color: var(--primary-text-color);
 }
 
-.page-header {
-  margin-bottom: 24px;
+.page-heading {
+  padding-bottom: 10px;
 }
 
-.page-header h2 {
+.page-heading h2 {
+  margin-bottom: 8px;
+  color: var(--primary-text-color);
+  letter-spacing: 0;
   font-size: 1.5rem;
-  color: #071f49;
 }
 
 .filter-section,
 .form-section,
-.table-section,
-.summary-card {
-  background: #fff;
-  border: 1px solid #edf2f7;
+.table-section {
+  background: var(--personal-color-white, #fff);
+  border: 1px solid #e5eaf2;
   border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .filter-section {
@@ -479,7 +369,6 @@ onMounted(async () => {
   padding: 8px 0;
 }
 
-.btn-search,
 .btn-approve,
 .btn-reject {
   height: 38px;
@@ -491,39 +380,6 @@ onMounted(async () => {
   font-weight: 700;
 }
 
-.btn-search {
-  background-color: #3267e3;
-}
-
-.btn-search:hover {
-  background-color: #2454bf;
-}
-
-.summary-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 16px;
-  margin-bottom: 22px;
-}
-
-.summary-card {
-  padding: 18px 20px;
-}
-
-.summary-card span {
-  color: #64748b;
-  font-size: 0.88rem;
-  font-weight: 700;
-}
-
-.summary-card strong {
-  display: block;
-  margin-top: 10px;
-  color: #071f49;
-  font-size: 1.7rem;
-}
-
-.summary-card strong.danger,
 .rate-text.danger {
   color: #dc2626;
 }
@@ -568,6 +424,27 @@ onMounted(async () => {
 
 .data-table tr:last-child td {
   border-bottom: 0;
+}
+
+.clickable-row {
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.clickable-row:hover {
+  background-color: #f8fafc;
+}
+
+.selected-row {
+  background-color: #eef2ff !important;
+}
+
+.empty-state-box {
+  padding: 60px 20px;
+  text-align: center;
+  color: #64748b;
+  font-size: 0.95rem;
+  background-color: #f8fafc;
 }
 
 .course-name {
@@ -637,11 +514,7 @@ onMounted(async () => {
   flex: 1.4;
 }
 
-.bottom-grid {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
-  gap: 22px;
-}
+
 
 .empty-text {
   color: #697386;
@@ -664,12 +537,6 @@ onMounted(async () => {
   padding: 6px 12px;
 }
 
-@media (max-width: 1000px) {
-  .summary-grid,
-  .bottom-grid {
-    grid-template-columns: 1fr;
-  }
-}
 
 @media (max-width: 760px) {
   .filter-row,
@@ -680,8 +547,7 @@ onMounted(async () => {
 
   .filter-group,
   .filter-group input,
-  .filter-group select,
-  .btn-search {
+  .filter-group select {
     width: 100%;
   }
 }

@@ -76,7 +76,7 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAttendance">
             <router-link to="/attendance" class="submenu-item">출결 조회</router-link>
-            <a href="#" class="submenu-item" @click.prevent="alertReady">공결 신청</a>
+            <router-link to="/excuses" class="submenu-item">공결 신청</router-link>
           </div>
         </div>
       </template>
