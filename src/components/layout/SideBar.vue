@@ -101,8 +101,8 @@ const alertReady = () => {
             <span class="chevron" :class="{ rotated: !activeMenus.professorCourse }">▼</span>
           </div>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
-            <router-link to="/professor/lectures/create" class="submenu-item">강의 개설</router-link>
-            <router-link to="/lectures" class="submenu-item">강의 조회</router-link>
+            <router-link to="/professor/lectures/create" class="submenu-item">강의 개설 (수강 계획서)</router-link>
+            <router-link to="/lectures" class="submenu-item">강의 조회 (시간표, 특강)</router-link>
           </div>
         </div>
 
