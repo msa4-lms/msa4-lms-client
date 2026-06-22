@@ -1,19 +1,24 @@
 <script setup>
-import { onMounted, ref } from 'vue';
-import { useEnrollmentStore } from '../../store/enrollment/useEnrollmentStore';
-import { useAuthStore } from '../../store/auth/useAuthStore';
+import { onMounted, ref } from "vue";
+import { useEnrollmentStore } from "../../store/enrollment/useEnrollmentStore";
+import { useAuthStore } from "../../store/auth/useAuthStore";
+import MyButton from "../../components/button/MyButton.vue";
+import MyTable from "../../components/table/MyTable.vue";
 
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
-const days = ['월', '화', '수', '목', '금'];
+const days = ["월", "화", "수", "목", "금"];
 
 const historyParams = ref({
   year: 2026,
-  semester: 1
+  semester: 1,
 });
 
 const onSearchHistory = () => {
-  enrollmentStore.fetchMyEnrollments(historyParams.value.year, historyParams.value.semester);
+  enrollmentStore.fetchMyEnrollments(
+    historyParams.value.year,
+    historyParams.value.semester
+  );
 };
 
 const handleCancel = async (lectureId) => {
@@ -24,20 +29,33 @@ const handleCancel = async (lectureId) => {
 
 // 1. 교시별 표준 시간 매핑 (50분 수업 / 10분 휴식)
 const timeSlots = {
-  1: { start: '09:00', end: '09:50' },
-  2: { start: '10:00', end: '10:50' },
-  3: { start: '11:00', end: '11:50' },
-  4: { start: '12:00', end: '12:50' },
-  5: { start: '13:00', end: '13:50' },
-  6: { start: '14:00', end: '14:50' },
-  7: { start: '15:00', end: '15:50' },
-  8: { start: '16:00', end: '16:50' },
-  9: { start: '17:00', end: '17:50' },
+  1: { start: "09:00", end: "09:50" },
+  2: { start: "10:00", end: "10:50" },
+  3: { start: "11:00", end: "11:50" },
+  4: { start: "12:00", end: "12:50" },
+  5: { start: "13:00", end: "13:50" },
+  6: { start: "14:00", end: "14:50" },
+  7: { start: "15:00", end: "15:50" },
+  8: { start: "16:00", end: "16:50" },
+  9: { start: "17:00", end: "17:50" },
 };
+
+const enrollmentColumns = [
+  { key: "courseCode", label: "과목코드" },
+  { key: "courseName", label: "과목명" },
+  { key: "professorName", label: "교수명" },
+  { key: "classroom", label: "강의실", class: "col-classroom" },
+  { key: "schedule", label: "수강시간", class: "col-time" },
+  { key: "credits", label: "학점" },
+  { key: "cancel", label: "취소" },
+];
 
 onMounted(async () => {
   if (authStore.isLoggedIn) {
-    await enrollmentStore.fetchMyEnrollments(historyParams.value.year, historyParams.value.semester);
+    await enrollmentStore.fetchMyEnrollments(
+      historyParams.value.year,
+      historyParams.value.semester
+    );
   }
 });
 
@@ -48,7 +66,7 @@ onMounted(async () => {
 const getScheduleInfo = (day, period) => {
   for (const item of enrollmentStore.myEnrollments) {
     if (!item.schedule) continue;
-    const parts = item.schedule.split(',').map(s => s.trim());
+    const parts = item.schedule.split(",").map((s) => s.trim());
     for (const part of parts) {
       // 정규표현식으로 요일, 시작시간, 종료시간 추출
       const match = part.match(/([가-힣]+) (\d{2}):00 ~ (\d{2}):50/);
@@ -58,13 +76,14 @@ const getScheduleInfo = (day, period) => {
       if (schedDay !== day) continue;
 
       const start = parseInt(match[2]) - 8; // '09' -> 1교시
-      const end = parseInt(match[3]) - 8;   // '10' -> 2교시
+      const end = parseInt(match[3]) - 8; // '10' -> 2교시
 
-      if (period === start) return { type: 'start', item, span: end - start + 1 };
-      if (period > start && period <= end) return { type: 'occupied' };
+      if (period === start)
+        return { type: "start", item, span: end - start + 1 };
+      if (period > start && period <= end) return { type: "occupied" };
     }
   }
-  return { type: 'empty' };
+  return { type: "empty" };
 };
 
 /**
@@ -73,7 +92,7 @@ const getScheduleInfo = (day, period) => {
  */
 const formatSchedule = (schedule) => {
   if (!schedule) return [];
-  return schedule.split(',').map(s => s.trim());
+  return schedule.split(",").map((s) => s.trim());
 };
 </script>
 
@@ -99,11 +118,20 @@ const formatSchedule = (schedule) => {
           <option :value="2">2학기</option>
         </select>
       </div>
-      <button class="btn-history-search" @click="onSearchHistory">조회</button>
+      <MyButton
+        btnType="submit"
+        color="deep-blue"
+        size="small"
+        content="조회"
+        @click="onSearchHistory"
+      />
     </div>
-    
+
     <div class="summary-card">
-      <p>신청 과목 합계 학점: <strong>{{ enrollmentStore.totalCredits }}</strong> 학점</p>
+      <p>
+        신청 과목 합계 학점:
+        <strong>{{ enrollmentStore.totalCredits }}</strong> 학점
+      </p>
     </div>
 
     <!-- 주간 시간표 섹션 -->
@@ -111,25 +139,38 @@ const formatSchedule = (schedule) => {
       <h3>주간 시간표</h3>
       <div class="timetable-grid">
         <div class="grid-cell header">시간</div>
-        <div v-for="day in days" :key="day" class="grid-cell header">{{ day }}</div>
+        <div v-for="day in days" :key="day" class="grid-cell header">
+          {{ day }}
+        </div>
 
         <template v-for="period in 9" :key="period">
           <!-- 시간 레이블 (교시 + 실제시간) -->
           <div class="grid-cell period-label">
             <span class="p-num">{{ period }}교시</span>
-            <span class="p-time">{{ timeSlots[period].start }}~{{ timeSlots[period].end }}</span>
+            <span class="p-time"
+              >{{ timeSlots[period].start }}~{{ timeSlots[period].end }}</span
+            >
           </div>
 
           <template v-for="day in days" :key="day">
             <!-- getScheduleInfo의 결과에 따라 조건부 렌더링 -->
-            <div v-if="getScheduleInfo(day, period).type === 'start'" 
-                 class="grid-cell content schedule-item"
-                 :style="{ gridRow: `span ${getScheduleInfo(day, period).span}` }">
-              <span class="course-name">{{ getScheduleInfo(day, period).item.courseName }}</span>
-              <span class="classroom">{{ getScheduleInfo(day, period).item.classroom }}</span>
+            <div
+              v-if="getScheduleInfo(day, period).type === 'start'"
+              class="grid-cell content schedule-item"
+              :style="{ gridRow: `span ${getScheduleInfo(day, period).span}` }"
+            >
+              <span class="course-name">{{
+                getScheduleInfo(day, period).item.courseName
+              }}</span>
+              <span class="classroom">{{
+                getScheduleInfo(day, period).item.classroom
+              }}</span>
             </div>
             <!-- 이미 연강으로 차지된 칸은 그리지 않음 (Grid Row Span이 처리) -->
-            <div v-else-if="getScheduleInfo(day, period).type === 'empty'" class="grid-cell content"></div>
+            <div
+              v-else-if="getScheduleInfo(day, period).type === 'empty'"
+              class="grid-cell content"
+            ></div>
           </template>
         </template>
       </div>
@@ -138,46 +179,47 @@ const formatSchedule = (schedule) => {
     <!-- 수강 신청 목록 섹션 -->
     <section class="list-section">
       <h3>수강 신청 목록</h3>
-      <table class="enrollment-table">
-        <thead>
-          <tr>
-            <th>과목코드</th>
-            <th>과목명</th>
-            <th>교수명</th>
-            <th class="col-classroom">강의실</th>
-            <th class="col-time">수강시간</th>
-            <th>학점</th>
-            <th>취소</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="item in enrollmentStore.myEnrollments" :key="item.id">
-            <td>{{ item.courseCode }}</td>
-            <td class="bold">{{ item.courseName }}</td>
-            <td>{{ item.professorName }}</td>
-            <td>{{ item.classroom }}</td>
-            <!-- formatSchedule 함수를 사용하여 줄바꿈 처리 -->
-            <td class="time-text">
-              <div v-for="(time, idx) in formatSchedule(item.schedule)" :key="idx">
-                {{ time }}
-              </div>
-            </td>
-            <td>{{ item.credits }}학점</td>
-            <td>
-              <button class="btn-cancel" @click="handleCancel(item.lectureId)">취소</button>
-            </td>
-          </tr>
-          <tr v-if="enrollmentStore.myEnrollments.length === 0">
-            <td colspan="7" class="empty-msg">신청 내역이 없습니다.</td>
-          </tr>
-        </tbody>
-      </table>
+      <MyTable
+        :columns="enrollmentColumns"
+        :loading="enrollmentStore.loading"
+        :empty="enrollmentStore.myEnrollments.length === 0"
+        emptyMessage="신청 내역이 없습니다."
+      >
+        <tr v-for="item in enrollmentStore.myEnrollments" :key="item.id">
+          <td>{{ item.courseCode }}</td>
+          <td>{{ item.courseName }}</td>
+          <td>{{ item.professorName }}</td>
+          <td>{{ item.classroom }}</td>
+          <td class="time-text">
+            <div
+              v-for="(time, idx) in formatSchedule(item.schedule)"
+              :key="idx"
+            >
+              {{ time }}
+            </div>
+          </td>
+          <td>{{ item.credits }}학점</td>
+          <td>
+            <MyButton
+              btnType="button"
+              color="red"
+              size="small"
+              content="취소"
+              @click="handleCancel(item.lectureId)"
+            />
+          </td>
+        </tr>
+      </MyTable>
     </section>
   </div>
 </template>
 
 <style scoped>
-.enrollment-container { padding: 20px; max-width: 1400px; margin: 0 auto; }
+.enrollment-container {
+  padding: 20px;
+  max-width: 1400px;
+  margin: 0 auto;
+}
 
 .history-filter {
   display: flex;
@@ -210,7 +252,7 @@ const formatSchedule = (schedule) => {
 
 .btn-history-search {
   padding: 8px 20px;
-  background-color: #0B3D91;
+  background-color: #0b3d91;
   color: white;
   border: none;
   border-radius: 4px;
@@ -218,7 +260,14 @@ const formatSchedule = (schedule) => {
   height: 35px;
 }
 
-.summary-card { background-color: #f8f9fa; padding: 15px; border-radius: 8px; margin-bottom: 25px; border-left: 5px solid #0B3D91; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
+.summary-card {
+  background-color: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 25px;
+  border-left: 5px solid #0b3d91;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
 
 .timetable-grid {
   display: grid;
@@ -229,42 +278,68 @@ const formatSchedule = (schedule) => {
   margin-bottom: 40px;
 }
 
-.grid-cell { border: 0.5px solid #eee; padding: 8px; min-height: 70px; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-.grid-cell.header { background-color: #0B3D91; color: white; font-weight: bold; min-height: 45px; }
+.grid-cell {
+  border: 0.5px solid #eee;
+  padding: 8px;
+  min-height: 70px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+.grid-cell.header {
+  background-color: #0b3d91;
+  color: white;
+  font-weight: bold;
+  min-height: 45px;
+}
 
-.grid-cell.period-label { background-color: #f8f9fa; border-right: 2px solid #dee2e6; }
-.p-num { font-weight: bold; font-size: 0.9rem; }
-.p-time { font-size: 0.75rem; color: #666; margin-top: 2px; }
+.grid-cell.period-label {
+  background-color: #f8f9fa;
+  border-right: 2px solid #dee2e6;
+}
+.p-num {
+  font-weight: bold;
+  font-size: 0.9rem;
+}
+.p-time {
+  font-size: 0.75rem;
+  color: #666;
+  margin-top: 2px;
+}
 
 .schedule-item {
   background-color: #e7f1ff;
   border: 1px solid #b3d7ff;
-  color: #0B3D91;
+  color: #0b3d91;
   border-radius: 4px;
   margin: 1px;
   z-index: 1;
 }
 
-.course-name { font-weight: bold; font-size: 0.85rem; margin-bottom: 4px; }
-.classroom { font-size: 0.75rem; color: #666; }
-
-.enrollment-table { width: 100%; border-collapse: collapse; margin-top: 15px; }
-.enrollment-table th, .enrollment-table td { border: 1px solid #dee2e6; padding: 12px; text-align: center; }
-.enrollment-table th { background-color: #f8f9fa; font-size: 0.9rem; white-space: nowrap; }
+.course-name {
+  font-weight: bold;
+  font-size: 0.85rem;
+  margin-bottom: 4px;
+}
+.classroom {
+  font-size: 0.75rem;
+  color: #666;
+}
 
 /* 컬럼 너비 및 가독성 최적화 */
-.col-classroom { width: 15%; }
-.col-time { width: 25%; }
+.col-classroom {
+  width: 15%;
+}
+.col-time {
+  width: 25%;
+}
 
 .time-text {
-  color: #1a73e8;
+  color: var(--primary-text-color);
   font-size: 0.85rem;
-  text-align: left !important;
+  text-align: center !important;
   line-height: 1.5;
 }
-.bold { font-weight: 600; }
-
-.btn-cancel { padding: 6px 12px; background-color: #dc3545; color: white; border: none; border-radius: 4px; cursor: pointer; font-size: 0.8rem; }
-.btn-cancel:hover { background-color: #c82333; }
-.empty-msg { text-align: center; color: #666; padding: 30px; }
 </style>

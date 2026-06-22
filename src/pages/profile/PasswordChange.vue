@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import MyButton from "../../components/button/MyButton.vue";
+import MyInput from "../../components/input/MyInput.vue";
 import { useAuthStore } from "../../store/auth/useAuthStore.js";
 import passwordChangeValidator from "../../util/validator/domain/passwordChangeValidator.js";
 import { useRouter } from "vue-router";
@@ -67,13 +68,13 @@ const updatePassword = async () => {
       <form class="modal-box" @submit.prevent="updatePassword">
         <h2>비밀번호 변경</h2>
 
-        <input
+        <MyInput
           v-model="passwordChangeData.newPassword"
           type="password"
           placeholder="새 비밀번호"
         />
 
-        <input
+        <MyInput
           v-model="passwordChangeData.confirmPassword"
           type="password"
           placeholder="새 비밀번호 확인"
@@ -121,7 +122,7 @@ const updatePassword = async () => {
   gap: 16px;
 }
 
-.modal-box input {
+.modal-box :deep(input) {
   height: 42px;
   padding: 0 12px;
   border: 1px solid #ddd;

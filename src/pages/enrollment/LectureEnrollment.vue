@@ -1,69 +1,151 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue';
-import { useLectureStore } from '../../store/lecture/useLectureStore';
-import { useEnrollmentStore } from '../../store/enrollment/useEnrollmentStore';
-import { useAuthStore } from '../../store/auth/useAuthStore';
+import { computed, onMounted, ref } from "vue";
+import { useAuthStore } from "../../store/auth/useAuthStore";
+import { useEnrollmentStore } from "../../store/enrollment/useEnrollmentStore";
+import { useLectureStore } from "../../store/lecture/useLectureStore";
+import MyButton from "../../components/button/MyButton.vue";
+import MyInput from "../../components/input/MyInput.vue";
+import MyPagination from "../../components/pagination/MyPagination.vue";
+import MyTable from "../../components/table/MyTable.vue";
 
 const lectureStore = useLectureStore();
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
 
-// 수강신청 전용 검색 파라미터 (현재 학기 2026-1 고정)
 const searchParams = ref({
-    courseName: '',
-    professorName: '',
-    departmentName: '',
-    year: 2026, 
-    semester: 1,
-    page: 1,
-    size: 10
+  courseName: "",
+  professorName: "",
+  departmentName: "",
+  collegeName: "",
+  year: 2026,
+  semester: 1,
+  page: 1,
+  size: 10,
 });
+
+const lectureColumns = [
+  { key: "courseCode", label: "과목코드" },
+  { key: "departmentName", label: "학과" },
+  { key: "courseName", label: "강의명" },
+  { key: "credits", label: "학점" },
+  { key: "targetGrade", label: "대상학년" },
+  { key: "professorName", label: "담당교수" },
+  { key: "classroom", label: "강의실", class: "col-classroom" },
+  { key: "schedule", label: "시간", class: "col-time" },
+  { key: "capacity", label: "정원", class: "col-capacity" },
+  { key: "apply", label: "신청" },
+];
+
+const filteredDepartments = computed(() => {
+  if (!searchParams.value.collegeName) {
+    const allDepartments = [];
+
+    lectureStore.colleges.forEach((college) => {
+      if (college.departments) {
+        allDepartments.push(...college.departments);
+      }
+    });
+
+    return Array.from(
+      new Map(allDepartments.map((department) => [department.name, department])).values()
+    ).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  const matchedCollege = lectureStore.colleges.find(
+    (college) => college.name === searchParams.value.collegeName
+  );
+
+  return matchedCollege ? matchedCollege.departments || [] : [];
+});
+
+const onCollegeChange = () => {
+  if (searchParams.value.collegeName) {
+    const matchedCollege = lectureStore.colleges.find(
+      (college) => college.name === searchParams.value.collegeName
+    );
+    const departmentNames = matchedCollege
+      ? (matchedCollege.departments || []).map((department) => department.name)
+      : [];
+
+    if (!departmentNames.includes(searchParams.value.departmentName)) {
+      searchParams.value.departmentName = "";
+    }
+  } else {
+    searchParams.value.departmentName = "";
+  }
+
+  onSearch();
+};
 
 const onSearch = () => {
-    searchParams.value.page = 1;
-    lectureStore.fetchLectures(searchParams.value);
+  searchParams.value.page = 1;
+  lectureStore.fetchLectures(searchParams.value);
 };
 
-const goToPage = (p) => {
-    searchParams.value.page = p;
-    lectureStore.fetchLectures(searchParams.value);
+const goToPage = (page) => {
+  searchParams.value.page = page;
+  lectureStore.fetchLectures(searchParams.value);
 };
 
-const totalPages = computed(() => {
-    return Math.ceil(lectureStore.totalCount / searchParams.value.size);
-});
+const totalPages = computed(() =>
+  Math.ceil(lectureStore.totalCount / searchParams.value.size)
+);
 
 const apply = async (lectureId) => {
-    if (!authStore.isLoggedIn) {
-        alert('로그인이 필요한 서비스입니다.');
-        return;
-    }
-    
-    if (!confirm('해당 강의를 수강 신청하시겠습니까?')) {
-        return;
-    }
-    
-    await enrollmentStore.applyEnrollment(lectureId);
+  if (!authStore.isLoggedIn) {
+    alert("로그인이 필요한 서비스입니다.");
+    return;
+  }
+
+  if (!confirm("해당 강의를 수강 신청하시겠습니까?")) {
+    return;
+  }
+
+  await enrollmentStore.applyEnrollment(lectureId);
 };
 
-/**
- * [시간 포맷터] 쉼표로 구분된 시간을 줄바꿈 배열로 변환
- */
 const formatSchedule = (schedule) => {
   if (!schedule) return [];
-  return schedule.split(',').map(s => s.trim());
+  return schedule.split(",").map((item) => item.trim());
 };
 
-const isApplied = (lectureId) => {
-    return enrollmentStore.myEnrollments.some(e => e.lectureId === lectureId);
-};
+const isApplied = (lectureId) =>
+  enrollmentStore.myEnrollments.some((enrollment) => enrollment.lectureId === lectureId);
 
-onMounted(() => {
-    lectureStore.fetchLectures(searchParams.value);
-    if (authStore.isLoggedIn) {
-        // 수강신청 화면 진입 시 현재 학기 내역 로드
-        enrollmentStore.fetchMyEnrollments(searchParams.value.year, searchParams.value.semester);
+onMounted(async () => {
+  lectureStore.lectures = [];
+  lectureStore.totalCount = 0;
+
+  await lectureStore.fetchColleges();
+
+  if (authStore.isLoggedIn && authStore.userInfo) {
+    const studentDepartmentName = authStore.userInfo.departmentName;
+
+    if (studentDepartmentName) {
+      const matchedCollege = lectureStore.colleges.find(
+        (college) =>
+          college.departments &&
+          college.departments.some(
+            (department) => department.name === studentDepartmentName
+          )
+      );
+
+      if (matchedCollege) {
+        searchParams.value.collegeName = matchedCollege.name;
+      }
+
+      searchParams.value.departmentName = studentDepartmentName;
     }
+  }
+
+  lectureStore.fetchLectures(searchParams.value);
+
+  if (authStore.isLoggedIn) {
+    enrollmentStore.fetchMyEnrollments(
+      searchParams.value.year,
+      searchParams.value.semester
+    );
+  }
 });
 </script>
 
@@ -73,91 +155,110 @@ onMounted(() => {
       <h2>수강 신청</h2>
     </div>
 
-    <!-- 검색 바 (연도/학기 선택 삭제) -->
     <div class="search-section">
       <div class="search-row">
         <div class="search-group">
-          <label>학과</label>
-          <input v-model="searchParams.departmentName" type="text" placeholder="학과명 입력" @keyup.enter="onSearch">
+          <label>단과대</label>
+          <select v-model="searchParams.collegeName" @change="onCollegeChange">
+            <option value="">전체</option>
+            <option
+              v-for="college in lectureStore.colleges"
+              :key="college.id"
+              :value="college.name"
+            >
+              {{ college.name }}
+            </option>
+          </select>
         </div>
+
+        <div class="search-group">
+          <label>학과</label>
+          <select v-model="searchParams.departmentName" @change="onSearch">
+            <option value="">전체</option>
+            <option
+              v-for="department in filteredDepartments"
+              :key="department.id"
+              :value="department.name"
+            >
+              {{ department.name }}
+            </option>
+          </select>
+        </div>
+
         <div class="search-group">
           <label>강의명</label>
-          <input v-model="searchParams.courseName" type="text" placeholder="강의명 입력" @keyup.enter="onSearch">
+          <MyInput
+            v-model="searchParams.courseName"
+            placeholder="강의명 입력"
+            @keyup-enter="onSearch"
+          />
         </div>
+
         <div class="search-group">
           <label>교수명</label>
-          <input v-model="searchParams.professorName" type="text" placeholder="교수명 입력" @keyup.enter="onSearch">
+          <MyInput
+            v-model="searchParams.professorName"
+            placeholder="교수명 입력"
+            @keyup-enter="onSearch"
+          />
         </div>
+
         <div class="current-semester-info">
           <span class="label">대상 학기</span>
           <span class="value">{{ searchParams.year }}년 {{ searchParams.semester }}학기</span>
         </div>
-        <button class="btn-search" @click="onSearch">조회</button>
+
+        <MyButton
+          btnType="button"
+          color="deep-blue"
+          size="small"
+          content="조회"
+          @click="onSearch"
+        />
       </div>
     </div>
 
-    <!-- 테이블 영역 -->
-    <div class="table-container">
-      <table class="lecture-table">
-        <thead>
-          <tr>
-            <th>과목코드</th>
-            <th>학과</th>
-            <th>강의명</th>
-            <th>학점</th>
-            <th>담당교수</th>
-            <th class="col-classroom">강의실</th>
-            <th class="col-time">시간</th>
-            <th class="col-capacity">정원</th>
-            <th>신청</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="lectureStore.loading">
-            <td colspan="9" class="loading-text">데이터를 불러오는 중입니다...</td>
-          </tr>
-          <tr v-else-if="lectureStore.lectures.length === 0">
-            <td colspan="9" class="empty-text">조회된 강의가 없습니다.</td>
-          </tr>
-          <tr v-for="lecture in lectureStore.lectures" :key="lecture.id">
-            <td>{{ lecture.courseCode }}</td>
-            <td>{{ lecture.departmentName }}</td>
-            <td class="course-name">{{ lecture.courseName }}</td>
-            <td>{{ lecture.credits }}</td>
-            <td>{{ lecture.professorName }}</td>
-            <td class="classroom-text">{{ lecture.classroom }}</td>
-            <td class="time-text">
-              <div v-for="(time, idx) in formatSchedule(lecture.schedule)" :key="idx">
-                {{ time }}
-              </div>
-            </td>
-            <td>{{ lecture.capacity }}명</td>
-            <td>
-              <button 
-                class="btn-apply" 
-                :class="{ 'btn-applied': isApplied(lecture.id) }"
-                :disabled="isApplied(lecture.id)" 
-                @click="apply(lecture.id)"
-              >
-                {{ isApplied(lecture.id) ? '신청완료' : '신청' }}
-              </button>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+    <MyTable
+      :columns="lectureColumns"
+      :loading="lectureStore.loading"
+      :empty="lectureStore.lectures.length === 0"
+      emptyMessage="조회된 강의가 없습니다."
+    >
+      <tr v-for="lecture in lectureStore.lectures" :key="lecture.id">
+        <td>{{ lecture.courseCode }}</td>
+        <td>{{ lecture.departmentName }}</td>
+        <td class="course-name">{{ lecture.courseName }}</td>
+        <td>{{ lecture.credits }}</td>
+        <td>{{ lecture.targetGrade }}학년</td>
+        <td>{{ lecture.professorName }}</td>
+        <td class="classroom-text">{{ lecture.classroom }}</td>
+        <td class="time-text">
+          <div
+            v-for="(time, index) in formatSchedule(lecture.schedule)"
+            :key="index"
+          >
+            {{ time }}
+          </div>
+        </td>
+        <td>{{ lecture.capacity }}명</td>
+        <td>
+          <MyButton
+            btnType="button"
+            :color="isApplied(lecture.id) ? 'gray' : 'green'"
+            size="small"
+            :content="isApplied(lecture.id) ? '신청완료' : '신청'"
+            :disabled="isApplied(lecture.id)"
+            @click="apply(lecture.id)"
+          />
+        </td>
+      </tr>
+    </MyTable>
 
-    <!-- 페이지네이션 -->
-    <div class="pagination" v-if="totalPages > 0">
-      <button 
-        v-for="p in totalPages" 
-        :key="p" 
-        :class="{ active: searchParams.page === p }"
-        @click="goToPage(p)"
-      >
-        {{ p }}
-      </button>
-    </div>
+    <MyPagination
+      :currentPage="searchParams.page"
+      :totalPages="totalPages"
+      @page-change="goToPage"
+    />
   </div>
 </template>
 
@@ -173,11 +274,10 @@ onMounted(() => {
 }
 
 .page-header h2 {
-  font-size: 1.5rem;
   color: #1a1f36;
+  font-size: 1.5rem;
 }
 
-/* 검색 섹션 */
 .search-section {
   background: white;
   padding: 20px;
@@ -199,16 +299,20 @@ onMounted(() => {
   gap: 6px;
 }
 
-.search-group label {
+.search-group label,
+.current-semester-info .label {
+  color: #4f566b;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #4f566b;
 }
 
-.search-group input {
+.search-group select {
+  min-width: 160px;
   padding: 8px 12px;
   border: 1px solid #ddd;
   border-radius: 4px;
+  background-color: white;
+  box-sizing: border-box;
   font-size: 0.9rem;
 }
 
@@ -220,126 +324,37 @@ onMounted(() => {
   padding-bottom: 2px;
 }
 
-.current-semester-info .label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #4f566b;
-}
-
 .current-semester-info .value {
+  color: var(--primary-color);
   font-size: 0.95rem;
   font-weight: 700;
-  color: #0B3D91;
   padding: 8px 0;
 }
 
-.btn-search {
-  padding: 8px 24px;
-  background-color: #1a73e8;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
-  font-weight: 600;
-  height: 38px;
+.col-classroom {
+  width: 15%;
 }
 
-.btn-search:hover {
-  background-color: #1557b0;
+.col-time {
+  width: 22%;
 }
 
-.btn-apply {
-  padding: 6px 12px;
-  background-color: #34a853;
-  color: white;
-  border: none;
-  border-radius: 4px;
-  cursor: pointer;
+.col-capacity {
+  width: 80px;
+}
+
+.classroom-text {
   font-size: 0.85rem;
-  font-weight: 600;
 }
 
-.btn-apply:hover {
-  background-color: #2d8e47;
-}
-
-.btn-apply.btn-applied {
-  background-color: #6c757d;
-  cursor: default;
-}
-
-.btn-apply.btn-applied:hover {
-  background-color: #6c757d;
-}
-
-/* 테이블 스타일 */
-.table-container {
-  background: white;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-  overflow: hidden;
-}
-
-.lecture-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: left;
-}
-
-.lecture-table th {
-  background-color: #f8f9fa;
-  padding: 12px 16px;
+.time-text {
+  color: var(--primary-text-color);
   font-size: 0.85rem;
-  color: #4f566b;
-  border-bottom: 2px solid #edf2f7;
-  white-space: nowrap;
+  line-height: 1.5;
 }
 
-.lecture-table td {
-  padding: 14px 16px;
-  font-size: 0.9rem;
-  border-bottom: 1px solid #edf2f7;
-}
-
-.col-classroom { width: 15%; }
-.col-time { width: 22%; }
-.col-capacity { width: 80px; }
-
-.classroom-text { font-size: 0.85rem; }
-.time-text { font-size: 0.85rem; color: #1a73e8; line-height: 1.5; }
-.course-name { font-weight: 600; color: #1a1f36; }
-
-.loading-text, .empty-text {
-  text-align: center;
-  padding: 40px !important;
-  color: #697386;
-}
-
-/* 페이지네이션 스타일 */
-.pagination {
-  display: flex;
-  justify-content: center;
-  gap: 8px;
-  margin-top: 30px;
-}
-
-.pagination button {
-  padding: 8px 14px;
-  border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
-  border-radius: 4px;
-  font-size: 0.9rem;
-}
-
-.pagination button.active {
-  background-color: #1a73e8;
-  color: white;
-  border-color: #1a73e8;
+.course-name {
+  color: #1a1f36;
   font-weight: 600;
-}
-
-.pagination button:hover:not(.active) {
-  background-color: #f8f9fa;
 }
 </style>
