@@ -182,7 +182,7 @@ const employmentRows = computed(() => [
 
 .profile-image {
   width: 148px;
-  height: 148px;
+  height: 180px;
   background-image: url("/profile.png");
   background-position: center;
   background-repeat: no-repeat;

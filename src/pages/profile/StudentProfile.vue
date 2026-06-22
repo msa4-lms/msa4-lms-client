@@ -195,8 +195,8 @@ const academicRows = computed(() => [
 
 .profile-image {
   width: 148px;
-  height: 148px;
-  background-image: url("/profile.png");
+  height: 180px;
+  background-image: url("/student-profile.jpeg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
