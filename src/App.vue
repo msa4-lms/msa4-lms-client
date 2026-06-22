@@ -3,8 +3,10 @@ import { useRoute } from "vue-router";
 import Header from "./components/layout/Header.vue";
 import SideBar from "./components/layout/SideBar.vue";
 import TabBar from "./components/layout/TabBar.vue";
+import { useTabStore } from "./store/tab/useTabStore";
 
 const route = useRoute();
+const tabStore = useTabStore();
 </script>
 
 <template>
@@ -21,7 +23,7 @@ const route = useRoute();
           :style="{ padding: route.path === '/' ? '0' : '32px' }"
         >
           <router-view v-slot="{ Component, route }">
-            <keep-alive>
+            <keep-alive :include="tabStore.tabs.map(t => t.name)">
               <component :is="Component" :key="route.path" />
             </keep-alive>
           </router-view>

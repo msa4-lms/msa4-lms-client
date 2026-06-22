@@ -10,6 +10,7 @@ const activeMenus = ref({
   studentGrade: false,
   studentAttendance: false,
   professorTeacher: false,
+  professorStudent: false,
   professorCourse: false,
   professorGrade: false,
   professorAttendance: false,
@@ -27,8 +28,8 @@ const alertReady = () => {
 <template>
   <aside class="sidebar">
     <nav class="sidebar-nav">
-      <!-- 대시보드(홈) 공통 링크 -->
-      <router-link to="/main" class="nav-item main-link">대시보드</router-link>
+      <!-- 메인 화면 링크 -->
+      <router-link to="/main" class="nav-item main-link">메인 화면</router-link>
 
       <!-- 학생 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
@@ -46,9 +47,7 @@ const alertReady = () => {
             <router-link to="/profile" class="submenu-item"
               >학적조회</router-link
             >
-            <a href="#" class="submenu-item" @click.prevent="alertReady"
-              >휴/복학 신청</a
-            >
+            <router-link to="/leave-return" class="submenu-item">휴/복학 신청</router-link>
           </div>
         </div>
 
@@ -128,6 +127,21 @@ const alertReady = () => {
             <router-link to="/profile" class="submenu-item"
               >교적 조회</router-link
             >
+          </div>
+        </div>
+
+        <!-- 학생 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorStudent')">
+            <span>학생 관리</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.professorStudent }"
+              >▼</span
+            >
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorStudent">
+            <router-link to="/professor/leave-return" class="submenu-item">휴/복학 결재</router-link>
           </div>
         </div>
 

@@ -5,6 +5,7 @@ import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyButton from "../../components/button/MyButton.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
@@ -93,9 +94,7 @@ const formatSchedule = (schedule) => {
 </script>
 
 <template>
-  <div class="enrollment-container">
-    <h2>내 수강 내역 및 시간표</h2>
-
+  <MyPageContainer title="내 수강 내역 및 시간표">
     <!-- 학기 선택 필터 추가 -->
     <MySearchFilter @search="onSearchHistory">
       <div class="search-group">
@@ -191,21 +190,10 @@ const formatSchedule = (schedule) => {
         </tr>
       </MyTable>
     </section>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.enrollment-container {
-  padding: 20px;
-  max-width: 1400px;
-  margin: 0 auto;
-}
-
-.enrollment-container h2 {
-  color: var(--primary-text-color);
-  padding-bottom: 10px;
-}
-
 .btn-history-search {
   padding: 8px 20px;
   background-color: #0b3d91;

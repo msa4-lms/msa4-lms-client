@@ -1,17 +1,18 @@
 import { createRouter, createWebHistory } from "vue-router";
-import GradePage from "../pages/academic/GradePage.vue";
-import AttendancePage from "../pages/academic/AttendancePage.vue";
-import ExcuseRequestPage from "../pages/academic/ExcuseRequestPage.vue";
-import Login from "../pages/auth/Login.vue";
-import LectureList from "../pages/lectures/LectureList.vue";
-import LectureEnrollment from "../pages/enrollment/LectureEnrollment.vue";
-import EnrollmentList from "../pages/enrollment/EnrollmentList.vue";
+const GradePage = () => import("../pages/academic/GradePage.vue");
+const AttendancePage = () => import("../pages/academic/AttendancePage.vue");
+const ExcuseRequestPage = () => import("../pages/academic/ExcuseRequestPage.vue");
+const Login = () => import("../pages/auth/Login.vue");
+const LectureList = () => import("../pages/lectures/LectureList.vue");
+const LectureEnrollment = () => import("../pages/enrollment/LectureEnrollment.vue");
+const EnrollmentList = () => import("../pages/enrollment/EnrollmentList.vue");
 import { useAuthStore } from "../store/auth/useAuthStore.js";
-import ProfileRouter from "../pages/profile/ProfileRouter.vue";
-import Dashboard from "../pages/dashboard/Dashboard.vue";
-import ProfessorLectureCreate from "../pages/lectures/ProfessorLectureCreate.vue";
-import ProfessorGradeManage from "../pages/academic/ProfessorGradeManage.vue";
-
+const ProfileRouter = () => import("../pages/profile/ProfileRouter.vue");
+const Dashboard = () => import("../pages/dashboard/Dashboard.vue");
+const ProfessorLectureCreate = () => import("../pages/lectures/ProfessorLectureCreate.vue");
+const ProfessorGradeManage = () => import("../pages/academic/ProfessorGradeManage.vue");
+const LeaveReturnPage = () => import("../pages/academic/LeaveReturnPage.vue");
+const ProfessorLeaveReturnPage = () => import("../pages/academic/ProfessorLeaveReturnPage.vue");
 const setMeta = (isAuthenticated, isGuestOnly) => {
   return {
     isAuthenticated, // 인증된 사용자
@@ -69,6 +70,12 @@ const routes = [
     meta: setMeta(true, false),
   },
   {
+    path: "/excuses",
+    name: "ExcuseRequestPage",
+    component: ExcuseRequestPage,
+    meta: setMeta(true, false),
+  },
+  {
     path: "/professor/lectures/create",
     name: "ProfessorLectureCreate",
     component: ProfessorLectureCreate,
@@ -84,6 +91,18 @@ const routes = [
     path: "/professor/grades/correct",
     name: "ProfessorGradeCorrect",
     component: ProfessorGradeManage,
+    meta: setMeta(true, false),
+  },
+  {
+    path: "/leave-return",
+    name: "LeaveReturnPage",
+    component: LeaveReturnPage,
+    meta: setMeta(true, false),
+  },
+  {
+    path: "/professor/leave-return",
+    name: "ProfessorLeaveReturnPage",
+    component: ProfessorLeaveReturnPage,
     meta: setMeta(true, false),
   },
 ];

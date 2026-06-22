@@ -3,6 +3,7 @@ import { ref, onMounted } from "vue";
 import { useAcademicStore } from "../../store/academic/useAcademicStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyTable from "../../components/table/MyTable.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
 
 const academicStore = useAcademicStore();
@@ -38,7 +39,7 @@ const formatStatus = (status) => {
   return map[status] || "미공개";
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (authStore.isLoggedIn) {
     await academicStore.fetchGrades();
   }
@@ -46,12 +47,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="grade-page">
-    <div class="page-heading">
-      <h2>성적 조회</h2>
-      <p>확정된 성적 및 전체 평균 평점(GPA)을 확인할 수 있습니다.</p>
-    </div>
-
+  <MyPageContainer title="성적 조회" subtitle="학기별 전체 학점 및 평균 평점(GPA)을 확인할 수 있습니다.">
     <div class="summary-grid">
       <section class="summary-card">
         <span>전체 평균 평점 (GPA)</span>
@@ -93,33 +89,10 @@ onMounted(() => {
         </tr>
       </MyTable>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.grade-page {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-  color: var(--primary-text-color);
-}
-
-.page-heading {
-  padding-bottom: 10px;
-}
-
-.page-heading h2 {
-  margin-bottom: 8px;
-  color: var(--primary-text-color);
-  letter-spacing: 0;
-  font-size: 1.5rem;
-}
-
-.page-heading p {
-  color: var(--primary-text-color);
-  font-size: 1rem;
-}
-
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -146,7 +119,7 @@ onMounted(() => {
 .label {
   color: #64748b;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .summary-card strong {
@@ -181,15 +154,7 @@ onMounted(() => {
   font-size: 1.1rem;
 }
 
-.semester {
-  color: #1e293b;
-  font-weight: 600;
-}
 
-.code {
-  color: #64748b;
-  font-family: monospace;
-}
 
 .credit {
   font-weight: 500;
@@ -201,7 +166,7 @@ onMounted(() => {
   border-radius: 8px;
   padding: 5px 10px;
   font-size: 0.82rem;
-  font-weight: 700;
+  font-weight: 600;
   color: #1e293b;
 }
 
@@ -284,7 +249,7 @@ onMounted(() => {
   padding-bottom: 12px;
   text-align: left;
   color: #1a1f36;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .modal-body {

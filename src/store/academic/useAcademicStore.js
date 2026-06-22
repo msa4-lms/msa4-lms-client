@@ -57,7 +57,6 @@ export const useAcademicStore = defineStore("academic", () => {
     }
   };
 
-  return { gradeSummary, attendanceList, fetchGrades, fetchAttendance, applyObjection };
   const fetchAttendanceRates = async (params = {}) => {
     try {
       const res = await myAxios.get("/api/student/academic/attendance-rates", {
@@ -131,5 +130,6 @@ export const useAcademicStore = defineStore("academic", () => {
     fetchPendingExcuseRequests,
     requestExcuse,
     decideExcuseRequest,
+    applyObjection,
   };
 });
