@@ -70,7 +70,9 @@ export const useTabStore = defineStore("tab", () => {
       case "/professor/grades/input": return "성적 입력";
       case "/professor/grades/correct": return "성적 정정";
       case "/students": return "사용자 관리";
-      default: return name || "새 탭";
+      case "/leave-return": return "휴/복학 신청";
+      case "/professor/leave-return": return "휴/복학 결재";
+      default: return name || "알 수 없음";
     }
   };
 
