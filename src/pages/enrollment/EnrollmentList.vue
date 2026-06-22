@@ -21,11 +21,7 @@ const onSearchHistory = () => {
   );
 };
 
-const handleCancel = async (lectureId) => {
-  await enrollmentStore.cancelEnrollment(lectureId);
-  // 취소 후 현재 필터링된 과거 학기 데이터 다시 로드
-  onSearchHistory();
-};
+// handleCancel removed
 
 // 1. 교시별 표준 시간 매핑 (50분 수업 / 10분 휴식)
 const timeSlots = {
@@ -47,7 +43,6 @@ const enrollmentColumns = [
   { key: "classroom", label: "강의실", class: "col-classroom" },
   { key: "schedule", label: "수강시간", class: "col-time" },
   { key: "credits", label: "학점" },
-  { key: "cancel", label: "취소" },
 ];
 
 onMounted(async () => {
@@ -199,15 +194,6 @@ const formatSchedule = (schedule) => {
             </div>
           </td>
           <td>{{ item.credits }}학점</td>
-          <td>
-            <MyButton
-              btnType="button"
-              color="red"
-              size="small"
-              content="취소"
-              @click="handleCancel(item.lectureId)"
-            />
-          </td>
         </tr>
       </MyTable>
     </section>
@@ -261,7 +247,7 @@ const formatSchedule = (schedule) => {
 }
 
 .summary-card {
-  background-color: #f8f9fa;
+  background-color: #ffffff;
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 25px;
