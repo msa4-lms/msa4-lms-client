@@ -27,8 +27,8 @@ const alertReady = () => {
 <template>
   <aside class="sidebar">
     <nav class="sidebar-nav">
-      <router-link to="/main" class="nav-item">대시보드</router-link>
-      <router-link to="/lectures" class="nav-item">강의 조회</router-link>
+      <!-- 대시보드(홈) 공통 링크 -->
+      <router-link to="/main" class="nav-item main-link">대시보드</router-link>
       
       <!-- 학생 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
@@ -83,10 +83,53 @@ const alertReady = () => {
 
       <!-- 교수 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
-        <router-link to="/lectures/manage" class="nav-item">강의 관리</router-link>
-        <router-link to="/students" class="nav-item">학생 관리</router-link>
-        <router-link to="/attendance" class="nav-item">출결 관리</router-link>
-        <router-link to="/profile" class="nav-item">내 정보</router-link>
+        <!-- 교사관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorTeacher')">
+            <span>교사관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorTeacher }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorTeacher">
+            <router-link to="/profile" class="submenu-item">교적 조회</router-link>
+          </div>
+        </div>
+
+        <!-- 강의 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorCourse')">
+            <span>강의 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorCourse }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorCourse">
+            <a href="#" class="submenu-item" @click.prevent="alertReady">강의 개설 (수강 계획서)</a>
+            <router-link to="/lectures" class="submenu-item">강의 조회 (시간표, 폐강)</router-link>
+          </div>
+        </div>
+
+        <!-- 성적 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorGrade')">
+            <span>성적 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorGrade }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorGrade">
+            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 입력</a>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 정정</a>
+          </div>
+        </div>
+
+        <!-- 출결 관리 -->
+        <div class="menu-group">
+          <div class="menu-header" @click="toggleMenu('professorAttendance')">
+            <span>출결 관리</span>
+            <span class="chevron" :class="{ rotated: !activeMenus.professorAttendance }">▼</span>
+          </div>
+          <div class="submenu-list" v-show="activeMenus.professorAttendance">
+            <a href="#" class="submenu-item" @click.prevent="alertReady">출결 승인</a>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">출결 확인</a>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">출석부</a>
+          </div>
+        </div>
       </template>
 
       <!-- 관리자 전용 메뉴 -->
