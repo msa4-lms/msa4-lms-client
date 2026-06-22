@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import { useProfileStore } from "../../store/profile/useProfileStore";
 import PasswordChange from "./PasswordChange.vue";
+import MyInput from "../../components/input/MyInput.vue";
 
 const profileStore = useProfileStore();
 
@@ -94,7 +95,7 @@ const academicRows = computed(() => [
           :key="item.label"
           class="summary-item"
         >
-          <span class="line-icon" :class="item.icon" aria-hidden="true"></span>
+          <span aria-hidden="true">◆</span>
           <span class="summary-label">{{ item.label }}</span>
           <span>{{ item.value }}</span>
         </div>
@@ -147,19 +148,19 @@ const academicRows = computed(() => [
 
 <style scoped>
 .student-profile-page {
-  max-width: 1180px;
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 20px;
   color: var(--primary-text-color);
 }
 
 .page-heading {
-  margin-bottom: 24px;
+  padding-bottom: 10x;
 }
 
-.page-heading h1 {
+.page-heading h2 {
   margin-bottom: 8px;
   color: var(--primary-text-color);
-  font-size: 2rem;
   letter-spacing: 0;
 }
 
@@ -171,7 +172,7 @@ const academicRows = computed(() => [
 .profile-hero,
 .info-card,
 .security-card {
-  background: #fff;
+  background: var(--personal-color-white);
   border: 1px solid #e5eaf2;
   border-radius: 8px;
   box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
@@ -179,23 +180,23 @@ const academicRows = computed(() => [
 
 .profile-hero {
   display: grid;
-  grid-template-columns: 1.15fr 1fr;
+  grid-template-columns: 1fr 1.4fr;
   align-items: center;
   margin-bottom: 28px;
-  padding: 28px 36px;
+  padding: 28px 50px;
 }
 
 .student-intro {
   display: flex;
   align-items: center;
-  gap: 34px;
+  gap: 70px;
   min-width: 0;
 }
 
 .profile-image {
   width: 148px;
-  height: 148px;
-  background-image: url("/profile.png");
+  height: 180px;
+  background-image: url("/student-profile.jpeg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
@@ -264,7 +265,7 @@ const academicRows = computed(() => [
   display: grid;
   grid-template-columns: 1fr 1fr;
   gap: 24px 34px;
-  padding-left: 34px;
+  padding-left: 90px;
   border-left: 1px solid #d5dbe6;
 }
 
@@ -371,7 +372,6 @@ const academicRows = computed(() => [
   display: flex;
   align-items: center;
   gap: 12px;
-  margin-bottom: 20px;
   padding-bottom: 18px;
   border-bottom: 2px solid #e5eaf2;
 }
@@ -440,9 +440,8 @@ const academicRows = computed(() => [
 .info-row {
   display: grid;
   grid-template-columns: minmax(92px, 0.36fr) minmax(0, 1fr);
-  gap: 20px;
   min-height: 44px;
-  padding: 12px 0;
+  padding: 13px 40px;
   border-bottom: 1px solid #e5eaf2;
 }
 
@@ -466,7 +465,6 @@ const academicRows = computed(() => [
   justify-content: space-between;
   gap: 24px;
   padding: 26px 36px;
-  background: linear-gradient(90deg, #eff6ff 0%, #ffffff 58%, #eef4ff 100%);
   border-left: 4px solid var(--primary-color);
 }
 
@@ -519,7 +517,6 @@ const academicRows = computed(() => [
   width: 180px;
   height: 52px;
   border-radius: 6px;
-  box-shadow: 0 8px 16px rgba(23, 74, 165, 0.2);
 }
 
 @media (max-width: 1080px) {
