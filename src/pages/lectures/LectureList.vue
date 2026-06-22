@@ -5,6 +5,8 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import MyPagination from "../../components/pagination/MyPagination.vue";
 import MyTable from "../../components/table/MyTable.vue";
+import MySearchFilter from "../../components/search/MySearchFilter.vue";
+import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
 
 const lectureStore = useLectureStore();
 
@@ -49,11 +51,6 @@ const totalPages = computed(() =>
   Math.ceil(lectureStore.totalCount / searchParams.value.size)
 );
 
-const formatSchedule = (schedule) => {
-  if (!schedule) return [];
-  return schedule.split(",").map((item) => item.trim());
-};
-
 onMounted(() => {
   lectureStore.lectures = [];
   lectureStore.totalCount = 0;
@@ -67,8 +64,7 @@ onMounted(() => {
       <h2>강의 조회</h2>
     </div>
 
-    <div class="search-section">
-      <div class="search-row">
+    <MySearchFilter @search="onSearch">
         <div class="search-group">
           <label>학과</label>
           <MyInput
@@ -113,16 +109,7 @@ onMounted(() => {
             <option :value="2">2학기</option>
           </select>
         </div>
-
-        <MyButton
-          btnType="submit"
-          color="deep-blue"
-          size="small"
-          content="조회"
-          @click="onSearch"
-        />
-      </div>
-    </div>
+    </MySearchFilter>
 
     <MyTable
       :columns="lectureColumns"
@@ -138,13 +125,8 @@ onMounted(() => {
         <td>{{ lecture.targetGrade }}학년</td>
         <td>{{ lecture.professorName }}</td>
         <td class="classroom-text">{{ lecture.classroom }}</td>
-        <td class="time-text">
-          <div
-            v-for="(time, index) in formatSchedule(lecture.schedule)"
-            :key="index"
-          >
-            {{ time }}
-          </div>
+        <td>
+          <ScheduleViewer :schedule="lecture.schedule" />
         </td>
         <td>{{ lecture.capacity }}명</td>
       </tr>
@@ -172,42 +154,6 @@ onMounted(() => {
 .page-header h2 {
   font-size: 1.5rem;
   color: #1a1f36;
-}
-
-.search-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-  margin-bottom: 24px;
-}
-
-.search-row {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.search-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.search-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #4f566b;
-}
-
-.search-group select {
-  min-width: 160px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  font-size: 0.9rem;
 }
 
 .col-classroom {

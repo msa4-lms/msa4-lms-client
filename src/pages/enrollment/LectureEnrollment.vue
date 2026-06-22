@@ -7,6 +7,9 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import MyPagination from "../../components/pagination/MyPagination.vue";
 import MyTable from "../../components/table/MyTable.vue";
+import MySearchFilter from "../../components/search/MySearchFilter.vue";
+import CollegeDepartmentSelect from "../../components/search/CollegeDepartmentSelect.vue";
+import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
 
 const lectureStore = useLectureStore();
 const enrollmentStore = useEnrollmentStore();
@@ -17,6 +20,7 @@ const searchParams = ref({
   professorName: "",
   departmentName: "",
   collegeName: "",
+  targetGrade: "",
   year: 2026,
   semester: 1,
   page: 1,
@@ -47,7 +51,9 @@ const filteredDepartments = computed(() => {
     });
 
     return Array.from(
-      new Map(allDepartments.map((department) => [department.name, department])).values()
+      new Map(
+        allDepartments.map((department) => [department.name, department])
+      ).values()
     ).sort((a, b) => a.name.localeCompare(b.name));
   }
 
@@ -104,13 +110,10 @@ const apply = async (lectureId) => {
   await enrollmentStore.applyEnrollment(lectureId);
 };
 
-const formatSchedule = (schedule) => {
-  if (!schedule) return [];
-  return schedule.split(",").map((item) => item.trim());
-};
-
 const isApplied = (lectureId) =>
-  enrollmentStore.myEnrollments.some((enrollment) => enrollment.lectureId === lectureId);
+  enrollmentStore.myEnrollments.some(
+    (enrollment) => enrollment.lectureId === lectureId
+  );
 
 onMounted(async () => {
   lectureStore.lectures = [];
@@ -136,6 +139,10 @@ onMounted(async () => {
 
       searchParams.value.departmentName = studentDepartmentName;
     }
+
+    if (authStore.userInfo.gradeLevel) {
+      searchParams.value.targetGrade = authStore.userInfo.gradeLevel;
+    }
   }
 
   lectureStore.fetchLectures(searchParams.value);
@@ -155,33 +162,22 @@ onMounted(async () => {
       <h2>수강 신청</h2>
     </div>
 
-    <div class="search-section">
-      <div class="search-row">
-        <div class="search-group">
-          <label>단과대</label>
-          <select v-model="searchParams.collegeName" @change="onCollegeChange">
-            <option value="">전체</option>
-            <option
-              v-for="college in lectureStore.colleges"
-              :key="college.id"
-              :value="college.name"
-            >
-              {{ college.name }}
-            </option>
-          </select>
-        </div>
+    <MySearchFilter @search="onSearch">
+        <CollegeDepartmentSelect
+          v-model:collegeName="searchParams.collegeName"
+          v-model:departmentName="searchParams.departmentName"
+          :colleges="lectureStore.colleges"
+          @change="onSearch"
+        />
 
         <div class="search-group">
-          <label>학과</label>
-          <select v-model="searchParams.departmentName" @change="onSearch">
+          <label>대상 학년</label>
+          <select v-model="searchParams.targetGrade" @change="onSearch">
             <option value="">전체</option>
-            <option
-              v-for="department in filteredDepartments"
-              :key="department.id"
-              :value="department.name"
-            >
-              {{ department.name }}
-            </option>
+            <option :value="1">1학년</option>
+            <option :value="2">2학년</option>
+            <option :value="3">3학년</option>
+            <option :value="4">4학년</option>
           </select>
         </div>
 
@@ -205,18 +201,11 @@ onMounted(async () => {
 
         <div class="current-semester-info">
           <span class="label">대상 학기</span>
-          <span class="value">{{ searchParams.year }}년 {{ searchParams.semester }}학기</span>
+          <span class="value"
+            >{{ searchParams.year }}년 {{ searchParams.semester }}학기</span
+          >
         </div>
-
-        <MyButton
-          btnType="button"
-          color="deep-blue"
-          size="small"
-          content="조회"
-          @click="onSearch"
-        />
-      </div>
-    </div>
+    </MySearchFilter>
 
     <MyTable
       :columns="lectureColumns"
@@ -232,13 +221,8 @@ onMounted(async () => {
         <td>{{ lecture.targetGrade }}학년</td>
         <td>{{ lecture.professorName }}</td>
         <td class="classroom-text">{{ lecture.classroom }}</td>
-        <td class="time-text">
-          <div
-            v-for="(time, index) in formatSchedule(lecture.schedule)"
-            :key="index"
-          >
-            {{ time }}
-          </div>
+        <td>
+          <ScheduleViewer :schedule="lecture.schedule" />
         </td>
         <td>{{ lecture.capacity }}명</td>
         <td>
@@ -274,46 +258,7 @@ onMounted(async () => {
 }
 
 .page-header h2 {
-  color: #1a1f36;
-  font-size: 1.5rem;
-}
-
-.search-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-  margin-bottom: 24px;
-}
-
-.search-row {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.search-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.search-group label,
-.current-semester-info .label {
-  color: #4f566b;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
-
-.search-group select {
-  min-width: 160px;
-  padding: 8px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  background-color: white;
-  box-sizing: border-box;
-  font-size: 0.9rem;
+  color: var(--primary-text-color);
 }
 
 .current-semester-info {

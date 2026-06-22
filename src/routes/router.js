@@ -62,8 +62,8 @@ const routes = [
     meta: setMeta(true, false),
   },
   {
-    path: '/attendance',
-    name: 'AttendancePage',
+    path: "/attendance",
+    name: "AttendancePage",
     component: AttendancePage,
     meta: setMeta(true, false),
   },
@@ -94,8 +94,7 @@ const router = createRouter({
 
 router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore();
-
-  if (!authStore.isLoggedIn) {
+  if (!authStore.isLoggedIn && to.path !== "/") {
     try {
       await authStore.reissue();
     } catch (error) {}
