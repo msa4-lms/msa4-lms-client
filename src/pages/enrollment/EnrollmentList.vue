@@ -223,6 +223,7 @@ const formatSchedule = (schedule) => {
 
 .enrollment-container h2 {
   color: var(--primary-text-color);
+  padding-bottom: 10px;
 }
 
 .history-filter {
@@ -265,7 +266,7 @@ const formatSchedule = (schedule) => {
 }
 
 .summary-card {
-  background-color: #f8f9fa;
+  background-color: var(--personal-color-white);
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 25px;
