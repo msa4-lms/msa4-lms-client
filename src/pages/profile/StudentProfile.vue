@@ -95,7 +95,7 @@ const academicRows = computed(() => [
           :key="item.label"
           class="summary-item"
         >
-          <span class="line-icon" :class="item.icon" aria-hidden="true"></span>
+          <span aria-hidden="true">◆</span>
           <span class="summary-label">{{ item.label }}</span>
           <span>{{ item.value }}</span>
         </div>
