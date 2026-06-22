@@ -1,27 +1,39 @@
 <script setup>
-// 부모에게 저 이름으로 key가 올 것임
+defineOptions({
+  inheritAttrs: false,
+});
+
 const props = defineProps({
   btnType: {
     type: String,
     default: "button",
-  }, // 'button', 'submit', 'reset'
-  size: String, // 'big', 'middle', 'small'
-  color: String, // 'deep-blue', 'white', 'gray'
+  },
+  type: {
+    type: String,
+    default: "",
+  },
+  size: String,
+  color: String,
   content: String,
   disabled: Boolean,
 });
 
 const emit = defineEmits(["click"]);
+
+const handleClick = (event) => {
+  emit("click", event);
+};
 </script>
 
 <template>
   <button
-    :type="props.btnType"
+    v-bind="$attrs"
+    :type="props.type || props.btnType"
     :class="[props.color, props.size]"
     :disabled="props.disabled"
-    @click="emit('click')"
+    @click="handleClick"
   >
-    {{ props.content }}
+    <slot>{{ props.content }}</slot>
   </button>
 </template>
 
@@ -52,7 +64,7 @@ button:hover {
 .middle {
   width: 120px;
   height: 38px;
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 500;
 }
 

@@ -64,40 +64,33 @@ const updatePassword = async () => {
   />
 
   <div v-if="isPasswordModalOpen" class="modal-backdrop">
-    <div v-if="isPasswordModalOpen" class="modal-backdrop">
-      <form class="modal-box" @submit.prevent="updatePassword">
-        <h2>비밀번호 변경</h2>
+    <form class="modal-box" @submit.prevent="updatePassword">
+      <h2>비밀번호 변경</h2>
 
-        <MyInput
-          v-model="passwordChangeData.newPassword"
-          type="password"
-          placeholder="새 비밀번호"
+      <MyInput
+        v-model="passwordChangeData.newPassword"
+        type="password"
+        placeholder="새 비밀번호"
+      />
+
+      <MyInput
+        v-model="passwordChangeData.confirmPassword"
+        type="password"
+        placeholder="새 비밀번호 확인"
+      />
+
+      <div class="modal-buttons">
+        <MyButton
+          type="button"
+          color="gray"
+          size="small"
+          content="취소"
+          @click="closePasswordModal"
         />
 
-        <MyInput
-          v-model="passwordChangeData.confirmPassword"
-          type="password"
-          placeholder="새 비밀번호 확인"
-        />
-
-        <div class="modal-buttons">
-          <MyButton
-            btnType="button"
-            color="gray"
-            size="small"
-            content="취소"
-            @click="closePasswordModal"
-          />
-
-          <MyButton
-            btnType="submit"
-            color="deep-blue"
-            size="small"
-            content="변경"
-          />
-        </div>
-      </form>
-    </div>
+        <MyButton type="submit" color="deep-blue" size="small" content="변경" />
+      </div>
+    </form>
   </div>
 </template>
 
