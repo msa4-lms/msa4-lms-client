@@ -1,6 +1,6 @@
 <script setup>
-import { ref } from 'vue';
-import { useAuthStore } from '../../store/auth/useAuthStore';
+import { ref } from "vue";
+import { useAuthStore } from "../../store/auth/useAuthStore";
 
 const authStore = useAuthStore();
 
@@ -12,7 +12,7 @@ const activeMenus = ref({
   professorTeacher: false,
   professorCourse: false,
   professorGrade: false,
-  professorAttendance: false
+  professorAttendance: false,
 });
 
 const toggleMenu = (menuKey) => {
@@ -20,7 +20,7 @@ const toggleMenu = (menuKey) => {
 };
 
 const alertReady = () => {
-  alert('준비 중인 서비스입니다.');
+  alert("준비 중인 서비스입니다.");
 };
 </script>
 
@@ -29,18 +29,26 @@ const alertReady = () => {
     <nav class="sidebar-nav">
       <!-- 대시보드(홈) 공통 링크 -->
       <router-link to="/main" class="nav-item main-link">대시보드</router-link>
-      
+
       <!-- 학생 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
         <!-- 학사관리 -->
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('studentAcademic')">
             <span>학사관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.studentAcademic }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.studentAcademic }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAcademic">
-            <router-link to="/profile" class="submenu-item">학적조회</router-link>
-            <a href="#" class="submenu-item" @click.prevent="alertReady">휴/복학 신청</a>
+            <router-link to="/profile" class="submenu-item"
+              >학적조회</router-link
+            >
+            <a href="#" class="submenu-item" @click.prevent="alertReady"
+              >휴/복학 신청</a
+            >
           </div>
         </div>
 
@@ -48,11 +56,19 @@ const alertReady = () => {
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('studentCourse')">
             <span>수강 관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.studentCourse }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.studentCourse }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentCourse">
-            <router-link to="/enrollments" class="submenu-item">시간표 조회</router-link>
-            <router-link to="/registration" class="submenu-item">수강 신청</router-link>
+            <router-link to="/enrollments" class="submenu-item"
+              >시간표 조회</router-link
+            >
+            <router-link to="/registration" class="submenu-item"
+              >수강 신청</router-link
+            >
           </div>
         </div>
 
@@ -60,11 +76,19 @@ const alertReady = () => {
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('studentGrade')">
             <span>성적 관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.studentGrade }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.studentGrade }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentGrade">
-            <router-link to="/grade" class="submenu-item">성적 조회</router-link>
-            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 이의 신청</a>
+            <router-link to="/grade" class="submenu-item"
+              >성적 조회</router-link
+            >
+            <a href="#" class="submenu-item" @click.prevent="alertReady"
+              >성적 이의 신청</a
+            >
           </div>
         </div>
 
@@ -72,11 +96,19 @@ const alertReady = () => {
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('studentAttendance')">
             <span>출결 관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.studentAttendance }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.studentAttendance }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAttendance">
-            <router-link to="/attendance" class="submenu-item">출결 조회</router-link>
-            <router-link to="/excuses" class="submenu-item">공결 신청</router-link>
+            <router-link to="/attendance" class="submenu-item"
+              >출결 조회</router-link
+            >
+            <router-link to="/excuses" class="submenu-item"
+              >공결 신청</router-link
+            >
           </div>
         </div>
       </template>
@@ -86,10 +118,16 @@ const alertReady = () => {
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('professorTeacher')">
             <span>교사관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.professorTeacher }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.professorTeacher }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorTeacher">
-            <router-link to="/profile" class="submenu-item">교적 조회</router-link>
+            <router-link to="/profile" class="submenu-item"
+              >교적 조회</router-link
+            >
           </div>
         </div>
 
@@ -97,7 +135,11 @@ const alertReady = () => {
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('professorCourse')">
             <span>강의 관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.professorCourse }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.professorCourse }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
             <router-link to="/professor/lectures/create" class="submenu-item">강의 개설 (수강 계획서)</router-link>
@@ -109,7 +151,11 @@ const alertReady = () => {
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('professorGrade')">
             <span>성적 관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.professorGrade }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.professorGrade }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorGrade">
             <router-link to="/professor/grades/input" class="submenu-item">성적 입력</router-link>
@@ -121,12 +167,22 @@ const alertReady = () => {
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('professorAttendance')">
             <span>출결 관리</span>
-            <span class="chevron" :class="{ rotated: !activeMenus.professorAttendance }">▼</span>
+            <span
+              class="chevron"
+              :class="{ rotated: !activeMenus.professorAttendance }"
+              >▼</span
+            >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorAttendance">
-            <a href="#" class="submenu-item" @click.prevent="alertReady">출결 승인</a>
-            <a href="#" class="submenu-item" @click.prevent="alertReady">출결 확인</a>
-            <a href="#" class="submenu-item" @click.prevent="alertReady">출석부</a>
+            <a href="#" class="submenu-item" @click.prevent="alertReady"
+              >출결 승인</a
+            >
+            <a href="#" class="submenu-item" @click.prevent="alertReady"
+              >출결 확인</a
+            >
+            <a href="#" class="submenu-item" @click.prevent="alertReady"
+              >출석부</a
+            >
           </div>
         </div>
       </template>
@@ -242,5 +298,13 @@ const alertReady = () => {
 
 .router-link-active.main-link {
   border-left: 4px solid #1a73e8;
+}
+
+.sidebar {
+  height: calc(100vh - 64px); /* Header 높이랑 맞추기 */
+  position: sticky;
+  top: 64px;
+  align-self: flex-start;
+  overflow-y: auto;
 }
 </style>
