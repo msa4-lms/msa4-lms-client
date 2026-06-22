@@ -23,15 +23,18 @@ const professor = computed(() => ({
   status: formatStatus(user.value.status),
   department: user.value.departmentName || "-",
   professorNo: user.value.professorNo || "-",
+  phone: user.value.phoneNum || "-",
+  address: user.value.address || "-",
   email: user.value.email || "-",
+  college: user.value.collegeName || "-",
   hireYear: user.value.hireYear || "-",
 }));
 
 const summaryItems = computed(() => [
-  { icon: "calendar", label: "임용연도", value: professor.value.hireYear },
-  { icon: "users", label: "학과", value: professor.value.department },
-  { icon: "person", label: "교번", value: professor.value.professorNo },
-  { icon: "clock", label: "재직상태", value: professor.value.status },
+  { label: "임용연도", value: professor.value.hireYear + "년" },
+  { label: "소속", value: professor.value.college },
+  { label: "학과", value: professor.value.department },
+  { label: "교번", value: professor.value.professorNo },
 ]);
 
 const basicRows = computed(() => [
@@ -39,11 +42,14 @@ const basicRows = computed(() => [
   { label: "교번", value: professor.value.professorNo },
   { label: "학과", value: professor.value.department },
   { label: "이메일", value: professor.value.email },
+  { label: "연락처", value: professor.value.phone },
+  { label: "주소", value: professor.value.address },
 ]);
 
 const employmentRows = computed(() => [
   { label: "재직 상태", value: professor.value.status },
   { label: "임용연도", value: professor.value.hireYear },
+  { label: "소속 단과대학", value: professor.value.college },
   { label: "소속 학과", value: professor.value.department },
 ]);
 </script>
@@ -167,7 +173,7 @@ const employmentRows = computed(() => [
 
 .profile-hero {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   margin-bottom: 28px;
   padding: 28px 50px;
