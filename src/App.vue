@@ -1,8 +1,8 @@
 <script setup>
-import { useRoute } from 'vue-router';
-import Header from './components/layout/Header.vue';
-import SideBar from './components/layout/SideBar.vue';
-import TabBar from './components/layout/TabBar.vue';
+import { useRoute } from "vue-router";
+import Header from "./components/layout/Header.vue";
+import SideBar from "./components/layout/SideBar.vue";
+import TabBar from "./components/layout/TabBar.vue";
 
 const route = useRoute();
 </script>
@@ -16,7 +16,10 @@ const route = useRoute();
       <!-- 로그인 화면일 경우 패딩을 없애거나 다르게 줄 수 있습니다 -->
       <div class="content-wrapper">
         <TabBar v-if="route.path !== '/'" />
-        <main class="content" :style="{ padding: route.path === '/' ? '0' : '32px' }">
+        <main
+          class="content"
+          :style="{ padding: route.path === '/' ? '0' : '32px' }"
+        >
           <router-view v-slot="{ Component, route }">
             <keep-alive>
               <component :is="Component" :key="route.path" />
@@ -36,20 +39,17 @@ const route = useRoute();
 }
 
 body {
-  font-family: 'Noto Sans KR', sans-serif;
+  font-family: "Noto Sans KR", sans-serif;
   background-color: #f5f7fa;
   color: #333;
 }
-
 .app-container {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
 }
 
 .main-layout {
   display: flex;
-  flex: 1;
+  height: calc(100vh - 64px); /* Header 높이에 맞게 수정 */
   overflow: hidden;
 }
 
@@ -57,6 +57,7 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
   overflow: hidden;
 }
 

@@ -2,12 +2,12 @@ import { createRouter, createWebHistory } from "vue-router";
 import GradePage from "../pages/academic/GradePage.vue";
 import AttendancePage from "../pages/academic/AttendancePage.vue";
 import Login from "../pages/auth/Login.vue";
-import Main from "../pages/Main.vue";
 import LectureList from "../pages/lectures/LectureList.vue";
 import LectureEnrollment from "../pages/enrollment/LectureEnrollment.vue";
 import EnrollmentList from "../pages/enrollment/EnrollmentList.vue";
 import { useAuthStore } from "../store/auth/useAuthStore.js";
 import ProfileRouter from "../pages/profile/ProfileRouter.vue";
+import Dashboard from "../pages/dashboard/Dashboard.vue";
 
 const setMeta = (isAuthenticated, isGuestOnly) => {
   return {
@@ -26,7 +26,7 @@ const routes = [
   {
     path: "/main",
     name: "Main",
-    component: Main,
+    component: Dashboard,
     meta: setMeta(true, false),
   },
   {

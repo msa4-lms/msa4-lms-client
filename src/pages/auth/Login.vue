@@ -167,7 +167,9 @@ const handleLogin = async () => {
         </div>
 
         <form @submit.prevent="handleLogin">
-          <label for="userId">{{ loginContent.idLabel }}</label>
+          <label class="login-title" for="userId">{{
+            loginContent.idLabel
+          }}</label>
           <div class="input-box">
             <svg viewBox="0 0 24 24">
               <path
@@ -184,7 +186,7 @@ const handleLogin = async () => {
             />
           </div>
 
-          <label for="password">비밀번호</label>
+          <label class="login-title" for="password">비밀번호</label>
           <div class="input-box">
             <svg viewBox="0 0 24 24">
               <path
@@ -376,20 +378,24 @@ const handleLogin = async () => {
 }
 .welcome {
   color: #2563eb;
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 900;
   letter-spacing: 0.2em;
 }
 .login-header h2 {
   margin-top: 10px;
   color: #0f2f68;
-  font-size: 30px;
+  font-size: 42px;
   letter-spacing: -0.05em;
 }
 .login-header p {
   margin-top: 8px;
   color: #64748b;
-  font-size: 12px;
+  font-size: 15px;
+}
+
+.login-title {
+  font-size: 15px;
 }
 .login-tabs {
   margin: 30px 0 27px;
@@ -446,11 +452,11 @@ const handleLogin = async () => {
   display: block;
 }
 .login-tabs strong {
-  font-size: 11px;
+  font-size: 14px;
 }
 .login-tabs small {
   margin-top: 2px;
-  font-size: 6px;
+  font-size: 10px;
   letter-spacing: 0.03em;
   opacity: 0.7;
 }
@@ -462,7 +468,7 @@ form > label {
   font-weight: 800;
 }
 .input-box {
-  height: 52px;
+  height: 58px;
   display: flex;
   align-items: center;
   gap: 10px;
@@ -492,7 +498,7 @@ form > label {
   outline: 0;
   color: #1e293b;
   background: transparent;
-  font-size: 12px;
+  font-size: 15px;
 }
 .input-box input::placeholder {
   color: #b4bfcd;
@@ -521,7 +527,7 @@ form > label {
   align-items: center;
   justify-content: space-between;
   color: #64748b;
-  font-size: 10px;
+  font-size: 12px;
 }
 .remember {
   display: flex;
@@ -552,7 +558,7 @@ form > label {
 }
 .login-button {
   width: 100%;
-  height: 54px;
+  height: 60px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -562,7 +568,7 @@ form > label {
   color: #fff;
   background: linear-gradient(135deg, #0b3d91, #2563eb);
   box-shadow: 0 14px 26px #2563eb3d;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 800;
   cursor: pointer;
   transition: 0.2s;
@@ -599,7 +605,7 @@ form > label {
   border-radius: 50%;
   color: #2563eb;
   background: #eff6ff;
-  font-size: 11px;
+  font-size: 14px;
   font-weight: 800;
 }
 .support-box p {
@@ -611,17 +617,17 @@ form > label {
 }
 .support-box strong {
   color: #334155;
-  font-size: 9px;
+  font-size: 13px;
 }
 .support-box small {
   margin-top: 3px;
   color: #94a3b8;
-  font-size: 8px;
+  font-size: 11px;
 }
 .support-box a {
   color: #2563eb;
   text-decoration: none;
-  font-size: 9px;
+  font-size: 10px;
   font-weight: 800;
 }
 .policy-links {
@@ -630,7 +636,7 @@ form > label {
   justify-content: center;
   align-items: center;
   gap: 10px;
-  font-size: 9px;
+  font-size: 11px;
 }
 .policy-links i {
   width: 1px;

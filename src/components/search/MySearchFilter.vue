@@ -4,15 +4,15 @@ import MyButton from "../button/MyButton.vue";
 defineProps({
   showSubmit: {
     type: Boolean,
-    default: true
+    default: true,
   },
   submitText: {
     type: String,
-    default: "조회"
-  }
+    default: "조회",
+  },
 });
 
-defineEmits(['search']);
+defineEmits(["search"]);
 </script>
 
 <template>
