@@ -100,8 +100,8 @@ const alertReady = () => {
             <span class="chevron" :class="{ rotated: !activeMenus.professorCourse }">▼</span>
           </div>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
-            <a href="#" class="submenu-item" @click.prevent="alertReady">강의 개설 (수강 계획서)</a>
-            <router-link to="/lectures" class="submenu-item">강의 조회 (시간표, 폐강)</router-link>
+            <router-link to="/professor/lectures/create" class="submenu-item">강의 개설 (수강 계획서)</router-link>
+            <router-link to="/lectures" class="submenu-item">강의 조회 (시간표, 특강)</router-link>
           </div>
         </div>
 
@@ -112,7 +112,7 @@ const alertReady = () => {
             <span class="chevron" :class="{ rotated: !activeMenus.professorGrade }">▼</span>
           </div>
           <div class="submenu-list" v-show="activeMenus.professorGrade">
-            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 입력</a>
+            <router-link to="/professor/grades/input" class="submenu-item">성적 입력</router-link>
             <a href="#" class="submenu-item" @click.prevent="alertReady">성적 정정</a>
           </div>
         </div>

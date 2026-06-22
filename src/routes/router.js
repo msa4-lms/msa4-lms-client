@@ -9,6 +9,8 @@ import LectureEnrollment from "../pages/enrollment/LectureEnrollment.vue";
 import EnrollmentList from "../pages/enrollment/EnrollmentList.vue";
 import { useAuthStore } from "../store/auth/useAuthStore.js";
 import ProfileRouter from "../pages/profile/ProfileRouter.vue";
+import ProfessorLectureCreate from "../pages/lectures/ProfessorLectureCreate.vue";
+import ProfessorGradeManage from "../pages/academic/ProfessorGradeManage.vue";
 
 const setMeta = (isAuthenticated, isGuestOnly) => {
   return {
@@ -67,9 +69,21 @@ const routes = [
     meta: setMeta(true, false),
   },
   {
-    path: "/excuses",
-    name: "ExcuseRequestPage",
-    component: ExcuseRequestPage,
+    path: "/professor/lectures/create",
+    name: "ProfessorLectureCreate",
+    component: ProfessorLectureCreate,
+    meta: setMeta(true, false),
+  },
+  {
+    path: "/professor/grades/input",
+    name: "ProfessorGradeInput",
+    component: ProfessorGradeManage,
+    meta: setMeta(true, false),
+  },
+  {
+    path: "/professor/grades/correct",
+    name: "ProfessorGradeCorrect",
+    component: ProfessorGradeManage,
     meta: setMeta(true, false),
   },
 ];

@@ -1,4 +1,6 @@
 <script setup>
+import MyButton from "../button/MyButton.vue";
+
 defineProps({
   currentPage: Number,
   totalPages: Number,
@@ -9,14 +11,14 @@ const emit = defineEmits(["page-change"]);
 
 <template>
   <div class="pagination" v-if="totalPages > 0">
-    <button
+    <MyButton
       v-for="page in totalPages"
       :key="page"
-      :class="{ active: currentPage === page }"
+      :color="currentPage === page ? 'deep-blue' : 'white'"
+      size="small"
+      :content="String(page)"
       @click="emit('page-change', page)"
-    >
-      {{ page }}
-    </button>
+    />
   </div>
 </template>
 
@@ -28,22 +30,19 @@ const emit = defineEmits(["page-change"]);
   margin-top: 30px;
 }
 
-.pagination button {
-  padding: 8px 14px;
+.pagination :deep(button) {
+  width: 38px;
+  height: 38px;
+  padding: 0;
   border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
   border-radius: 4px;
-  font-size: 0.9rem;
 }
 
-.pagination button.active {
-  background-color: var(--primary-color);
-  color: white;
-  font-weight: 600;
+.pagination :deep(button.deep-blue) {
+  border-color: var(--primary-color);
 }
 
-.pagination button:hover:not(.active) {
+.pagination :deep(button:hover:not(.deep-blue)) {
   background-color: #f8f9fa;
 }
 </style>
