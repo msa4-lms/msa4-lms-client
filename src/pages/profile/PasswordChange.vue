@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import MyButton from "../../components/button/MyButton.vue";
+import MyInput from "../../components/input/MyInput.vue";
 import { useAuthStore } from "../../store/auth/useAuthStore.js";
 import passwordChangeValidator from "../../util/validator/domain/passwordChangeValidator.js";
 import { useRouter } from "vue-router";
@@ -63,40 +64,33 @@ const updatePassword = async () => {
   />
 
   <div v-if="isPasswordModalOpen" class="modal-backdrop">
-    <div v-if="isPasswordModalOpen" class="modal-backdrop">
-      <form class="modal-box" @submit.prevent="updatePassword">
-        <h2>비밀번호 변경</h2>
+    <form class="modal-box" @submit.prevent="updatePassword">
+      <h2>비밀번호 변경</h2>
 
-        <input
-          v-model="passwordChangeData.newPassword"
-          type="password"
-          placeholder="새 비밀번호"
+      <MyInput
+        v-model="passwordChangeData.newPassword"
+        type="password"
+        placeholder="새 비밀번호"
+      />
+
+      <MyInput
+        v-model="passwordChangeData.confirmPassword"
+        type="password"
+        placeholder="새 비밀번호 확인"
+      />
+
+      <div class="modal-buttons">
+        <MyButton
+          type="button"
+          color="gray"
+          size="small"
+          content="취소"
+          @click="closePasswordModal"
         />
 
-        <input
-          v-model="passwordChangeData.confirmPassword"
-          type="password"
-          placeholder="새 비밀번호 확인"
-        />
-
-        <div class="modal-buttons">
-          <MyButton
-            btnType="button"
-            color="gray"
-            size="small"
-            content="취소"
-            @click="closePasswordModal"
-          />
-
-          <MyButton
-            btnType="submit"
-            color="deep-blue"
-            size="small"
-            content="변경"
-          />
-        </div>
-      </form>
-    </div>
+        <MyButton type="submit" color="deep-blue" size="small" content="변경" />
+      </div>
+    </form>
   </div>
 </template>
 
@@ -121,7 +115,7 @@ const updatePassword = async () => {
   gap: 16px;
 }
 
-.modal-box input {
+.modal-box :deep(input) {
   height: 42px;
   padding: 0 12px;
   border: 1px solid #ddd;

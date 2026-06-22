@@ -1,6 +1,7 @@
 <script setup>
 import { useRouter } from "vue-router";
 import { useAuthStore } from "../../store/auth/useAuthStore";
+import MyButton from "../button/MyButton.vue";
 
 const router = useRouter();
 const authStore = useAuthStore();
@@ -39,7 +40,13 @@ const login = () => {
           >
           <span class="user-role">[{{ authStore.userInfo?.role }}]</span>
         </div>
-        <button @click="logout" class="btn-logout">로그아웃</button>
+        <MyButton
+          btnType="button"
+          color="white"
+          size="small"
+          content="로그아웃"
+          @click="logout"
+        />
       </template>
     </div>
   </header>
@@ -89,31 +96,8 @@ const login = () => {
 }
 
 .user-role {
-  color: #1a73e8;
+  color: var(--primary-color);
   font-size: 0.8rem;
   font-weight: bold;
-}
-
-.btn-login,
-.btn-logout {
-  padding: 8px 16px;
-  border-radius: 4px;
-  border: 1px solid #ddd;
-  background: white;
-  cursor: pointer;
-  font-size: 0.9rem;
-  transition: all 0.2s;
-}
-
-.btn-login:hover {
-  background: #f0f4ff;
-  border-color: #1a73e8;
-  color: #1a73e8;
-}
-
-.btn-logout:hover {
-  background: #fff0f0;
-  border-color: #d93025;
-  color: #d93025;
 }
 </style>

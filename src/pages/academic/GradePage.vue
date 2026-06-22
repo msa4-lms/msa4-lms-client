@@ -85,7 +85,9 @@ onMounted(() => {
         <div class="card-info">
           <span class="label">{{ searchedYear }}년 {{ searchedSemester }}학기 이수 학점</span>
           <div class="value-group">
-            <span class="value">{{ academicStore.gradeSummary.totalCredits }}</span>
+            <span class="value">{{
+              academicStore.gradeSummary.totalCredits
+            }}</span>
             <span class="unit">학점</span>
           </div>
         </div>
@@ -149,8 +151,8 @@ onMounted(() => {
 }
 
 .header-section h1 {
-  font-size: 1.8rem;
   color: #1a1f36;
+  font-size: 1.8rem;
   margin-bottom: 8px;
 }
 
@@ -222,7 +224,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
 .card-info {
@@ -231,9 +233,9 @@ onMounted(() => {
 }
 
 .label {
+  color: #64748b;
   font-size: 0.85rem;
   font-weight: 600;
-  color: #64748b;
   margin-bottom: 4px;
 }
 
@@ -244,14 +246,15 @@ onMounted(() => {
 }
 
 .value {
+  color: #1e293b;
   font-size: 2rem;
   font-weight: 800;
-  color: #1e293b;
 }
 
-.max, .unit {
-  font-size: 1rem;
+.max,
+.unit {
   color: #94a3b8;
+  font-size: 1rem;
   font-weight: 500;
 }
 
@@ -259,7 +262,8 @@ onMounted(() => {
   background: white;
   border-radius: 12px;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
 }
 
 .card-header {
@@ -268,45 +272,23 @@ onMounted(() => {
 }
 
 .card-header h3 {
-  font-size: 1.1rem;
   color: #1a1f36;
+  font-size: 1.1rem;
 }
 
-.table-wrapper {
-  overflow-x: auto;
+.semester {
+  color: #1e293b;
+  font-weight: 600;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
+.code {
+  color: #64748b;
+  font-family: monospace;
 }
 
-.data-table th {
-  background: #f8fafc;
-  padding: 14px 24px;
-  text-align: left;
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #475569;
-  text-transform: uppercase;
-  letter-spacing: 0.05em;
-  border-bottom: 2px solid #edf2f7;
+.credit {
+  font-weight: 500;
 }
-
-.data-table td {
-  padding: 16px 24px;
-  border-bottom: 1px solid #f1f5f9;
-  color: #334155;
-  font-size: 0.95rem;
-}
-
-.data-table tr:last-child td {
-  border-bottom: none;
-}
-
-.semester { font-weight: 600; color: #1e293b; }
-.code { font-family: monospace; color: #64748b; }
-.credit, .point { font-weight: 500; }
 
 .grade-badge {
   display: inline-flex;
@@ -320,10 +302,10 @@ onMounted(() => {
   display: inline-flex;
   padding: 2px 8px;
   border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
   background: #f1f5f9;
   color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
 }
 
 .status-badge.confirmed {
