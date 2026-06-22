@@ -1,27 +1,32 @@
 <script setup>
-import { onMounted } from "vue";
-import { useAcademicStore } from "../../store/academic/useAcademicStore";
-import { useAuthStore } from "../../store/auth/useAuthStore";
-import MyTable from "../../components/table/MyTable.vue";
+import { onMounted, ref, computed } from 'vue';
+import { useAcademicStore } from '../../store/academic/useAcademicStore';
+import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
 
-const gradeColumns = [
-  { key: "semester", label: "연도/학기" },
-  { key: "courseCode", label: "과목코드" },
-  { key: "courseName", label: "과목명" },
-  { key: "credits", label: "학점" },
-  { key: "grade", label: "등급" },
-  { key: "status", label: "상태" },
-];
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentSemester = now.getMonth() + 1 >= 1 && now.getMonth() + 1 <= 6 ? 1 : 2;
 
-const isConfirmedGrade = (grade) => grade.grade !== "미입력";
+// select 박스에 바인딩된 값 (사용자가 변경하는 값)
+const selectedYear = ref(currentYear);
+const selectedSemester = ref(currentSemester);
 
-const getGradeLevel = (grade) => {
-  if (grade.startsWith("A")) return "high";
-  if (grade.startsWith("B")) return "mid";
-  return "low";
+// '조회' 버튼을 눌렀을 때 확정되는 값
+const searchedYear = ref(currentYear);
+const searchedSemester = ref(currentSemester);
+
+const onSearch = () => {
+  // 조회 버튼 클릭 시에만 검색된 연도/학기 상태 업데이트 및 API 호출
+  searchedYear.value = selectedYear.value;
+  searchedSemester.value = selectedSemester.value;
+  
+  academicStore.fetchGrades({
+    year: searchedYear.value,
+    semester: searchedSemester.value
+  });
 };
 
 onMounted(async () => {
@@ -50,39 +55,11 @@ onMounted(async () => {
       </section>
     </div>
 
+    <!-- 상세 성적 테이블 -->
     <div class="content-card table-section">
       <div class="card-header">
         <h2>학기별 상세 성적</h2>
       </div>
-
-      <MyTable
-        :columns="gradeColumns"
-        :empty="academicStore.gradeSummary.semesterGrades.length === 0"
-        emptyMessage="조회된 성적 내역이 없습니다."
-      >
-        <tr
-          v-for="(grade, index) in academicStore.gradeSummary.semesterGrades"
-          :key="index"
-        >
-          <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
-          <td class="code">{{ grade.courseCode }}</td>
-          <td class="name">{{ grade.courseName }}</td>
-          <td class="credit">{{ grade.credits }}</td>
-          <td class="grade">
-            <span :class="['grade-badge', getGradeLevel(grade.grade)]">
-              {{ grade.grade }}
-            </span>
-          </td>
-          <td class="status">
-            <span
-              class="status-badge"
-              :class="{ confirmed: isConfirmedGrade(grade) }"
-            >
-              {{ isConfirmedGrade(grade) ? "공개(확정)" : "미공개" }}
-            </span>
-          </td>
-        </tr>
-      </MyTable>
     </div>
   </div>
 </template>
@@ -185,21 +162,7 @@ onMounted(async () => {
   padding: 5px 10px;
   font-size: 0.82rem;
   font-weight: 700;
-}
-
-.grade-badge.high {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-.grade-badge.mid {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-.grade-badge.low {
-  background: #fef2f2;
-  color: #dc2626;
+  color: #1e293b;
 }
 
 .status-badge {
@@ -216,4 +179,27 @@ onMounted(async () => {
   background: #e0e7ff;
   color: #4338ca;
 }
+
+.no-data {
+  padding: 60px 0;
+  text-align: center;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty-state p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.empty-state small {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
 </style>
+

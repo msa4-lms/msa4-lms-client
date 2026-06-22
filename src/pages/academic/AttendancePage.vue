@@ -7,6 +7,7 @@ import { useAuthStore } from "../../store/auth/useAuthStore";
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
+const enrollmentStore = useEnrollmentStore();
 
 const labels = {
   pageStudent: "\uCD9C\uACB0 \uD604\uD669",
@@ -549,6 +550,19 @@ onMounted(async () => {
   .filter-group input,
   .filter-group select {
     width: 100%;
+  }
+}
+
+@media (max-width: 760px) {
+  .excuse-form {
+    grid-template-columns: 1fr;
+  }
+
+  .attendance-item,
+  .rate-item {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 12px;
   }
 }
 </style>

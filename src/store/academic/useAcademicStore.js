@@ -13,8 +13,8 @@ export const useAcademicStore = defineStore("academic", () => {
   const myExcuseRequests = ref([]);
   const pendingExcuseRequests = ref([]);
 
-  // 성적 조회
-  const fetchGrades = async () => {
+  // 성적 조회 (연도 및 학기 필터링 추가)
+  const fetchGrades = async (params = {}) => {
     try {
       const res = await myAxios.get(`/api/student/academic/grades`);
       if (res.data.code === "00") {
