@@ -26,6 +26,10 @@ const student = computed(() => ({
   grade: user.value.grade ? `${user.value.grade}학년` : "-",
   studentNo: user.value.studentNo || "-",
   email: user.value.email || "-",
+  phone: user.value.phoneNum || "-",
+  address: user.value.address || "-",
+  college: user.value.collegeName || "-",
+  advisor: user.value.advisorName || "-",
   entranceYear: user.value.admissionYear || "-",
   credits:
     user.value.credits !== null && user.value.credits !== undefined
@@ -34,10 +38,10 @@ const student = computed(() => ({
 }));
 
 const summaryItems = computed(() => [
-  { icon: "calendar", label: "입학년도", value: student.value.entranceYear },
-  { icon: "users", label: "학과", value: student.value.department },
-  { icon: "person", label: "학년", value: student.value.grade },
-  { icon: "clock", label: "취득학점", value: student.value.credits },
+  { label: "입학년도", value: student.value.entranceYear + "년" },
+  { label: "소속", value: student.value.college },
+  { label: "학과", value: student.value.department },
+  { label: "지도교수", value: student.value.advisor },
 ]);
 
 const basicRows = computed(() => [
@@ -46,11 +50,15 @@ const basicRows = computed(() => [
   { label: "학과", value: student.value.department },
   { label: "학년", value: student.value.grade },
   { label: "이메일", value: student.value.email },
+  { label: "연락처", value: student.value.phone },
+  { label: "주소", value: student.value.address },
 ]);
 
 const academicRows = computed(() => [
   { label: "학적 상태", value: student.value.status },
   { label: "입학년도", value: student.value.entranceYear },
+  { label: "소속 단과대학", value: student.value.college },
+  { label: "지도교수", value: student.value.advisor },
   { label: "학과", value: student.value.department },
   { label: "총 취득 학점", value: student.value.credits },
 ]);
@@ -180,7 +188,7 @@ const academicRows = computed(() => [
 
 .profile-hero {
   display: grid;
-  grid-template-columns: 1fr 1.4fr;
+  grid-template-columns: 1fr 1fr;
   align-items: center;
   margin-bottom: 28px;
   padding: 28px 50px;
