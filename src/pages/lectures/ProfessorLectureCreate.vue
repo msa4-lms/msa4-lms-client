@@ -1,6 +1,7 @@
 <script setup>
 import { reactive, computed } from "vue";
 import { useRouter } from "vue-router";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
@@ -82,12 +83,7 @@ const handleSubmit = async () => {
 </script>
 
 <template>
-  <div class="lecture-create-view">
-    <!-- 헤더 섹션 (투명 배경, 학생용 동일) -->
-    <div class="header-section">
-      <h1>강의 개설 신청</h1>
-    </div>
-
+  <MyPageContainer title="강의 개설 신청">
     <!-- 개설 폼 컨텐츠 카드 -->
     <div class="content-card">
       <form @submit.prevent="handleSubmit" class="create-form-layout">
@@ -227,33 +223,10 @@ const handleSubmit = async () => {
         </div>
       </form>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.lecture-create-view {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 50px;
-}
-
-/* 헤더 영역 (학생용과 완벽 일치) */
-.header-section {
-  margin-bottom: 32px;
-  text-align: left;
-}
-
-.header-section h1 {
-  color: #1a1f36;
-  font-size: 1.8rem;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.header-section p {
-  color: #697386;
-  font-size: 0.95rem;
-}
 
 .content-card {
   background: var(--personal-color-white);
@@ -284,7 +257,7 @@ const handleSubmit = async () => {
 
 .section-title {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 1.2rem;
   color: var(--primary-color);
   text-align: left;
@@ -347,7 +320,7 @@ label {
 
 .schedule-section h3 {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 1.2rem;
   color: var(--primary-color);
 }
@@ -404,7 +377,7 @@ label {
 
 .ratio-section h3 {
   font-size: 1.1rem;
-  font-weight: 700;
+  font-weight: 600;
   margin-bottom: 1.2rem;
   color: var(--primary-color);
 }

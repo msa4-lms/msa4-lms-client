@@ -4,6 +4,9 @@ import myAxios from "../../api/myAxios";
 import { useAcademicStore } from "../../store/academic/useAcademicStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyButton from "../../components/button/MyButton.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
+import MyTable from "../../components/table/MyTable.vue";
+import StatusBadge from "../../components/common/StatusBadge.vue";
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
@@ -24,11 +27,20 @@ const labels = {
   loading: "데이터를 불러오는 중입니다.",
 };
 
-const statusLabel = {
-  PENDING: "대기",
-  APPROVED: "승인",
-  REJECTED: "반려",
-};
+const myExcuseColumns = [
+  { key: "subject", label: "과목" },
+  { key: "date", label: "날짜" },
+  { key: "status", label: "상태" },
+  { key: "reason", label: "사유" },
+];
+
+const pendingExcuseColumns = [
+  { key: "subject", label: "과목" },
+  { key: "date", label: "날짜" },
+  { key: "period", label: "교시" },
+  { key: "reason", label: "사유" },
+  { key: "status", label: "상태" },
+];
 
 const dayNames = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
 const shortDayNames = ["일", "월", "화", "수", "목", "금", "토"];
@@ -204,11 +216,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="excuse-container">
-    <div class="page-header">
-      <h2>{{ isProfessor ? '공결 승인 관리' : labels.pageTitle }}</h2>
-    </div>
-
+  <MyPageContainer :title="isProfessor ? '공결 승인 관리' : labels.pageTitle">
     <template v-if="isStudent">
       <section class="panel">
       <div class="panel-title">
@@ -252,34 +260,21 @@ onMounted(async () => {
       <div class="panel-title">
         <h3>{{ labels.resultTitle }}</h3>
       </div>
-      <table class="data-table compact-table">
-        <thead>
-          <tr>
-            <th>{{ labels.subject }}</th>
-            <th>{{ labels.date }}</th>
-            <th>{{ labels.status }}</th>
-            <th>{{ labels.reason }}</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="loading">
-            <td colspan="4" class="empty-text">{{ labels.loading }}</td>
-          </tr>
-          <tr v-else-if="academicStore.myExcuseRequests.length === 0">
-            <td colspan="4" class="empty-text">{{ labels.emptyExcuse }}</td>
-          </tr>
-          <tr v-for="request in academicStore.myExcuseRequests" :key="request.id">
-            <td class="course-name">{{ request.courseName }}</td>
-            <td>{{ request.lectureDate }}</td>
-            <td>
-              <span :class="['status-badge', request.status?.toLowerCase()]">
-                {{ statusLabel[request.status] || request.status }}
-              </span>
-            </td>
-            <td>{{ request.rejectReason || request.reason }}</td>
-          </tr>
-        </tbody>
-      </table>
+      <MyTable
+        :columns="myExcuseColumns"
+        :loading="loading"
+        :empty="academicStore.myExcuseRequests.length === 0"
+        :emptyMessage="labels.emptyExcuse"
+      >
+        <tr v-for="request in academicStore.myExcuseRequests" :key="request.id">
+          <td class="course-name">{{ request.courseName }}</td>
+          <td>{{ request.lectureDate }}</td>
+          <td>
+            <StatusBadge :status="request.status" />
+          </td>
+          <td>{{ request.rejectReason || request.reason }}</td>
+        </tr>
+      </MyTable>
     </section>
     </template>
 
@@ -288,60 +283,31 @@ onMounted(async () => {
         <div class="panel-title">
           <h3>공결 승인 대기</h3>
         </div>
-        <table class="data-table">
-          <thead>
-            <tr>
-              <th>과목</th>
-              <th>날짜</th>
-              <th>교시</th>
-              <th>사유</th>
-              <th>상태</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr v-if="loading">
-              <td colspan="5" class="empty-text">{{ labels.loading }}</td>
-            </tr>
-            <tr v-else-if="academicStore.pendingExcuseRequests.length === 0">
-              <td colspan="5" class="empty-text">승인 대기 중인 공결 신청이 없습니다.</td>
-            </tr>
-            <tr v-for="request in academicStore.pendingExcuseRequests" :key="request.id">
-              <td class="course-name">{{ request.studentName }} · {{ request.courseName }}</td>
-              <td>{{ request.lectureDate }}</td>
-              <td>{{ request.period }}</td>
-              <td>{{ request.reason }}</td>
-              <td>
-                <div class="button-group">
-                  <button type="button" class="btn-approve" @click="decideExcuse(request.id, 'APPROVED')">승인</button>
-                  <button type="button" class="btn-reject" @click="decideExcuse(request.id, 'REJECTED')">반려</button>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+        <MyTable
+          :columns="pendingExcuseColumns"
+          :loading="loading"
+          :empty="academicStore.pendingExcuseRequests.length === 0"
+          emptyMessage="승인 대기 중인 공결 신청이 없습니다."
+        >
+          <tr v-for="request in academicStore.pendingExcuseRequests" :key="request.id">
+            <td class="course-name">{{ request.studentName }} · {{ request.courseName }}</td>
+            <td>{{ request.lectureDate }}</td>
+            <td>{{ request.period }}</td>
+            <td>{{ request.reason }}</td>
+            <td>
+              <div class="button-group">
+                <MyButton btnType="button" color="green" size="small" content="승인" @click="decideExcuse(request.id, 'APPROVED')" />
+                <MyButton btnType="button" color="red" size="small" content="반려" @click="decideExcuse(request.id, 'REJECTED')" />
+              </div>
+            </td>
+          </tr>
+        </MyTable>
       </section>
     </template>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.excuse-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding: 20px;
-  padding-bottom: 50px;
-}
-
-.page-header {
-  margin-bottom: 20px;
-}
-
-.page-header h2 {
-  color: var(--primary-text-color);
-  font-size: 1.5rem;
-  font-weight: 700;
-  padding-bottom: 10px;
-}
 
 .panel {
   margin-bottom: 20px;
@@ -359,7 +325,7 @@ onMounted(async () => {
 .panel-title h3 {
   color: var(--primary-text-color);
   font-size: 1rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .excuse-form {
@@ -477,90 +443,12 @@ onMounted(async () => {
   cursor: pointer;
 }
 
-.data-table {
-  width: 100%;
-  border-collapse: collapse;
-  text-align: center;
-}
 
-.data-table th {
-  background-color: #f8f9fa;
-  border-bottom: 2px solid #edf2f7;
-  color: #4f566b;
-  font-size: 0.85rem;
-  font-weight: 700;
-  padding: 18px 16px;
-  white-space: nowrap;
-}
-
-.data-table td {
-  border-bottom: 1px solid #edf2f7;
-  color: #334155;
-  font-size: 0.9rem;
-  padding: 20px 16px;
-  vertical-align: middle;
-}
-
-.data-table tr:last-child td {
-  border-bottom: 0;
-}
-
-.course-name {
-  color: var(--primary-text-color);
-  font-weight: 700;
-}
-
-.status-badge {
-  display: inline;
-  padding: 0;
-  background: transparent;
-  color: #137333;
-  font-size: 0.8rem;
-  font-weight: 700;
-}
-
-.status-badge.rejected {
-  color: #c5221f;
-}
-
-.status-badge.pending {
-  color: #b06000;
-}
-
-.status-badge.approved {
-  color: #1a73e8;
-}
-
-.empty-text {
-  padding: 40px !important;
-  color: #697386 !important;
-  text-align: center;
-}
 
 .button-group {
   display: flex;
   gap: 8px;
   justify-content: center;
-}
-
-.btn-approve,
-.btn-reject {
-  height: 32px;
-  border: 0;
-  border-radius: 4px;
-  padding: 0 16px;
-  color: #fff;
-  cursor: pointer;
-  font-weight: 700;
-  font-size: 0.85rem;
-}
-
-.btn-approve {
-  background-color: #34a853;
-}
-
-.btn-reject {
-  background-color: #dc3545;
 }
 
 @media (max-width: 1100px) {

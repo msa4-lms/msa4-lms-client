@@ -1,25 +1,19 @@
 <template>
-  <div class="grade-manage-view">
+  <MyPageContainer :title="isCorrectionMode ? '성적 정정 관리' : '성적 입력 관리'">
     <div v-if="isCorrectionMode" class="welcome-section" style="margin-top: 50px;">
       <div class="empty-state">
-        <span class="empty-icon">🛠️</span>
-        <p>성적 정정 기능은 준비중인 서비스입니다.</p>
+        <span class="empty-icon">🚧</span>
+        <p>기능 구현 준비 중입니다.</p>
       </div>
     </div>
 
     <div v-else>
-      <!-- 헤더 섹션 (투명 배경, 학생용 동일) -->
-      <div class="header-section">
-        <h1>성적 입력 관리</h1>
-      </div>
-
-    <!-- 강좌 검색/선택 섹션 (학생용 search-section 카드 스타일 적용) -->
-    <div class="search-section">
-      <div class="search-row">
+      <!-- 상단 강의 선택 (MySearchFilter 사용) -->
+      <MySearchFilter :showSubmit="false">
         <div class="search-group">
-          <label for="lectureSelect">강좌 선택</label>
+          <label for="lectureSelect">강의 선택</label>
           <select id="lectureSelect" v-model="selectedLectureId" @change="loadGrades" class="form-select">
-            <option :value="null" disabled>강좌를 선택하세요</option>
+            <option :value="null" disabled>강의를 선택하세요</option>
             <option v-for="lec in lectures" :key="lec.id" :value="lec.id">
               [{{ lec.courseCode }}] {{ lec.courseName }} ({{ lec.classroom }})
             </option>
@@ -27,13 +21,13 @@
         </div>
 
         <div v-if="selectedLectureId" class="current-semester-info">
-          <span class="label">강좌 정보</span>
+          <span class="label">강의 정보</span>
           <span class="value">
             정원: {{ currentLecture?.capacity }}명 | 
             {{ currentLecture?.academicYear }}학년도 {{ currentLecture?.term === 'FIRST' ? '1학기' : '2학기' }}
           </span>
         </div>
-      </div>
+      </MySearchFilter>
     </div>
 
     <!-- 성적 관리 테이블 섹션 (하단 카드) -->
@@ -208,8 +202,7 @@
         </div>
       </div>
       </div>
-    </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <script setup>
@@ -218,6 +211,8 @@ import { useRoute } from "vue-router";
 import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import MyTable from "../../components/table/MyTable.vue";
+import MySearchFilter from "../../components/search/MySearchFilter.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
 import { useGradeProfessorStore } from "../../store/academic/useGradeProfessorStore";
 
@@ -471,58 +466,7 @@ const handleObjectionApprove = async () => {
 </script>
 
 <style scoped>
-.grade-manage-view {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 50px;
-}
 
-/* 헤더 영역 (학생용과 완벽 일치) */
-.header-section {
-  margin-bottom: 32px;
-  text-align: left;
-}
-
-.header-section h1 {
-  color: #1a1f36;
-  font-size: 1.8rem;
-  margin-bottom: 8px;
-  font-weight: 700;
-}
-
-.header-section p {
-  color: #697386;
-  font-size: 0.95rem;
-}
-
-/* 검색/조회 박스 (학생용 search-section 스타일 적용) */
-.search-section {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  border: 1px solid #edf2f7;
-  margin-bottom: 24px;
-}
-
-.search-row {
-  display: flex;
-  gap: 24px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.search-group {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-  text-align: left;
-}
-
-.search-group label {
-  font-size: 0.85rem;
-  font-weight: 600;
-  color: #4f566b;
-}
 
 .form-select {
   background: white;
@@ -591,18 +535,6 @@ const handleObjectionApprove = async () => {
   gap: 8px;
 }
 
-/* 학번 및 코드 스타일 (가독성 증대) */
-.code {
-  color: #64748b;
-  font-family: monospace;
-  font-weight: 500;
-}
-
-.student-name {
-  color: #1a1f36;
-  font-weight: 600;
-}
-
 .val-total {
   color: var(--primary-color);
 }
@@ -613,7 +545,7 @@ const handleObjectionApprove = async () => {
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .grade-badge.high {
@@ -768,7 +700,7 @@ const handleObjectionApprove = async () => {
   padding-bottom: 12px;
   text-align: left;
   color: #1a1f36;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .modal-body {
@@ -843,7 +775,7 @@ const handleObjectionApprove = async () => {
   font-size: 0.9rem;
   color: var(--primary-color);
   margin-bottom: 12px;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .adjust-grid {

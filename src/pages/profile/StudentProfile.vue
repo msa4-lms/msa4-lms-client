@@ -3,6 +3,7 @@ import { computed, onMounted } from "vue";
 import { useProfileStore } from "../../store/profile/useProfileStore";
 import PasswordChange from "./PasswordChange.vue";
 import MyInput from "../../components/input/MyInput.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 
 const profileStore = useProfileStore();
 
@@ -65,10 +66,7 @@ const academicRows = computed(() => [
 </script>
 
 <template>
-  <section class="student-profile-page">
-    <div class="page-heading">
-      <h2>내 정보</h2>
-    </div>
+  <MyPageContainer title="내 정보">
 
     <article class="profile-hero">
       <div class="student-intro">
@@ -151,7 +149,7 @@ const academicRows = computed(() => [
 
       <PasswordChange />
     </article>
-  </section>
+  </MyPageContainer>
 </template>
 
 <style scoped>

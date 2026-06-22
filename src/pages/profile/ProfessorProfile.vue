@@ -2,6 +2,7 @@
 import { computed, onMounted } from "vue";
 import { useProfileStore } from "../../store/profile/useProfileStore";
 import PasswordChange from "./PasswordChange.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 
 const profileStore = useProfileStore();
 
@@ -55,11 +56,7 @@ const employmentRows = computed(() => [
 </script>
 
 <template>
-  <section class="professor-profile-page">
-    <div class="page-heading">
-      <h2>교수 정보</h2>
-    </div>
-
+  <MyPageContainer title="교수 정보">
     <article class="profile-hero">
       <div class="professor-intro">
         <div class="profile-image" aria-hidden="true"></div>
@@ -141,7 +138,7 @@ const employmentRows = computed(() => [
 
       <PasswordChange />
     </article>
-  </section>
+  </MyPageContainer>
 </template>
 
 <style scoped>
