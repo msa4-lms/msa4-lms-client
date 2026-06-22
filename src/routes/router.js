@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
 import GradePage from "../pages/academic/GradePage.vue";
 import AttendancePage from "../pages/academic/AttendancePage.vue";
+import ExcuseRequestPage from "../pages/academic/ExcuseRequestPage.vue";
 import Login from "../pages/auth/Login.vue";
 import Main from "../pages/Main.vue";
 import LectureList from "../pages/lectures/LectureList.vue";
@@ -105,12 +106,19 @@ router.beforeEach(async (to, from, next) => {
     return next("/");
   }
 
-  // 로그인 상태에서 게스트 전용 페이지(로그인 등)에 접근 시 -> 메인으로
   if (to.meta.isGuestOnly && authStore.isLoggedIn) {
     return next("/main");
   }
 
   next();
+});
+
+router.afterEach((to) => {
+  // 컴포넌트 외부에서 호출되므로 콜백 내부에서 동적으로 스토어를 임포트하여 사용
+  import("../store/tab/useTabStore.js").then(({ useTabStore }) => {
+    const tabStore = useTabStore();
+    tabStore.addTab(to);
+  });
 });
 
 export default router;

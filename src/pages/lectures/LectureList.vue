@@ -147,15 +147,6 @@ onMounted(() => {
   padding-bottom: 50px;
 }
 
-.page-header {
-  margin-bottom: 24px;
-}
-
-.page-header h2 {
-  font-size: 1.5rem;
-  color: #1a1f36;
-}
-
 .col-classroom {
   width: 15%;
 }

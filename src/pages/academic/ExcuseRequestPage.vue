@@ -1,0 +1,587 @@
+<script setup>
+import { computed, onMounted, reactive, ref, watch } from "vue";
+import myAxios from "../../api/myAxios";
+import { useAcademicStore } from "../../store/academic/useAcademicStore";
+import { useAuthStore } from "../../store/auth/useAuthStore";
+import MyButton from "../../components/button/MyButton.vue";
+
+const academicStore = useAcademicStore();
+const authStore = useAuthStore();
+
+const labels = {
+  pageTitle: "공결 신청",
+  resultTitle: "공결 신청 내역",
+  subject: "과목",
+  date: "날짜",
+  reason: "사유",
+  attachment: "첨부파일",
+  select: "선택",
+  selectDateFirst: "날짜를 먼저 선택",
+  noClassOnDate: "해당 날짜의 수업이 없습니다",
+  apply: "신청",
+  status: "상태",
+  emptyExcuse: "공결 신청 내역이 없습니다.",
+  loading: "데이터를 불러오는 중입니다.",
+};
+
+const statusLabel = {
+  PENDING: "대기",
+  APPROVED: "승인",
+  REJECTED: "반려",
+};
+
+const dayNames = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+const shortDayNames = ["일", "월", "화", "수", "목", "금", "토"];
+
+const enrollments = ref([]);
+const loading = ref(false);
+const searchParams = reactive({ year: 2026, semester: 1 });
+const excuseForm = reactive({
+  enrollmentId: "",
+  lectureDate: "",
+  period: 1,
+  reason: "",
+  attachmentName: "",
+});
+
+const isStudent = computed(() => authStore.userInfo?.role === "STUDENT");
+const isProfessor = computed(() => authStore.userInfo?.role === "PROFESSOR");
+
+const selectedDate = computed(() => {
+  if (!excuseForm.lectureDate) return null;
+  return new Date(`${excuseForm.lectureDate}T00:00:00`);
+});
+
+const selectedDayIndex = computed(() => (selectedDate.value ? selectedDate.value.getDay() : null));
+
+const selectedDateLabel = computed(() => {
+  if (!selectedDate.value) return "날짜 선택";
+
+  const year = selectedDate.value.getFullYear();
+  const month = String(selectedDate.value.getMonth() + 1).padStart(2, "0");
+  const date = String(selectedDate.value.getDate()).padStart(2, "0");
+  return `${year}.${month}.${date} ${shortDayNames[selectedDayIndex.value]}`;
+});
+
+const scheduleMatchesSelectedDate = (schedule) => {
+  if (selectedDayIndex.value === null || !schedule) return false;
+
+  const dayName = dayNames[selectedDayIndex.value];
+  const shortDayName = shortDayNames[selectedDayIndex.value];
+  const englishDayMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const englishDayName = englishDayMap[selectedDayIndex.value];
+
+  return schedule
+    .split(",")
+    .map((item) => item.trim().toUpperCase())
+    .some((item) => item.includes(dayName) || item.includes(`${shortDayName}요일`) || item.startsWith(shortDayName) || item.includes(englishDayName));
+};
+
+const hasAttendanceOnSelectedDate = (courseName) => {
+  if (!excuseForm.lectureDate || !courseName) return false;
+
+  return academicStore.attendanceList.some((attendance) => {
+    return attendance.lectureDate === excuseForm.lectureDate && attendance.courseName === courseName;
+  });
+};
+
+const getScheduleStartPeriod = (schedule) => {
+  if (!scheduleMatchesSelectedDate(schedule)) return 1;
+
+  const part = schedule.split(",").find((item) => scheduleMatchesSelectedDate(item));
+  const match = part?.match(/(\d{2}):\d{2}/);
+  if (!match) return 1;
+
+  return Math.max(1, Number(match[1]) - 8);
+};
+
+const excuseCourseOptions = computed(() => {
+  if (!excuseForm.lectureDate) return [];
+
+  return enrollments.value
+    .filter((enrollment) => scheduleMatchesSelectedDate(enrollment.schedule) || hasAttendanceOnSelectedDate(enrollment.courseName))
+    .map((enrollment) => {
+      const id = enrollment.enrollmentId || enrollment.id;
+      return id && enrollment.courseName ? { id, courseName: enrollment.courseName } : null;
+    })
+    .filter(Boolean);
+});
+
+const loadEnrollments = async () => {
+  try {
+    const res = await myAxios.get("/api/student/enrollments/my", {
+      params: {
+        year: searchParams.year,
+        semester: searchParams.semester,
+      },
+      suppressErrorAlert: true,
+    });
+    enrollments.value = res.data.data?.enrollments || [];
+  } catch (error) {
+    enrollments.value = [];
+    console.error("수강 내역 조회 실패:", error);
+  }
+};
+
+const loadPageData = async () => {
+  loading.value = true;
+  try {
+    if (isStudent.value) {
+      await Promise.allSettled([
+        academicStore.fetchAttendance(),
+        academicStore.fetchMyExcuseRequests(),
+        loadEnrollments(),
+      ]);
+    } else if (isProfessor.value) {
+      await academicStore.fetchPendingExcuseRequests();
+    }
+  } finally {
+    loading.value = false;
+  }
+};
+
+const decideExcuse = async (requestId, status) => {
+  const rejectReason = status === "REJECTED" ? prompt("반려 사유를 입력해주세요.") : "";
+  if (status === "REJECTED" && !rejectReason) return;
+  await academicStore.decideExcuseRequest(requestId, { status, rejectReason });
+};
+
+const submitExcuse = async () => {
+  if (!excuseForm.enrollmentId || !excuseForm.lectureDate || !excuseForm.reason.trim()) {
+    alert("과목, 날짜, 사유를 입력해주세요.");
+    return;
+  }
+
+  const reason = excuseForm.attachmentName
+    ? `${excuseForm.reason.trim()} [첨부파일: ${excuseForm.attachmentName}]`
+    : excuseForm.reason.trim();
+
+  try {
+    await academicStore.requestExcuse({
+      enrollmentId: Number(excuseForm.enrollmentId),
+      lectureDate: excuseForm.lectureDate,
+      period: Number(excuseForm.period),
+      reason,
+    });
+
+    excuseForm.lectureDate = "";
+    excuseForm.period = 1;
+    excuseForm.reason = "";
+    excuseForm.attachmentName = "";
+    alert("공결 신청이 완료되었습니다.");
+  } catch (error) {
+    console.error("공결 신청 실패:", error);
+  }
+};
+
+const selectAttachment = (event) => {
+  const file = event.target.files?.[0];
+  excuseForm.attachmentName = file?.name || "";
+};
+
+watch(
+  () => excuseForm.lectureDate,
+  () => {
+    excuseForm.enrollmentId = "";
+  }
+);
+
+watch(
+  () => excuseForm.enrollmentId,
+  () => {
+    const selectedEnrollment = enrollments.value.find((enrollment) => {
+      return String(enrollment.enrollmentId || enrollment.id) === String(excuseForm.enrollmentId);
+    });
+
+    excuseForm.period = getScheduleStartPeriod(selectedEnrollment?.schedule);
+  }
+);
+
+onMounted(async () => {
+  if (!authStore.isLoggedIn) return;
+  await loadPageData();
+});
+</script>
+
+<template>
+  <div class="excuse-container">
+    <div class="page-header">
+      <h2>{{ isProfessor ? '공결 승인 관리' : labels.pageTitle }}</h2>
+    </div>
+
+    <template v-if="isStudent">
+      <section class="panel">
+      <div class="panel-title">
+        <h3>{{ labels.pageTitle }}</h3>
+      </div>
+      <form class="excuse-form" @submit.prevent="submitExcuse">
+        <div class="search-group date-chip-field">
+          <label>{{ labels.date }}</label>
+          <div class="date-chip-wrap">
+            <span class="date-chip-text">{{ selectedDateLabel }}</span>
+            <input v-model="excuseForm.lectureDate" type="date" aria-label="날짜 선택" />
+          </div>
+        </div>
+        <div class="search-group subject-field">
+          <label>{{ labels.subject }}</label>
+          <select v-model="excuseForm.enrollmentId" :disabled="!excuseForm.lectureDate">
+            <option value="">
+              {{ !excuseForm.lectureDate ? labels.selectDateFirst : (excuseCourseOptions.length === 0 ? labels.noClassOnDate : labels.select) }}
+            </option>
+            <option v-for="course in excuseCourseOptions" :key="course.id" :value="course.id">
+              {{ course.courseName }}
+            </option>
+          </select>
+        </div>
+        <div class="search-group reason-field">
+          <label>{{ labels.reason }}</label>
+          <input v-model="excuseForm.reason" maxlength="500" type="text" placeholder="사유 입력" />
+        </div>
+        <div class="search-group attachment-field">
+          <label>{{ labels.attachment }}</label>
+          <input type="file" accept=".pdf,.jpg,.jpeg,.png,.hwp,.hwpx" @change="selectAttachment" />
+        </div>
+        <div class="search-group button-field">
+          <label>&nbsp;</label>
+          <MyButton btnType="submit" color="deep-blue" size="small" :content="labels.apply" />
+        </div>
+      </form>
+    </section>
+
+    <section class="panel">
+      <div class="panel-title">
+        <h3>{{ labels.resultTitle }}</h3>
+      </div>
+      <table class="data-table compact-table">
+        <thead>
+          <tr>
+            <th>{{ labels.subject }}</th>
+            <th>{{ labels.date }}</th>
+            <th>{{ labels.status }}</th>
+            <th>{{ labels.reason }}</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loading">
+            <td colspan="4" class="empty-text">{{ labels.loading }}</td>
+          </tr>
+          <tr v-else-if="academicStore.myExcuseRequests.length === 0">
+            <td colspan="4" class="empty-text">{{ labels.emptyExcuse }}</td>
+          </tr>
+          <tr v-for="request in academicStore.myExcuseRequests" :key="request.id">
+            <td class="course-name">{{ request.courseName }}</td>
+            <td>{{ request.lectureDate }}</td>
+            <td>
+              <span :class="['status-badge', request.status?.toLowerCase()]">
+                {{ statusLabel[request.status] || request.status }}
+              </span>
+            </td>
+            <td>{{ request.rejectReason || request.reason }}</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+    </template>
+
+    <template v-else-if="isProfessor">
+      <section class="panel">
+        <div class="panel-title">
+          <h3>공결 승인 대기</h3>
+        </div>
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>과목</th>
+              <th>날짜</th>
+              <th>교시</th>
+              <th>사유</th>
+              <th>상태</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr v-if="loading">
+              <td colspan="5" class="empty-text">{{ labels.loading }}</td>
+            </tr>
+            <tr v-else-if="academicStore.pendingExcuseRequests.length === 0">
+              <td colspan="5" class="empty-text">승인 대기 중인 공결 신청이 없습니다.</td>
+            </tr>
+            <tr v-for="request in academicStore.pendingExcuseRequests" :key="request.id">
+              <td class="course-name">{{ request.studentName }} · {{ request.courseName }}</td>
+              <td>{{ request.lectureDate }}</td>
+              <td>{{ request.period }}</td>
+              <td>{{ request.reason }}</td>
+              <td>
+                <div class="button-group">
+                  <button type="button" class="btn-approve" @click="decideExcuse(request.id, 'APPROVED')">승인</button>
+                  <button type="button" class="btn-reject" @click="decideExcuse(request.id, 'REJECTED')">반려</button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </section>
+    </template>
+  </div>
+</template>
+
+<style scoped>
+.excuse-container {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  padding-bottom: 50px;
+}
+
+.page-header {
+  margin-bottom: 20px;
+}
+
+.page-header h2 {
+  color: var(--primary-text-color);
+  font-size: 1.5rem;
+  font-weight: 700;
+  padding-bottom: 10px;
+}
+
+.panel {
+  margin-bottom: 20px;
+  overflow: hidden;
+  background-color: white;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+}
+
+.panel-title {
+  padding: 15px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.panel-title h3 {
+  color: var(--primary-text-color);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.excuse-form {
+  display: grid;
+  grid-template-columns: 190px minmax(240px, 1fr) minmax(260px, 1.4fr) minmax(220px, 1fr) auto;
+  align-items: flex-end;
+  gap: 15px;
+  padding: 15px;
+}
+
+.search-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.search-group label {
+  color: #666;
+  font-size: 0.8rem;
+  font-weight: 600;
+}
+
+.search-group input,
+.search-group select {
+  width: 100%;
+  height: 37px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  padding: 8px;
+  background: #fff;
+  color: #111827;
+  font-size: 0.9rem;
+}
+
+.search-group select:disabled {
+  background: #f8f9fa;
+  color: #8a94a6;
+  cursor: not-allowed;
+}
+
+.search-group input[type="file"] {
+  padding: 3px 8px;
+  color: #64748b;
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+.search-group input[type="file"]::file-selector-button {
+  height: 29px;
+  margin-right: 10px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background-color: #f3f4f6;
+  color: #374151;
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.search-group input[type="file"]::file-selector-button:hover {
+  background-color: #e5e7eb;
+}
+
+.date-chip-field {
+  min-width: 0;
+}
+
+.date-chip-wrap {
+  display: grid;
+  grid-template-columns: 1fr 44px;
+  align-items: center;
+  min-width: 190px;
+  height: 37px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.date-chip-text {
+  padding: 0 8px;
+  color: #111827;
+  font-size: 0.9rem;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.date-chip-wrap input[type="date"] {
+  justify-self: center;
+  width: 24px;
+  height: 37px;
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: transparent;
+  cursor: pointer;
+  font-size: 1.05rem;
+}
+
+.date-chip-wrap input[type="date"]::-webkit-datetime-edit,
+.date-chip-wrap input[type="date"]::-webkit-datetime-edit-fields-wrapper,
+.date-chip-wrap input[type="date"]::-webkit-datetime-edit-text,
+.date-chip-wrap input[type="date"]::-webkit-datetime-edit-year-field,
+.date-chip-wrap input[type="date"]::-webkit-datetime-edit-month-field,
+.date-chip-wrap input[type="date"]::-webkit-datetime-edit-day-field {
+  color: transparent;
+}
+
+.date-chip-wrap input[type="date"]::-webkit-calendar-picker-indicator {
+  width: 22px;
+  height: 22px;
+  margin: 0;
+  padding: 0;
+  cursor: pointer;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.data-table th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #edf2f7;
+  color: #4f566b;
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 18px 16px;
+  white-space: nowrap;
+}
+
+.data-table td {
+  border-bottom: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 0.9rem;
+  padding: 20px 16px;
+  vertical-align: middle;
+}
+
+.data-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.course-name {
+  color: var(--primary-text-color);
+  font-weight: 700;
+}
+
+.status-badge {
+  display: inline;
+  padding: 0;
+  background: transparent;
+  color: #137333;
+  font-size: 0.8rem;
+  font-weight: 700;
+}
+
+.status-badge.rejected {
+  color: #c5221f;
+}
+
+.status-badge.pending {
+  color: #b06000;
+}
+
+.status-badge.approved {
+  color: #1a73e8;
+}
+
+.empty-text {
+  padding: 40px !important;
+  color: #697386 !important;
+  text-align: center;
+}
+
+.button-group {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+}
+
+.btn-approve,
+.btn-reject {
+  height: 32px;
+  border: 0;
+  border-radius: 4px;
+  padding: 0 16px;
+  color: #fff;
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.85rem;
+}
+
+.btn-approve {
+  background-color: #34a853;
+}
+
+.btn-reject {
+  background-color: #dc3545;
+}
+
+@media (max-width: 1100px) {
+  .excuse-form {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 760px) {
+  .excuse-form {
+    align-items: stretch;
+    grid-template-columns: 1fr;
+  }
+
+  .date-chip-field,
+  .subject-field,
+  .reason-field,
+  .attachment-field,
+  .button-field {
+    width: 100%;
+    flex-basis: auto;
+  }
+}
+</style>
