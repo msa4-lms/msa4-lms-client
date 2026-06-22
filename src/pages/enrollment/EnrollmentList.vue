@@ -207,6 +207,11 @@ const formatSchedule = (schedule) => {
   margin: 0 auto;
 }
 
+.enrollment-container h2 {
+  color: var(--primary-text-color);
+  padding-bottom: 10px;
+}
+
 .history-filter {
   display: flex;
   gap: 15px;
@@ -247,7 +252,7 @@ const formatSchedule = (schedule) => {
 }
 
 .summary-card {
-  background-color: #ffffff;
+  background-color: var(--personal-color-white);
   padding: 15px;
   border-radius: 8px;
   margin-bottom: 25px;

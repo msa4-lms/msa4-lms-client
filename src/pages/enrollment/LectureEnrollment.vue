@@ -50,6 +50,49 @@ const lectureColumns = [
   { key: "apply", label: "신청" },
 ];
 
+const filteredDepartments = computed(() => {
+  if (!searchParams.value.collegeName) {
+    const allDepartments = [];
+
+    lectureStore.colleges.forEach((college) => {
+      if (college.departments) {
+        allDepartments.push(...college.departments);
+      }
+    });
+
+    return Array.from(
+      new Map(
+        allDepartments.map((department) => [department.name, department])
+      ).values()
+    ).sort((a, b) => a.name.localeCompare(b.name));
+  }
+
+  const matchedCollege = lectureStore.colleges.find(
+    (college) => college.name === searchParams.value.collegeName
+  );
+
+  return matchedCollege ? matchedCollege.departments || [] : [];
+});
+
+const onCollegeChange = () => {
+  if (searchParams.value.collegeName) {
+    const matchedCollege = lectureStore.colleges.find(
+      (college) => college.name === searchParams.value.collegeName
+    );
+    const departmentNames = matchedCollege
+      ? (matchedCollege.departments || []).map((department) => department.name)
+      : [];
+
+    if (!departmentNames.includes(searchParams.value.departmentName)) {
+      searchParams.value.departmentName = "";
+    }
+  } else {
+    searchParams.value.departmentName = "";
+  }
+
+  onSearch();
+};
+
 const onSearch = () => {
   searchParams.value.page = 1;
   lectureStore.fetchLectures(searchParams.value);
@@ -84,7 +127,9 @@ const apply = async (lectureId) => {
 };
 
 const isApplied = (lectureId) =>
-  enrollmentStore.myEnrollments.some((enrollment) => enrollment.lectureId === lectureId);
+  enrollmentStore.myEnrollments.some(
+    (enrollment) => enrollment.lectureId === lectureId
+  );
 
 onMounted(async () => {
   lectureStore.lectures = [];
@@ -172,7 +217,9 @@ onMounted(async () => {
 
         <div class="current-semester-info">
           <span class="label">대상 학기</span>
-          <span class="value">{{ searchParams.year }}년 {{ searchParams.semester }}학기</span>
+          <span class="value"
+            >{{ searchParams.year }}년 {{ searchParams.semester }}학기</span
+          >
         </div>
     </MySearchFilter>
 
@@ -263,8 +310,7 @@ onMounted(async () => {
 }
 
 .page-header h2 {
-  color: #1a1f36;
-  font-size: 1.5rem;
+  color: var(--primary-text-color);
 }
 
 .current-semester-info {
