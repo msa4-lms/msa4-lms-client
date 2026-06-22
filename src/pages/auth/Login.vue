@@ -1,6 +1,7 @@
 <script setup>
 import { computed, reactive, ref } from "vue";
 import { useRouter } from "vue-router";
+import MyInput from "../../components/input/MyInput.vue";
 import loginValidator from "../../util/validator/domain/loginValidator";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 
@@ -176,7 +177,7 @@ const handleLogin = async () => {
                 d="M20 21a8 8 0 0 0-16 0M12 13a5 5 0 1 0 0-10 5 5 0 0 0 0 10Z"
               />
             </svg>
-            <input
+            <MyInput
               id="loginId"
               v-model.trim="loginForm.loginId"
               type="text"
@@ -193,7 +194,7 @@ const handleLogin = async () => {
                 d="M7 10V7a5 5 0 0 1 10 0v3M6 10h12a2 2 0 0 1 2 2v8H4v-8a2 2 0 0 1 2-2Z"
               />
             </svg>
-            <input
+            <MyInput
               id="password"
               v-model="loginForm.password"
               :type="showPassword ? 'text' : 'password'"
@@ -491,7 +492,7 @@ form > label {
   stroke-width: 1.7;
   stroke-linecap: round;
 }
-.input-box input {
+.input-box :deep(input) {
   min-width: 0;
   flex: 1;
   border: 0;
@@ -500,7 +501,7 @@ form > label {
   background: transparent;
   font-size: 15px;
 }
-.input-box input::placeholder {
+.input-box :deep(input)::placeholder {
   color: #b4bfcd;
 }
 .password-toggle {
