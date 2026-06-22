@@ -1,8 +1,9 @@
 <script setup>
-import { onMounted } from "vue";
+import { ref, onMounted } from "vue";
 import { useAcademicStore } from "../../store/academic/useAcademicStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyTable from "../../components/table/MyTable.vue";
+import MyButton from "../../components/button/MyButton.vue";
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
@@ -13,15 +14,28 @@ const gradeColumns = [
   { key: "courseName", label: "과목명" },
   { key: "credits", label: "학점" },
   { key: "grade", label: "등급" },
-  { key: "status", label: "상태" },
 ];
 
-const isConfirmedGrade = (grade) => grade.grade !== "미입력";
+const isConfirmedGrade = (grade) => grade.status != null;
 
 const getGradeLevel = (grade) => {
+  if (!grade) return "low";
   if (grade.startsWith("A")) return "high";
   if (grade.startsWith("B")) return "mid";
   return "low";
+};
+
+// 진행 상태 표시 매핑
+const formatStatus = (status) => {
+  const map = {
+    DRAFT: "임시저장",
+    SUBMITTED: "제출완료",
+    OPENED: "공개됨",
+    OBJECTION: "이의신청 중",
+    APPROVED: "정정승인",
+    FINAL: "최종확정",
+  };
+  return map[status] || "미공개";
 };
 
 onMounted(() => {
@@ -81,18 +95,12 @@ onMounted(() => {
           <td class="name">{{ grade.courseName }}</td>
           <td class="credit">{{ grade.credits }}</td>
           <td class="grade">
-            <span :class="['grade-badge', getGradeLevel(grade.grade)]">
+            <span v-if="isConfirmedGrade(grade)" :class="['grade-badge', getGradeLevel(grade.grade)]">
               {{ grade.grade }}
             </span>
+            <span v-else class="text-secondary">미입력</span>
           </td>
-          <td class="status">
-            <span
-              class="status-badge"
-              :class="{ confirmed: isConfirmedGrade(grade) }"
-            >
-              {{ isConfirmedGrade(grade) ? "공개(확정)" : "미공개" }}
-            </span>
-          </td>
+
         </tr>
       </MyTable>
     </div>
@@ -135,25 +143,6 @@ onMounted(() => {
   gap: 20px;
   border: 1px solid #edf2f7;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: #f8fafc;
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-
-.gpa-card .card-icon {
-  background-color: #eef2ff;
-}
-
-.credits-card .card-icon {
-  background-color: #ecfdf5;
 }
 
 .card-info {
@@ -244,16 +233,118 @@ onMounted(() => {
 
 .status-badge {
   display: inline-flex;
-  padding: 2px 8px;
+  padding: 4px 8px;
   border-radius: 4px;
-  background: #f1f5f9;
-  color: #94a3b8;
   font-size: 0.75rem;
   font-weight: 600;
+  border: 1px solid transparent;
 }
 
-.status-badge.confirmed {
+.status-badge.draft {
+  background: #f1f5f9;
+  color: #64748b;
+}
+
+.status-badge.submitted {
+  background: #eff6ff;
+  color: #2563eb;
+  border-color: #bfdbfe;
+}
+
+.status-badge.opened {
+  background: #fffbeb;
+  color: #d97706;
+  border-color: #fde68a;
+}
+
+.status-badge.objection {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fca5a5;
+}
+
+.status-badge.approved {
+  background: #ecfdf5;
+  color: #059669;
+  border-color: #a7f3d0;
+}
+
+.status-badge.final {
   background: #e0e7ff;
   color: #4338ca;
+  border-color: #c7d2fe;
+}
+
+.text-secondary {
+  color: #94a3b8;
+}
+
+/* 모달 디자인 */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(15, 23, 42, 0.4);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 100;
+  backdrop-filter: blur(4px);
+}
+
+.modal-card {
+  background: white;
+  border-radius: 12px;
+  width: 100%;
+  max-width: 500px;
+  padding: 24px;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.modal-card h2 {
+  font-size: 1.3rem;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #edf2f7;
+  padding-bottom: 12px;
+  text-align: left;
+  color: #1a1f36;
+  font-weight: 700;
+}
+
+.modal-body {
+  margin-bottom: 24px;
+  text-align: left;
+}
+
+.modal-desc {
+  font-size: 0.9rem;
+  color: #64748b;
+  margin-bottom: 12px;
+  line-height: 1.5;
+}
+
+.form-textarea {
+  width: 100%;
+  border: 1px solid #cbd5e1;
+  border-radius: 6px;
+  padding: 12px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  resize: vertical;
+  box-sizing: border-box;
+}
+
+.form-textarea:focus {
+  outline: none;
+  border-color: #3b82f6;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.modal-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
 }
 </style>

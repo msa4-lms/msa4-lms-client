@@ -9,8 +9,8 @@ const router = useRouter();
 const lectureProfessorStore = useLectureProfessorStore();
 
 const form = reactive({
-  semesterId: null,
-  courseId: null,
+  semesterId: 53,
+  courseId: 61,
   sectionNo: "01",
   capacity: 40,
   classroom: "",
@@ -96,40 +96,37 @@ const handleSubmit = async () => {
           <div class="section-box">
             <h3 class="section-title">기본 정보 설정</h3>
             <div class="info-grid">
-              <div class="form-group">
-                <label for="semesterId">학기 번호 (ID)</label>
-                <MyInput
-                  type="number"
-                  id="semesterId"
-                  v-model.number="form.semesterId"
-                  placeholder="예: 53(무조건 53)"
-                  required
-                  class="form-input"
-                />
-              </div>
+
 
               <div class="form-group">
-                <label for="courseId">과목 번호 (ID)</label>
-                <MyInput
-                  type="number"
+                <label for="courseId">과목 (Course)</label>
+                <select
                   id="courseId"
                   v-model.number="form.courseId"
-                  placeholder="예: 1"
                   required
-                  class="form-input"
-                />
+                  class="form-input select-day"
+                >
+                  <option :value="61">[14101] 컴퓨터학부 전공-1</option>
+                  <option :value="62">[14102] 컴퓨터학부 전공-2</option>
+                  <option :value="63">[14103] 컴퓨터학부 전공-3</option>
+                  <option :value="64">[14104] 컴퓨터학부 전공-4</option>
+                  <option :value="65">[14105] 컴퓨터학부 전공-5</option>
+                </select>
               </div>
 
               <div class="form-group">
                 <label for="sectionNo">분반 번호</label>
-                <MyInput
-                  type="text"
+                <select
                   id="sectionNo"
                   v-model="form.sectionNo"
-                  placeholder="예: 01"
                   required
-                  class="form-input"
-                />
+                  class="form-input select-day"
+                >
+                  <option value="01">01 분반</option>
+                  <option value="02">02 분반</option>
+                  <option value="03">03 분반</option>
+                  <option value="04">04 분반</option>
+                </select>
               </div>
 
               <div class="form-group">

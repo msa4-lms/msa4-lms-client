@@ -114,7 +114,7 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.professorGrade">
             <router-link to="/professor/grades/input" class="submenu-item">성적 입력</router-link>
-            <router-link to="/professor/grades/correct" class="submenu-item">성적 정정</router-link>
+            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 정정</a>
           </div>
         </div>
 

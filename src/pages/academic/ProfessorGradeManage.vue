@@ -1,9 +1,17 @@
 <template>
   <div class="grade-manage-view">
-    <!-- 헤더 섹션 (투명 배경, 학생용 동일) -->
-    <div class="header-section">
-      <h1>{{ isCorrectionMode ? '성적 정정 관리' : '성적 입력 관리' }}</h1>
+    <div v-if="isCorrectionMode" class="welcome-section" style="margin-top: 50px;">
+      <div class="empty-state">
+        <span class="empty-icon">🛠️</span>
+        <p>성적 정정 기능은 준비중인 서비스입니다.</p>
+      </div>
     </div>
+
+    <div v-else>
+      <!-- 헤더 섹션 (투명 배경, 학생용 동일) -->
+      <div class="header-section">
+        <h1>성적 입력 관리</h1>
+      </div>
 
     <!-- 강좌 검색/선택 섹션 (학생용 search-section 카드 스타일 적용) -->
     <div class="search-section">
@@ -32,10 +40,9 @@
     <div v-if="selectedLectureId" class="content-card">
       <div class="card-header">
         <h3>{{ isCorrectionMode ? '이의신청 수강생 목록' : '수강생 성적 입력' }}</h3>
-        <div v-if="!isCorrectionMode" class="control-buttons">
-          <MyButton color="white" size="middle" content="임시저장" :disabled="hasValidationError" @click="handleSave" />
-          <MyButton color="deep-blue" size="middle" content="성적 일괄 제출" :disabled="hasValidationError" @click="handleSubmitGrades" />
-          <MyButton color="green" size="middle" content="성적 전체 공개" :disabled="hasValidationError" @click="handlePublishGrades" />
+        <div class="control-buttons">
+          <MyButton color="white" size="middle" content="임시저장" :disabled="hasValidationError || isAllSubmitted" @click="handleSave" />
+          <MyButton color="deep-blue" size="middle" content="성적 일괄 제출" :disabled="hasValidationError || isAllSubmitted" @click="handleSubmitGrades" />
         </div>
       </div>
 
@@ -60,7 +67,7 @@
                   min="0"
                   max="100"
                   step="0.01"
-                  :disabled="g.status === 'FINAL'"
+                  :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
                 <span class="converted-score">{{ convertScore(g.midtermScore, 'midterm') }}점</span>
@@ -74,7 +81,7 @@
                   min="0"
                   max="100"
                   step="0.01"
-                  :disabled="g.status === 'FINAL'"
+                  :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
                 <span class="converted-score">{{ convertScore(g.finalScore, 'final') }}점</span>
@@ -88,7 +95,7 @@
                   min="0"
                   max="100"
                   step="0.01"
-                  :disabled="g.status === 'FINAL'"
+                  :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
                 <span class="converted-score">{{ convertScore(g.assignmentScore, 'assignment') }}점</span>
@@ -102,7 +109,7 @@
                   min="0"
                   max="100"
                   step="0.01"
-                  :disabled="g.status === 'FINAL'"
+                  :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
                 <span class="converted-score">{{ convertScore(g.attendanceScore, 'attendance') }}점</span>
@@ -121,10 +128,10 @@
             </td>
             <td v-if="isCorrectionMode">
               <MyButton
-                v-if="g.status === 'OBJECTION'"
-                color="red"
+                v-if="g.status === 'OPENED' || g.status === 'APPROVED'"
+                color="deep-blue"
                 size="small"
-                content="이의신청 보기"
+                content="성적 정정"
                 @click="openObjectionModal(g)"
               />
               <span v-else class="text-secondary">-</span>
@@ -142,27 +149,23 @@
       </div>
     </div>
 
-    <!-- 이의신청 처리 모달 -->
+    <!-- 성적 정정 모달 -->
     <div v-if="isObjectionModalOpen" class="modal-overlay">
       <div class="modal-card">
-        <h2>성적 이의신청 처리</h2>
+        <h2>성적 정정 처리</h2>
         <div class="modal-body">
           <div class="objection-info">
-            <p><strong>신청 학생:</strong> {{ activeObjection.studentName }} ({{ activeObjection.studentLoginId }})</p>
-            <div class="reason-box">
-              <p><strong>학생 이의 사유:</strong></p>
-              <p class="reason-text">{{ activeObjection.objectionReason }}</p>
-            </div>
+            <p><strong>대상 학생:</strong> {{ activeObjection.studentName }} ({{ activeObjection.studentLoginId }})</p>
           </div>
 
           <div class="objection-form">
             <div class="form-group">
-              <label for="objectionReply">교수님 답변</label>
+              <label for="objectionReply">정정 사유</label>
               <textarea
                 id="objectionReply"
                 v-model="objectionReplyText"
-                rows="4"
-                placeholder="답변을 입력해 주세요."
+                rows="3"
+                placeholder="성적 정정 사유를 입력해 주세요."
                 class="form-textarea"
               ></textarea>
             </div>
@@ -201,9 +204,9 @@
 
         <div class="modal-actions">
           <MyButton color="white" size="small" content="취소" @click="closeObjectionModal" />
-          <MyButton color="red" size="small" content="이의 기각" @click="handleObjectionReject" />
-          <MyButton color="deep-blue" size="small" content="이의 승인" :disabled="hasObjectionValidationError" @click="handleObjectionApprove" />
+          <MyButton color="deep-blue" size="small" content="정정 반영" :disabled="hasObjectionValidationError" @click="handleObjectionApprove" />
         </div>
+      </div>
       </div>
     </div>
   </div>
@@ -257,7 +260,7 @@ const gradeColumns = computed(() => {
     { key: "status", label: "진행 상태" },
   ];
   if (isCorrectionMode.value) {
-    cols.push({ key: "objection", label: "이의신청 관리" });
+    cols.push({ key: "correction", label: "성적 정정" });
   }
   return cols;
 });
@@ -285,6 +288,11 @@ const hasValidationError = computed(() => {
     (g.assignmentScore !== null && (g.assignmentScore < 0 || g.assignmentScore > 100)) ||
     (g.attendanceScore !== null && (g.attendanceScore < 0 || g.attendanceScore > 100))
   );
+});
+
+const isAllSubmitted = computed(() => {
+  if (localGrades.value.length === 0) return false;
+  return localGrades.value.every(g => g.status && g.status !== 'DRAFT');
 });
 
 const hasObjectionValidationError = computed(() => {
@@ -409,21 +417,8 @@ const handleSubmitGrades = async () => {
   }
 };
 
-// 성적 공개
-const handlePublishGrades = async () => {
-  if (!selectedLectureId.value) return;
-  if (!confirm("학생들에게 성적을 정식 공개(OPEN) 하시겠습니까?")) return;
 
-  try {
-    await gradeStore.updateGradesStatus(selectedLectureId.value, "OPENED");
-    alert("성적이 공개되었습니다. 학생 이의신청이 가능해집니다.");
-    await loadGrades();
-  } catch (error) {
-    alert("성적 공개 중 오류가 발생했습니다.");
-  }
-};
-
-// 이의신청 모달 팝업 오픈
+// 이의신청 모달 팝업 오픈 (이제 성적 정정으로 사용)
 const openObjectionModal = (g) => {
   activeObjection.value = g;
   objectionReplyText.value = g.objectionReply || "";
@@ -441,23 +436,7 @@ const closeObjectionModal = () => {
   activeObjection.value = null;
 };
 
-// 이의신청 기각/반려 (FINAL 처리)
-const handleObjectionReject = async () => {
-  if (!activeObjection.value) return;
-  try {
-    await gradeStore.replyObjection(activeObjection.value.id, {
-      approve: false,
-      reply: objectionReplyText.value,
-    });
-    alert("이의신청이 기각(반려)되었으며 성적이 최종 확정(FINAL)되었습니다.");
-    closeObjectionModal();
-    await loadGrades();
-  } catch (error) {
-    alert("기각 처리 중 오류가 발생했습니다.");
-  }
-};
-
-// 이의신청 승인 (APPROVED 처리 및 성적 갱신)
+// 성적 정정 승인 (APPROVED 처리 및 성적 갱신)
 const handleObjectionApprove = async () => {
   if (!activeObjection.value) return;
 
@@ -482,11 +461,11 @@ const handleObjectionApprove = async () => {
         attendanceScore: adjustScores.value.attendanceScore,
       },
     });
-    alert("성적 조정이 완료되었으며 이의신청이 승인(APPROVED)되었습니다.");
+    alert("성적 정정이 완료되었습니다.");
     closeObjectionModal();
     await loadGrades();
   } catch (error) {
-    alert("승인 처리 중 오류가 발생했습니다.");
+    alert("정정 처리 중 오류가 발생했습니다.");
   }
 };
 </script>
