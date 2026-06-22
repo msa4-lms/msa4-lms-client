@@ -106,14 +106,13 @@ const alertReady = () => {
             <router-link to="/attendance" class="submenu-item"
               >출결 조회</router-link
             >
-            <a href="#" class="submenu-item" @click.prevent="alertReady"
-              >공결 신청</a
+            <router-link to="/excuses" class="submenu-item"
+              >공결 신청</router-link
             >
           </div>
         </div>
       </template>
 
-      <!-- 교수 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'PROFESSOR'">
         <!-- 교사관리 -->
         <div class="menu-group">
@@ -196,7 +195,6 @@ const alertReady = () => {
         </div>
       </template>
 
-      <!-- 관리자 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'ADMIN'">
         <router-link to="/students" class="nav-item">사용자 관리</router-link>
         <router-link to="/profile" class="nav-item">내 정보</router-link>

@@ -1,202 +1,138 @@
 <script setup>
-import { onMounted } from "vue";
-import { useAcademicStore } from "../../store/academic/useAcademicStore";
-import { useAuthStore } from "../../store/auth/useAuthStore";
-import MyTable from "../../components/table/MyTable.vue";
+import { onMounted, ref, computed } from 'vue';
+import { useAcademicStore } from '../../store/academic/useAcademicStore';
+import { useAuthStore } from '../../store/auth/useAuthStore';
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
 
-const gradeColumns = [
-  { key: "semester", label: "연도/학기" },
-  { key: "courseCode", label: "과목코드" },
-  { key: "courseName", label: "과목명" },
-  { key: "credits", label: "학점" },
-  { key: "grade", label: "등급" },
-  { key: "status", label: "상태" },
-];
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentSemester = now.getMonth() + 1 >= 1 && now.getMonth() + 1 <= 6 ? 1 : 2;
 
-const isConfirmedGrade = (grade) => grade.grade !== "미입력";
+// select 박스에 바인딩된 값 (사용자가 변경하는 값)
+const selectedYear = ref(currentYear);
+const selectedSemester = ref(currentSemester);
 
-const getGradeLevel = (grade) => {
-  if (grade.startsWith("A")) return "high";
-  if (grade.startsWith("B")) return "mid";
-  return "low";
+// '조회' 버튼을 눌렀을 때 확정되는 값
+const searchedYear = ref(currentYear);
+const searchedSemester = ref(currentSemester);
+
+const onSearch = () => {
+  // 조회 버튼 클릭 시에만 검색된 연도/학기 상태 업데이트 및 API 호출
+  searchedYear.value = selectedYear.value;
+  searchedSemester.value = selectedSemester.value;
+  
+  academicStore.fetchGrades({
+    year: searchedYear.value,
+    semester: searchedSemester.value
+  });
 };
 
-onMounted(() => {
+onMounted(async () => {
   if (authStore.isLoggedIn) {
-    academicStore.fetchGrades();
+    await academicStore.fetchGrades();
   }
 });
 </script>
 
 <template>
-  <div class="grade-view">
-    <div class="header-section">
-      <h1>성적 조회</h1>
+  <div class="grade-page">
+    <div class="page-heading">
+      <h2>성적 조회</h2>
       <p>확정된 성적 및 전체 평균 평점(GPA)을 확인할 수 있습니다.</p>
     </div>
 
-    <div class="dashboard-grid">
-      <div class="summary-card gpa-card">
-        <div class="card-info">
-          <span class="label">전체 평균 평점 (GPA)</span>
-          <div class="value-group">
-            <span class="value">{{ academicStore.gradeSummary.totalGpa }}</span>
-            <span class="max">/ 4.5</span>
-          </div>
-        </div>
-      </div>
+    <div class="summary-grid">
+      <section class="summary-card">
+        <span>전체 평균 평점 (GPA)</span>
+        <strong>{{ academicStore.gradeSummary.totalGpa }} <small>/ 4.5</small></strong>
+      </section>
 
-      <div class="summary-card credits-card">
-        <div class="card-info">
-          <span class="label">총 이수 학점</span>
-          <div class="value-group">
-            <span class="value">{{
-              academicStore.gradeSummary.totalCredits
-            }}</span>
-            <span class="unit">학점</span>
-          </div>
-        </div>
-      </div>
+      <section class="summary-card">
+        <span>총 이수 학점</span>
+        <strong>{{ academicStore.gradeSummary.totalCredits }} <small>학점</small></strong>
+      </section>
     </div>
 
+    <!-- 상세 성적 테이블 -->
     <div class="content-card table-section">
       <div class="card-header">
-        <h3>학기별 상세 성적</h3>
+        <h2>학기별 상세 성적</h2>
       </div>
-
-      <MyTable
-        :columns="gradeColumns"
-        :empty="academicStore.gradeSummary.semesterGrades.length === 0"
-        emptyMessage="조회된 성적 내역이 없습니다."
-      >
-        <tr
-          v-for="(grade, index) in academicStore.gradeSummary.semesterGrades"
-          :key="index"
-        >
-          <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
-          <td class="code">{{ grade.courseCode }}</td>
-          <td class="name">{{ grade.courseName }}</td>
-          <td class="credit">{{ grade.credits }}</td>
-          <td class="grade">
-            <span :class="['grade-badge', getGradeLevel(grade.grade)]">
-              {{ grade.grade }}
-            </span>
-          </td>
-          <td class="status">
-            <span
-              class="status-badge"
-              :class="{ confirmed: isConfirmedGrade(grade) }"
-            >
-              {{ isConfirmedGrade(grade) ? "공개(확정)" : "미공개" }}
-            </span>
-          </td>
-        </tr>
-      </MyTable>
     </div>
   </div>
 </template>
 
 <style scoped>
-.grade-view {
-  max-width: 1200px;
+.grade-page {
+  max-width: 1400px;
   margin: 0 auto;
+  padding: 20px;
+  color: var(--primary-text-color);
 }
 
-.header-section {
-  margin-bottom: 32px;
+.page-heading {
+  padding-bottom: 10px;
 }
 
-.header-section h1 {
-  color: #1a1f36;
-  font-size: 1.8rem;
+.page-heading h2 {
   margin-bottom: 8px;
+  color: var(--primary-text-color);
+  letter-spacing: 0;
+  font-size: 1.5rem;
 }
 
-.header-section p {
-  color: #697386;
+.page-heading p {
+  color: var(--primary-text-color);
+  font-size: 1rem;
 }
 
-.dashboard-grid {
+.summary-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-  gap: 24px;
-  margin-bottom: 32px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-bottom: 22px;
 }
 
 .summary-card {
-  background: white;
-  border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  padding: 18px 20px;
+  background: var(--personal-color-white, #fff);
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
-.card-icon {
-  width: 56px;
-  height: 56px;
-  border-radius: 12px;
-  display: grid;
-  place-items: center;
-  background: #f8fafc;
-  font-size: 0.85rem;
-  font-weight: 800;
-}
-
-.gpa-card .card-icon {
-  background-color: #eef2ff;
-}
-
-.credits-card .card-icon {
-  background-color: #ecfdf5;
-}
-
-.card-info {
-  display: flex;
-  flex-direction: column;
-}
-
-.label {
+.summary-card span {
   color: #64748b;
-  font-size: 0.85rem;
-  font-weight: 600;
-  margin-bottom: 4px;
+  font-size: 0.88rem;
+  font-weight: 700;
 }
 
-.value-group {
-  display: flex;
-  align-items: baseline;
-  gap: 4px;
+.summary-card strong {
+  display: block;
+  margin-top: 10px;
+  color: #071f49;
+  font-size: 1.7rem;
 }
 
-.value {
-  color: #1e293b;
-  font-size: 2rem;
-  font-weight: 800;
-}
-
-.max,
-.unit {
+.summary-card strong small {
   color: #94a3b8;
   font-size: 1rem;
   font-weight: 500;
+  margin-left: 4px;
 }
 
 .content-card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  background: var(--personal-color-white, #fff);
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   overflow: hidden;
 }
 
 .card-header {
-  padding: 20px 24px;
+  padding: 18px 20px;
   border-bottom: 1px solid #edf2f7;
 }
 
@@ -221,25 +157,12 @@ onMounted(() => {
 
 .grade-badge {
   display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.85rem;
+  align-items: center;
+  border-radius: 8px;
+  padding: 5px 10px;
+  font-size: 0.82rem;
   font-weight: 700;
-}
-
-.grade-badge.high {
-  background: #ecfdf5;
-  color: #059669;
-}
-
-.grade-badge.mid {
-  background: #eff6ff;
-  color: #2563eb;
-}
-
-.grade-badge.low {
-  background: #fef2f2;
-  color: #dc2626;
+  color: #1e293b;
 }
 
 .status-badge {
@@ -256,4 +179,27 @@ onMounted(() => {
   background: #e0e7ff;
   color: #4338ca;
 }
+
+.no-data {
+  padding: 60px 0;
+  text-align: center;
+}
+
+.empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty-state p {
+  color: #64748b;
+  line-height: 1.6;
+}
+
+.empty-state small {
+  font-size: 0.8rem;
+  color: #94a3b8;
+}
 </style>
+
