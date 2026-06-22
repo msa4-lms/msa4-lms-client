@@ -96,9 +96,8 @@ const login = () => {
 }
 
 .user-role {
-  color: #1a73e8;
+  color: var(--primary-color);
   font-size: 0.8rem;
   font-weight: bold;
 }
-
 </style>
