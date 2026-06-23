@@ -13,10 +13,11 @@ const ProfessorLectureCreate = () => import("../pages/lectures/ProfessorLectureC
 const ProfessorGradeManage = () => import("../pages/academic/ProfessorGradeManage.vue");
 const LeaveReturnPage = () => import("../pages/academic/LeaveReturnPage.vue");
 const ProfessorLeaveReturnPage = () => import("../pages/academic/ProfessorLeaveReturnPage.vue");
-const setMeta = (isAuthenticated, isGuestOnly) => {
+const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
   return {
     isAuthenticated, // 인증된 사용자
     isGuestOnly, // 게스트
+    roles, // 접근을 허용할 권한 목록
   };
 };
 
@@ -79,19 +80,19 @@ const routes = [
     path: "/professor/lectures/create",
     name: "ProfessorLectureCreate",
     component: ProfessorLectureCreate,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["PROFESSOR"]),
   },
   {
     path: "/professor/grades/input",
     name: "ProfessorGradeInput",
     component: ProfessorGradeManage,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["PROFESSOR"]),
   },
   {
     path: "/professor/grades/correct",
     name: "ProfessorGradeCorrect",
     component: ProfessorGradeManage,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["PROFESSOR"]),
   },
   {
     path: "/leave-return",
@@ -103,7 +104,7 @@ const routes = [
     path: "/professor/leave-return",
     name: "ProfessorLeaveReturnPage",
     component: ProfessorLeaveReturnPage,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["PROFESSOR"]),
   },
 ];
 
@@ -123,6 +124,15 @@ router.beforeEach(async (to, from, next) => {
   // 인증이 필요한 페이지인데 로그인 안된 경우 -> 로그인 페이지로
   if (to.meta.isAuthenticated && !authStore.isLoggedIn) {
     return next("/");
+  }
+
+  // 역할 기반 접근 제어 검사
+  if (to.meta.roles && to.meta.roles.length > 0) {
+    const userRole = authStore.userInfo?.role;
+    if (!to.meta.roles.includes(userRole)) {
+      alert("접근 권한이 없습니다.");
+      return next("/main");
+    }
   }
 
   if (to.meta.isGuestOnly && authStore.isLoggedIn) {

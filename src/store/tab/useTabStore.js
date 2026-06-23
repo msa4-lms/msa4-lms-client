@@ -49,6 +49,11 @@ export const useTabStore = defineStore("tab", () => {
     }
   };
 
+  const clearTabs = () => {
+    tabs.value = [];
+    activeTab.value = "";
+  };
+
   // 경로(path)나 이름(name)을 기반으로 사용자에게 보여줄 탭 제목 추출
   const getTitleByPath = (path, name) => {
     const authStore = useAuthStore();
@@ -81,5 +86,6 @@ export const useTabStore = defineStore("tab", () => {
     activeTab,
     addTab,
     removeTab,
+    clearTabs,
   };
 });
