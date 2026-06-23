@@ -144,21 +144,12 @@
                 >
               </div>
             </td>
-            <td class="font-bold val-total">{{ calculateTotal(g) }}점</td>
+            <td>{{ calculateTotal(g) }}점</td>
             <td>
-              <span
-                :class="[
-                  'grade-badge',
-                  getGradeLevel(determineGrade(calculateTotal(g))),
-                ]"
-              >
-                {{ determineGrade(calculateTotal(g)) }}
-              </span>
+              <span>{{ determineGrade(calculateTotal(g)) }}</span>
             </td>
             <td>
-              <span :class="['status-badge', g.status.toLowerCase()]">
-                {{ formatStatus(g.status) }}
-              </span>
+              <StatusBadge :status="g.status" />
             </td>
             <td v-if="isCorrectionMode">
               <MyButton
@@ -311,6 +302,7 @@ import MyInput from "../../components/input/MyInput.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
+import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
 import { useGradeProfessorStore } from "../../store/academic/useGradeProfessorStore";
 
@@ -348,7 +340,7 @@ const gradeColumns = computed(() => {
     { key: "finalScore", label: `기말고사 (${getRatio("final")}%)` },
     { key: "assignmentScore", label: `과제 (${getRatio("assignment")}%)` },
     { key: "attendanceScore", label: `출결 (${getRatio("attendance")}%)` },
-    { key: "totalScore", label: "가중 총점" },
+    { key: "totalScore", label: "총점" },
     { key: "grade", label: "등급" },
     { key: "status", label: "진행 상태" },
   ];
@@ -410,26 +402,9 @@ const hasObjectionValidationError = computed(() => {
   );
 });
 
-// 학생 성적 등급 수준 구하기 (A계열 high, B계열 mid, 나머지 low)
-const getGradeLevel = (grade) => {
-  if (!grade) return "low";
-  if (grade.startsWith("A")) return "high";
-  if (grade.startsWith("B")) return "mid";
-  return "low";
-};
 
-// 진행 상태 표시 매핑
-const formatStatus = (status) => {
-  const map = {
-    DRAFT: "임시저장",
-    SUBMITTED: "제출완료",
-    OPENED: "공개됨",
-    OBJECTION: "이의신청",
-    APPROVED: "조정승인",
-    FINAL: "성적확정",
-  };
-  return map[status] || status;
-};
+
+
 
 onMounted(async () => {
   try {
@@ -660,78 +635,11 @@ const handleObjectionApprove = async () => {
   gap: 8px;
 }
 
-.val-total {
-  color: var(--primary-color);
-}
 
-/* 등급 뱃지 (학생용 GradePage 디자인 적용) */
-.grade-badge {
-  display: inline-flex;
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 0.85rem;
-  font-weight: 600;
-}
 
-.grade-badge.high {
-  background: #ecfdf5;
-  color: #059669;
-}
 
-.grade-badge.mid {
-  background: #eff6ff;
-  color: #2563eb;
-}
 
-.grade-badge.low {
-  background: #fef2f2;
-  color: #dc2626;
-}
 
-/* 진행 상태 뱃지 (학생용/공통 스타일 개선) */
-.status-badge {
-  display: inline-flex;
-  padding: 4px 8px;
-  border-radius: 4px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border: 1px solid transparent;
-}
-
-.status-badge.draft {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.status-badge.submitted {
-  background: #eff6ff;
-  color: #2563eb;
-  border-color: #bfdbfe;
-}
-
-.status-badge.opened {
-  background: #fffbeb;
-  color: #d97706;
-  border-color: #fde68a;
-}
-
-.status-badge.objection {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fca5a5;
-}
-
-.status-badge.approved {
-  background: #ecfdf5;
-  color: #059669;
-  border-color: #a7f3d0;
-}
-
-.status-badge.final {
-  background: #e0e7ff;
-  color: #4338ca;
-  border-color: #c7d2fe;
-}
 
 /* 입력 필드 크기 및 형태 */
 .table-input {

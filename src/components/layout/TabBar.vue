@@ -55,7 +55,7 @@ const closeTab = (path, event) => {
   align-items: center;
   background-color: #b5bdc9;
   color: var(--personal-color-white);
-  padding: 8px 16px;
+  padding: 8px 8px 8px 16px;
   border-radius: 8px 8px 0 0;
   cursor: pointer;
   min-width: 120px;
@@ -94,7 +94,12 @@ const closeTab = (path, event) => {
   line-height: 1;
   cursor: pointer;
   opacity: 0.6;
-  padding: 0 4px;
+  padding: 2px 4px;
+  margin-left: auto;
+  margin-right: -4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .close-btn:hover {

@@ -32,6 +32,16 @@ const statusLabel = computed(() => {
       return "결석";
     case "EXCUSED":
       return "공결";
+    case "DRAFT":
+      return "임시저장";
+    case "SUBMITTED":
+      return "제출완료";
+    case "OPENED":
+      return "공개됨";
+    case "OBJECTION":
+      return "이의신청";
+    case "FINAL":
+      return "성적확정";
     default:
       return props.status;
   }
@@ -43,14 +53,20 @@ const statusClass = computed(() => {
     case "ACTIVE":
     case "PRESENT":
     case "EXCUSED":
+    case "OPENED":
+    case "FINAL":
       return "approved";
     case "REJECTED":
     case "DROPPED":
     case "ABSENT":
+    case "OBJECTION":
       return "rejected";
     case "PENDING":
     case "LATE":
+    case "DRAFT":
       return "pending";
+    case "SUBMITTED":
+      return "submitted";
     default:
       return "pending";
   }
@@ -80,5 +96,10 @@ const statusClass = computed(() => {
 .status-badge.rejected {
   background-color: #f8d7da;
   color: #721c24;
+}
+
+.status-badge.submitted {
+  background-color: #cce5ff;
+  color: #004085;
 }
 </style>

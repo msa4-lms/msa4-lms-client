@@ -85,9 +85,6 @@ const alertReady = () => {
             <router-link to="/grade" class="submenu-item"
               >성적 조회</router-link
             >
-            <a href="#" class="submenu-item" @click.prevent="alertReady"
-              >성적 이의 신청</a
-            >
           </div>
         </div>
 

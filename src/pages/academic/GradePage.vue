@@ -101,26 +101,6 @@ const allTotalGpa = computed(() => {
 
 const isConfirmedGrade = (grade) => grade.status != null;
 
-const getGradeLevel = (grade) => {
-  if (!grade) return "low";
-  if (grade.startsWith("A")) return "high";
-  if (grade.startsWith("B")) return "mid";
-  return "low";
-};
-
-// 진행 상태 표시 매핑
-const formatStatus = (status) => {
-  const map = {
-    DRAFT: "임시저장",
-    SUBMITTED: "제출완료",
-    OPENED: "공개됨",
-    OBJECTION: "이의신청 중",
-    APPROVED: "정정승인",
-    FINAL: "최종확정",
-  };
-  return map[status] || "미공개";
-};
-
 onMounted(async () => {
   if (authStore.isLoggedIn) {
     await onSearch();
@@ -217,13 +197,11 @@ watch(
           :key="index"
         >
           <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
-          <td class="code">{{ grade.courseCode }}</td>
+          <td>{{ grade.courseCode }}</td>
           <td class="name">{{ grade.courseName }}</td>
-          <td class="credit">{{ grade.credits }}</td>
+          <td>{{ grade.credits }}</td>
           <td class="grade">
-            <span v-if="isConfirmedGrade(grade)" :class="['grade-badge', getGradeLevel(grade.grade)]">
-              {{ grade.grade }}
-            </span>
+            <span v-if="isConfirmedGrade(grade)">{{ grade.grade }}</span>
             <span v-else class="text-secondary">미입력</span>
           </td>
 
@@ -383,40 +361,6 @@ watch(
 
 .data-table tr:last-child td {
   border-bottom: 0;
-}
-
-
-.code {
-  color: #64748b;
-}
-
-.credit {
-  font-weight: 500;
-}
-
-.grade-badge {
-  display: inline-flex;
-  align-items: center;
-  border-radius: 8px;
-  padding: 5px 10px;
-  font-size: 0.82rem;
-  font-weight: 700;
-  color: #1e293b;
-}
-
-.status-badge {
-  display: inline-flex;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #f1f5f9;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-badge.confirmed {
-  background: #e0e7ff;
-  color: #4338ca;
 }
 
 .no-data {
