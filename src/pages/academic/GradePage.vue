@@ -2,6 +2,7 @@
 import { onMounted, ref, computed } from 'vue';
 import { useAcademicStore } from '../../store/academic/useAcademicStore';
 import { useAuthStore } from '../../store/auth/useAuthStore';
+import MyButton from '../../components/button/MyButton.vue';
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
@@ -43,6 +44,28 @@ onMounted(async () => {
       <p>확정된 성적 및 전체 평균 평점(GPA)을 확인할 수 있습니다.</p>
     </div>
 
+    <section class="filter-section">
+      <div class="filter-row">
+        <div class="filter-group">
+          <label>조회 연도</label>
+          <select v-model="selectedYear">
+            <option :value="2026">2026년</option>
+            <option :value="2025">2025년</option>
+            <option :value="2024">2024년</option>
+            <option :value="2023">2023년</option>
+          </select>
+        </div>
+        <div class="filter-group">
+          <label>학기</label>
+          <select v-model="selectedSemester">
+            <option :value="1">1학기</option>
+            <option :value="2">2학기</option>
+          </select>
+        </div>
+        <MyButton btnType="button" color="deep-blue" size="small" content="조회" @click="onSearch" />
+      </div>
+    </section>
+
     <div class="summary-grid">
       <section class="summary-card">
         <span>전체 평균 평점 (GPA)</span>
@@ -60,6 +83,39 @@ onMounted(async () => {
       <div class="card-header">
         <h2>학기별 상세 성적</h2>
       </div>
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>연도/학기</th>
+            <th>학수번호</th>
+            <th>교과목명</th>
+            <th>학점</th>
+            <th>출석률</th>
+            <th>등급</th>
+            <th>평점</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="academicStore.gradeSummary.semesterGrades?.length === 0">
+            <td colspan="7" class="no-data">
+              <div class="empty-state">
+                <p>조회된 상세 성적 내역이 없습니다.</p>
+              </div>
+            </td>
+          </tr>
+          <tr v-for="(grade, idx) in academicStore.gradeSummary.semesterGrades" :key="idx">
+            <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
+            <td class="code">{{ grade.courseCode }}</td>
+            <td class="course-name">{{ grade.courseName }}</td>
+            <td class="credit">{{ grade.credits }}</td>
+            <td>{{ grade.attendanceRate ? grade.attendanceRate + '%' : '-' }}</td>
+            <td>
+              <span class="grade-badge">{{ grade.grade || '-' }}</span>
+            </td>
+            <td>{{ grade.gradePoint ? grade.gradePoint.toFixed(1) : '-' }}</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </template>
@@ -86,6 +142,45 @@ onMounted(async () => {
 .page-heading p {
   color: var(--primary-text-color);
   font-size: 1rem;
+}
+
+.filter-section {
+  padding: 20px;
+  margin-bottom: 22px;
+  background: var(--personal-color-white, #fff);
+  border: 1px solid #e5eaf2;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.filter-row {
+  display: flex;
+  gap: 16px;
+  align-items: flex-end;
+  flex-wrap: wrap;
+}
+
+.filter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.filter-group label {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #2f3a4f;
+}
+
+.filter-group select {
+  width: 220px;
+  height: 38px;
+  border: 1px solid #d9dee7;
+  border-radius: 4px;
+  padding: 8px 12px;
+  background: #fff;
+  color: #1f2937;
+  font-size: 0.92rem;
 }
 
 .summary-grid {
@@ -136,9 +231,35 @@ onMounted(async () => {
   border-bottom: 1px solid #edf2f7;
 }
 
-.card-header h3 {
+.card-header h2 {
   color: #1a1f36;
   font-size: 1.1rem;
+}
+
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
+
+.data-table th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #edf2f7;
+  color: #4f566b;
+  font-size: 0.85rem;
+  padding: 13px 16px;
+  white-space: nowrap;
+}
+
+.data-table td {
+  border-bottom: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 0.9rem;
+  padding: 14px 16px;
+}
+
+.data-table tr:last-child td {
+  border-bottom: 0;
 }
 
 .semester {
@@ -149,6 +270,11 @@ onMounted(async () => {
 .code {
   color: #64748b;
   font-family: monospace;
+}
+
+.course-name {
+  color: #1a1f36;
+  font-weight: 700;
 }
 
 .credit {
@@ -162,22 +288,7 @@ onMounted(async () => {
   padding: 5px 10px;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #1e293b;
-}
-
-.status-badge {
-  display: inline-flex;
-  padding: 2px 8px;
-  border-radius: 4px;
-  background: #f1f5f9;
-  color: #94a3b8;
-  font-size: 0.75rem;
-  font-weight: 600;
-}
-
-.status-badge.confirmed {
-  background: #e0e7ff;
-  color: #4338ca;
+  color: #0b3d91;
 }
 
 .no-data {
@@ -195,11 +306,6 @@ onMounted(async () => {
 .empty-state p {
   color: #64748b;
   line-height: 1.6;
-}
-
-.empty-state small {
-  font-size: 0.8rem;
-  color: #94a3b8;
 }
 </style>
 
