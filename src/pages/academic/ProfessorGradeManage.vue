@@ -1,6 +1,12 @@
 <template>
-  <MyPageContainer :title="isCorrectionMode ? '성적 정정 관리' : '성적 입력 관리'">
-    <div v-if="isCorrectionMode" class="welcome-section" style="margin-top: 50px;">
+  <MyPageContainer
+    :title="isCorrectionMode ? '성적 정정 관리' : '성적 입력 관리'"
+  >
+    <div
+      v-if="isCorrectionMode"
+      class="welcome-section"
+      style="margin-top: 50px"
+    >
       <div class="empty-state">
         <span class="empty-icon">🚧</span>
         <p>기능 구현 준비 중입니다.</p>
@@ -12,7 +18,12 @@
       <MySearchFilter :showSubmit="false">
         <div class="search-group">
           <label for="lectureSelect">강의 선택</label>
-          <select id="lectureSelect" v-model="selectedLectureId" @change="loadGrades" class="form-select">
+          <select
+            id="lectureSelect"
+            v-model="selectedLectureId"
+            @change="loadGrades"
+            class="form-select"
+          >
             <option :value="null" disabled>강의를 선택하세요</option>
             <option v-for="lec in lectures" :key="lec.id" :value="lec.id">
               [{{ lec.courseCode }}] {{ lec.courseName }} ({{ lec.classroom }})
@@ -23,8 +34,9 @@
         <div v-if="selectedLectureId" class="current-semester-info">
           <span class="label">강의 정보</span>
           <span class="value">
-            정원: {{ currentLecture?.capacity }}명 | 
-            {{ currentLecture?.academicYear }}학년도 {{ currentLecture?.term === 'FIRST' ? '1학기' : '2학기' }}
+            정원: {{ currentLecture?.capacity }}명 |
+            {{ currentLecture?.academicYear }}학년도
+            {{ currentLecture?.term === "FIRST" ? "1학기" : "2학기" }}
           </span>
         </div>
       </MySearchFilter>
@@ -33,16 +45,31 @@
     <!-- 성적 관리 테이블 섹션 (하단 카드) -->
     <div v-if="selectedLectureId" class="content-card">
       <div class="card-header">
-        <h3>{{ isCorrectionMode ? '이의신청 수강생 목록' : '수강생 성적 입력' }}</h3>
+        <h3>
+          {{ isCorrectionMode ? "이의신청 수강생 목록" : "수강생 성적 입력" }}
+        </h3>
         <div class="control-buttons">
-          <MyButton color="white" size="middle" content="임시저장" :disabled="hasValidationError || isAllSubmitted" @click="handleSave" />
-          <MyButton color="deep-blue" size="middle" content="성적 일괄 제출" :disabled="hasValidationError || isAllSubmitted" @click="handleSubmitGrades" />
+          <MyButton
+            color="gray"
+            size="middle"
+            content="임시저장"
+            :disabled="hasValidationError || isAllSubmitted"
+            @click="handleSave"
+          />
+          <MyButton
+            color="deep-blue"
+            size="middle"
+            content="성적 일괄 제출"
+            :disabled="hasValidationError || isAllSubmitted"
+            @click="handleSubmitGrades"
+          />
         </div>
       </div>
 
       <div class="card-body">
         <div v-if="hasValidationError" class="validation-error-alert">
-          입력된 성적 중 0점 미만이거나 100점을 초과한 점수가 존재합니다. (0 ~ 100점 사이로 정상 입력하셔야 저장이 가능합니다.)
+          입력된 성적 중 0점 미만이거나 100점을 초과한 점수가 존재합니다. (0 ~
+          100점 사이로 정상 입력하셔야 저장이 가능합니다.)
         </div>
 
         <MyTable
@@ -64,7 +91,9 @@
                   :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
-                <span class="converted-score">{{ convertScore(g.midtermScore, 'midterm') }}점</span>
+                <span class="converted-score"
+                  >{{ convertScore(g.midtermScore, "midterm") }}점</span
+                >
               </div>
             </td>
             <td>
@@ -78,7 +107,9 @@
                   :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
-                <span class="converted-score">{{ convertScore(g.finalScore, 'final') }}점</span>
+                <span class="converted-score"
+                  >{{ convertScore(g.finalScore, "final") }}점</span
+                >
               </div>
             </td>
             <td>
@@ -92,7 +123,9 @@
                   :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
-                <span class="converted-score">{{ convertScore(g.assignmentScore, 'assignment') }}점</span>
+                <span class="converted-score"
+                  >{{ convertScore(g.assignmentScore, "assignment") }}점</span
+                >
               </div>
             </td>
             <td>
@@ -106,12 +139,19 @@
                   :disabled="g.status && g.status !== 'DRAFT'"
                   class="table-input"
                 />
-                <span class="converted-score">{{ convertScore(g.attendanceScore, 'attendance') }}점</span>
+                <span class="converted-score"
+                  >{{ convertScore(g.attendanceScore, "attendance") }}점</span
+                >
               </div>
             </td>
             <td class="font-bold val-total">{{ calculateTotal(g) }}점</td>
             <td>
-              <span :class="['grade-badge', getGradeLevel(determineGrade(calculateTotal(g)))]">
+              <span
+                :class="[
+                  'grade-badge',
+                  getGradeLevel(determineGrade(calculateTotal(g))),
+                ]"
+              >
                 {{ determineGrade(calculateTotal(g)) }}
               </span>
             </td>
@@ -149,7 +189,11 @@
         <h2>성적 정정 처리</h2>
         <div class="modal-body">
           <div class="objection-info">
-            <p><strong>대상 학생:</strong> {{ activeObjection.studentName }} ({{ activeObjection.studentLoginId }})</p>
+            <p>
+              <strong>대상 학생:</strong> {{ activeObjection.studentName }} ({{
+                activeObjection.studentLoginId
+              }})
+            </p>
           </div>
 
           <div class="objection-form">
@@ -169,39 +213,93 @@
               <h3>점수 재입력 (승인 시 적용)</h3>
               <div class="adjust-grid">
                 <div class="adjust-item">
-                  <label>중간 ({{ getRatio('midterm') }}%)</label>
-                  <MyInput type="number" v-model.number="adjustScores.midtermScore" min="0" max="100" class="form-input" />
-                  <span class="converted-score-modal">{{ convertScore(adjustScores.midtermScore, 'midterm') }}점</span>
+                  <label>중간 ({{ getRatio("midterm") }}%)</label>
+                  <MyInput
+                    type="number"
+                    v-model.number="adjustScores.midtermScore"
+                    min="0"
+                    max="100"
+                    class="form-input"
+                  />
+                  <span class="converted-score-modal"
+                    >{{
+                      convertScore(adjustScores.midtermScore, "midterm")
+                    }}점</span
+                  >
                 </div>
                 <div class="adjust-item">
-                  <label>기말 ({{ getRatio('final') }}%)</label>
-                  <MyInput type="number" v-model.number="adjustScores.finalScore" min="0" max="100" class="form-input" />
-                  <span class="converted-score-modal">{{ convertScore(adjustScores.finalScore, 'final') }}점</span>
+                  <label>기말 ({{ getRatio("final") }}%)</label>
+                  <MyInput
+                    type="number"
+                    v-model.number="adjustScores.finalScore"
+                    min="0"
+                    max="100"
+                    class="form-input"
+                  />
+                  <span class="converted-score-modal"
+                    >{{
+                      convertScore(adjustScores.finalScore, "final")
+                    }}점</span
+                  >
                 </div>
                 <div class="adjust-item">
-                  <label>과제 ({{ getRatio('assignment') }}%)</label>
-                  <MyInput type="number" v-model.number="adjustScores.assignmentScore" min="0" max="100" class="form-input" />
-                  <span class="converted-score-modal">{{ convertScore(adjustScores.assignmentScore, 'assignment') }}점</span>
+                  <label>과제 ({{ getRatio("assignment") }}%)</label>
+                  <MyInput
+                    type="number"
+                    v-model.number="adjustScores.assignmentScore"
+                    min="0"
+                    max="100"
+                    class="form-input"
+                  />
+                  <span class="converted-score-modal"
+                    >{{
+                      convertScore(adjustScores.assignmentScore, "assignment")
+                    }}점</span
+                  >
                 </div>
                 <div class="adjust-item">
-                  <label>출결 ({{ getRatio('attendance') }}%)</label>
-                  <MyInput type="number" v-model.number="adjustScores.attendanceScore" min="0" max="100" class="form-input" />
-                  <span class="converted-score-modal">{{ convertScore(adjustScores.attendanceScore, 'attendance') }}점</span>
+                  <label>출결 ({{ getRatio("attendance") }}%)</label>
+                  <MyInput
+                    type="number"
+                    v-model.number="adjustScores.attendanceScore"
+                    min="0"
+                    max="100"
+                    class="form-input"
+                  />
+                  <span class="converted-score-modal"
+                    >{{
+                      convertScore(adjustScores.attendanceScore, "attendance")
+                    }}점</span
+                  >
                 </div>
               </div>
-              <div v-if="hasObjectionValidationError" class="validation-error-alert modal-error">
-                 0점 이상 100점 이하로만 입력 가능합니다.
+              <div
+                v-if="hasObjectionValidationError"
+                class="validation-error-alert modal-error"
+              >
+                0점 이상 100점 이하로만 입력 가능합니다.
               </div>
             </div>
           </div>
         </div>
 
         <div class="modal-actions">
-          <MyButton color="white" size="small" content="취소" @click="closeObjectionModal" />
-          <MyButton color="deep-blue" size="small" content="정정 반영" :disabled="hasObjectionValidationError" @click="handleObjectionApprove" />
+          <MyButton
+            color="white"
+            size="small"
+            content="취소"
+            @click="closeObjectionModal"
+          />
+          <MyButton
+            color="deep-blue"
+            size="small"
+            content="정정 반영"
+            :disabled="hasObjectionValidationError"
+            @click="handleObjectionApprove"
+          />
         </div>
       </div>
-      </div>
+    </div>
   </MyPageContainer>
 </template>
 
@@ -237,8 +335,8 @@ const adjustScores = ref({
 });
 
 const lectures = computed(() => lectureStore.lectures);
-const currentLecture = computed(() => 
-  lectures.value.find(l => l.id === selectedLectureId.value)
+const currentLecture = computed(() =>
+  lectures.value.find((l) => l.id === selectedLectureId.value)
 );
 
 // 테이블 컬럼 정의
@@ -246,10 +344,10 @@ const gradeColumns = computed(() => {
   const cols = [
     { key: "studentName", label: "학생 이름" },
     { key: "studentLoginId", label: "학번" },
-    { key: "midtermScore", label: `중간고사 (${getRatio('midterm')}%)` },
-    { key: "finalScore", label: `기말고사 (${getRatio('final')}%)` },
-    { key: "assignmentScore", label: `과제 (${getRatio('assignment')}%)` },
-    { key: "attendanceScore", label: `출결 (${getRatio('attendance')}%)` },
+    { key: "midtermScore", label: `중간고사 (${getRatio("midterm")}%)` },
+    { key: "finalScore", label: `기말고사 (${getRatio("final")}%)` },
+    { key: "assignmentScore", label: `과제 (${getRatio("assignment")}%)` },
+    { key: "attendanceScore", label: `출결 (${getRatio("attendance")}%)` },
     { key: "totalScore", label: "가중 총점" },
     { key: "grade", label: "등급" },
     { key: "status", label: "진행 상태" },
@@ -263,10 +361,14 @@ const gradeColumns = computed(() => {
 const getRatio = (type) => {
   if (!currentLecture.value) return 0;
   const lec = currentLecture.value;
-  if (type === 'midterm') return lec.midtermRatio !== undefined ? lec.midtermRatio : 30;
-  if (type === 'final') return lec.finalRatio !== undefined ? lec.finalRatio : 30;
-  if (type === 'assignment') return lec.assignmentRatio !== undefined ? lec.assignmentRatio : 30;
-  if (type === 'attendance') return lec.attendanceRatio !== undefined ? lec.attendanceRatio : 10;
+  if (type === "midterm")
+    return lec.midtermRatio !== undefined ? lec.midtermRatio : 30;
+  if (type === "final")
+    return lec.finalRatio !== undefined ? lec.finalRatio : 30;
+  if (type === "assignment")
+    return lec.assignmentRatio !== undefined ? lec.assignmentRatio : 30;
+  if (type === "attendance")
+    return lec.attendanceRatio !== undefined ? lec.attendanceRatio : 10;
   return 0;
 };
 
@@ -277,25 +379,35 @@ const convertScore = (score, type) => {
 };
 
 const hasValidationError = computed(() => {
-  return localGrades.value.some(g => 
-    (g.midtermScore !== null && (g.midtermScore < 0 || g.midtermScore > 100)) ||
-    (g.finalScore !== null && (g.finalScore < 0 || g.finalScore > 100)) ||
-    (g.assignmentScore !== null && (g.assignmentScore < 0 || g.assignmentScore > 100)) ||
-    (g.attendanceScore !== null && (g.attendanceScore < 0 || g.attendanceScore > 100))
+  return localGrades.value.some(
+    (g) =>
+      (g.midtermScore !== null &&
+        (g.midtermScore < 0 || g.midtermScore > 100)) ||
+      (g.finalScore !== null && (g.finalScore < 0 || g.finalScore > 100)) ||
+      (g.assignmentScore !== null &&
+        (g.assignmentScore < 0 || g.assignmentScore > 100)) ||
+      (g.attendanceScore !== null &&
+        (g.attendanceScore < 0 || g.attendanceScore > 100))
   );
 });
 
 const isAllSubmitted = computed(() => {
   if (localGrades.value.length === 0) return false;
-  return localGrades.value.every(g => g.status && g.status !== 'DRAFT');
+  return localGrades.value.every((g) => g.status && g.status !== "DRAFT");
 });
 
 const hasObjectionValidationError = computed(() => {
   const scores = adjustScores.value;
-  return (scores.midtermScore !== null && (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
-         (scores.finalScore !== null && (scores.finalScore < 0 || scores.finalScore > 100)) ||
-         (scores.assignmentScore !== null && (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
-         (scores.attendanceScore !== null && (scores.attendanceScore < 0 || scores.attendanceScore > 100));
+  return (
+    (scores.midtermScore !== null &&
+      (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
+    (scores.finalScore !== null &&
+      (scores.finalScore < 0 || scores.finalScore > 100)) ||
+    (scores.assignmentScore !== null &&
+      (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
+    (scores.attendanceScore !== null &&
+      (scores.attendanceScore < 0 || scores.attendanceScore > 100))
+  );
 });
 
 // 학생 성적 등급 수준 구하기 (A계열 high, B계열 mid, 나머지 low)
@@ -372,16 +484,21 @@ const handleSave = async () => {
   if (!selectedLectureId.value) return;
 
   for (const g of localGrades.value) {
-    if ((g.midtermScore !== null && (g.midtermScore < 0 || g.midtermScore > 100)) ||
-        (g.finalScore !== null && (g.finalScore < 0 || g.finalScore > 100)) ||
-        (g.assignmentScore !== null && (g.assignmentScore < 0 || g.assignmentScore > 100)) ||
-        (g.attendanceScore !== null && (g.attendanceScore < 0 || g.attendanceScore > 100))) {
+    if (
+      (g.midtermScore !== null &&
+        (g.midtermScore < 0 || g.midtermScore > 100)) ||
+      (g.finalScore !== null && (g.finalScore < 0 || g.finalScore > 100)) ||
+      (g.assignmentScore !== null &&
+        (g.assignmentScore < 0 || g.assignmentScore > 100)) ||
+      (g.attendanceScore !== null &&
+        (g.attendanceScore < 0 || g.attendanceScore > 100))
+    ) {
       alert("성적 점수는 0점 이상 100점 이하로만 입력 가능합니다.");
       return;
     }
   }
-  
-  const payload = localGrades.value.map(g => ({
+
+  const payload = localGrades.value.map((g) => ({
     enrollmentId: g.enrollmentId,
     midtermScore: g.midtermScore,
     finalScore: g.finalScore,
@@ -401,7 +518,12 @@ const handleSave = async () => {
 // 성적 제출
 const handleSubmitGrades = async () => {
   if (!selectedLectureId.value) return;
-  if (!confirm("성적을 최종 제출하시겠습니까? 제출 후 학생 공개 여부 결정 전까지만 수정 가능합니다.")) return;
+  if (
+    !confirm(
+      "성적을 최종 제출하시겠습니까? 제출 후 학생 공개 여부 결정 전까지만 수정 가능합니다."
+    )
+  )
+    return;
 
   try {
     await gradeStore.updateGradesStatus(selectedLectureId.value, "SUBMITTED");
@@ -411,7 +533,6 @@ const handleSubmitGrades = async () => {
     alert("성적 제출 중 오류가 발생했습니다.");
   }
 };
-
 
 // 이의신청 모달 팝업 오픈 (이제 성적 정정으로 사용)
 const openObjectionModal = (g) => {
@@ -436,10 +557,16 @@ const handleObjectionApprove = async () => {
   if (!activeObjection.value) return;
 
   const scores = adjustScores.value;
-  if ((scores.midtermScore !== null && (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
-      (scores.finalScore !== null && (scores.finalScore < 0 || scores.finalScore > 100)) ||
-      (scores.assignmentScore !== null && (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
-      (scores.attendanceScore !== null && (scores.attendanceScore < 0 || scores.attendanceScore > 100))) {
+  if (
+    (scores.midtermScore !== null &&
+      (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
+    (scores.finalScore !== null &&
+      (scores.finalScore < 0 || scores.finalScore > 100)) ||
+    (scores.assignmentScore !== null &&
+      (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
+    (scores.attendanceScore !== null &&
+      (scores.attendanceScore < 0 || scores.attendanceScore > 100))
+  ) {
     alert("성적 점수는 0점 이상 100점 이하로만 입력 가능합니다.");
     return;
   }
@@ -466,8 +593,6 @@ const handleObjectionApprove = async () => {
 </script>
 
 <style scoped>
-
-
 .form-select {
   background: white;
   border: 1px solid #ddd;
@@ -690,7 +815,8 @@ const handleObjectionApprove = async () => {
   width: 100%;
   max-width: 580px;
   padding: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-card h2 {

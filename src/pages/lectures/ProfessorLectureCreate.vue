@@ -38,7 +38,9 @@ const ratioTotal = computed(() => {
 });
 
 const isRatioValid = computed(() => ratioTotal.value === 100);
-const isFormSubmitable = computed(() => isRatioValid.value && form.schedules.length > 0);
+const isFormSubmitable = computed(
+  () => isRatioValid.value && form.schedules.length > 0
+);
 
 const addSchedule = () => {
   if (tempSchedule.startPeriod > tempSchedule.endPeriod) {
@@ -54,7 +56,13 @@ const removeSchedule = (index) => {
 };
 
 const getDayLabel = (day) => {
-  const map = { MON: "월요일", TUE: "화요일", WED: "수요일", THU: "목요일", FRI: "금요일" };
+  const map = {
+    MON: "월요일",
+    TUE: "화요일",
+    WED: "수요일",
+    THU: "목요일",
+    FRI: "금요일",
+  };
   return map[day] || day;
 };
 
@@ -77,7 +85,9 @@ const handleSubmit = async () => {
     alert("강의 개설 신청이 정상 처리되었습니다.");
     router.push("/main");
   } catch (error) {
-    alert(error.response?.data?.message || "강의 개설 신청 중 오류가 발생했습니다.");
+    alert(
+      error.response?.data?.message || "강의 개설 신청 중 오류가 발생했습니다."
+    );
   }
 };
 </script>
@@ -92,10 +102,8 @@ const handleSubmit = async () => {
           <div class="section-box">
             <h3 class="section-title">기본 정보 설정</h3>
             <div class="info-grid">
-
-
               <div class="form-group">
-                <label for="courseId">과목 (Course)</label>
+                <label for="courseId">과목</label>
                 <select
                   id="courseId"
                   v-model.number="form.courseId"
@@ -157,23 +165,49 @@ const handleSubmit = async () => {
             <div class="ratio-inputs">
               <div class="ratio-group">
                 <label>중간고사 (%)</label>
-                <MyInput type="number" v-model.number="form.midtermRatio" min="0" max="100" class="form-input ratio-box" />
+                <MyInput
+                  type="number"
+                  v-model.number="form.midtermRatio"
+                  min="0"
+                  max="100"
+                  class="form-input ratio-box"
+                />
               </div>
               <div class="ratio-group">
                 <label>기말고사 (%)</label>
-                <MyInput type="number" v-model.number="form.finalRatio" min="0" max="100" class="form-input ratio-box" />
+                <MyInput
+                  type="number"
+                  v-model.number="form.finalRatio"
+                  min="0"
+                  max="100"
+                  class="form-input ratio-box"
+                />
               </div>
               <div class="ratio-group">
                 <label>과제 비율 (%)</label>
-                <MyInput type="number" v-model.number="form.assignmentRatio" min="0" max="100" class="form-input ratio-box" />
+                <MyInput
+                  type="number"
+                  v-model.number="form.assignmentRatio"
+                  min="0"
+                  max="100"
+                  class="form-input ratio-box"
+                />
               </div>
               <div class="ratio-group">
                 <label>출결 비율 (%)</label>
-                <MyInput type="number" v-model.number="form.attendanceRatio" min="0" max="100" class="form-input ratio-box" />
+                <MyInput
+                  type="number"
+                  v-model.number="form.attendanceRatio"
+                  min="0"
+                  max="100"
+                  class="form-input ratio-box"
+                />
               </div>
             </div>
-            <div :class="['ratio-indicator', isRatioValid ? 'valid' : 'invalid']">
-              현재 평가 비율 합계: <strong>{{ ratioTotal }}%</strong> 
+            <div
+              :class="['ratio-indicator', isRatioValid ? 'valid' : 'invalid']"
+            >
+              현재 평가 비율 합계: <strong>{{ ratioTotal }}%</strong>
               <span v-if="!isRatioValid">(100%가 되어야 개설 가능합니다)</span>
             </div>
           </div>
@@ -186,7 +220,10 @@ const handleSubmit = async () => {
             <div class="schedule-creator">
               <div class="form-group">
                 <label>요일</label>
-                <select v-model="tempSchedule.dayOfWeek" class="form-input select-day">
+                <select
+                  v-model="tempSchedule.dayOfWeek"
+                  class="form-input select-day"
+                >
                   <option value="MON">월요일</option>
                   <option value="TUE">화요일</option>
                   <option value="WED">수요일</option>
@@ -196,30 +233,73 @@ const handleSubmit = async () => {
               </div>
               <div class="form-group">
                 <label>시작 교시</label>
-                <MyInput type="number" v-model.number="tempSchedule.startPeriod" min="1" max="9" class="form-input" />
+                <MyInput
+                  type="number"
+                  v-model.number="tempSchedule.startPeriod"
+                  min="1"
+                  max="9"
+                  class="form-input"
+                />
               </div>
               <div class="form-group">
                 <label>종료 교시</label>
-                <MyInput type="number" v-model.number="tempSchedule.endPeriod" min="1" max="9" class="form-input" />
+                <MyInput
+                  type="number"
+                  v-model.number="tempSchedule.endPeriod"
+                  min="1"
+                  max="9"
+                  class="form-input"
+                />
               </div>
-              <MyButton color="green" size="middle" content="추가" class="add-btn" @click="addSchedule" />
+              <MyButton
+                color="deep-blue"
+                size="small"
+                content="추가"
+                class="add-btn"
+                @click="addSchedule"
+              />
             </div>
 
             <!-- 추가된 시간표 리스트 -->
             <div v-if="form.schedules.length > 0" class="schedule-list">
-              <div v-for="(sched, index) in form.schedules" :key="index" class="schedule-item">
-                <span>📅 {{ getDayLabel(sched.dayOfWeek) }} {{ sched.startPeriod }}교시 ~ {{ sched.endPeriod }}교시</span>
-                <MyButton color="red" size="small" content="삭제" @click="removeSchedule(index)" />
+              <div
+                v-for="(sched, index) in form.schedules"
+                :key="index"
+                class="schedule-item"
+              >
+                <span
+                  >📅 {{ getDayLabel(sched.dayOfWeek) }}
+                  {{ sched.startPeriod }}교시 ~ {{ sched.endPeriod }}교시</span
+                >
+                <MyButton
+                  color="red"
+                  size="small"
+                  content="삭제"
+                  @click="removeSchedule(index)"
+                />
               </div>
             </div>
-            <div v-else class="empty-schedule-text">등록된 강의 시간이 없습니다. 최소 1개 이상 추가해야 합니다.</div>
+            <div v-else class="empty-schedule-text">
+              등록된 강의 시간이 없습니다. 최소 1개 이상 추가해야 합니다.
+            </div>
           </div>
         </div>
 
         <!-- 하단: 폼 액션 버튼들 -->
         <div class="form-actions full-width">
-          <MyButton color="white" size="middle" content="이전으로" @click="goBack" />
-          <MyButton btnType="submit" color="deep-blue" size="middle" content="강의 개설 신청" :disabled="!isFormSubmitable" />
+          <MyButton
+            color="white"
+            size="middle"
+            content="이전으로"
+            @click="goBack"
+          />
+          <MyButton
+            btnType="submit"
+            color="deep-blue"
+            size="middle"
+            content="강의 개설 신청"
+            :disabled="!isFormSubmitable"
+          />
         </div>
       </form>
     </div>
@@ -227,7 +307,6 @@ const handleSubmit = async () => {
 </template>
 
 <style scoped>
-
 .content-card {
   background: var(--personal-color-white);
   border: 1px solid #edf2f7;
@@ -259,7 +338,7 @@ const handleSubmit = async () => {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.2rem;
-  color: var(--primary-color);
+  color: var(--primary-text-color);
   text-align: left;
 }
 
@@ -289,7 +368,7 @@ label {
 
 .form-input {
   background: var(--personal-color-white);
-  border: 1px solid #CBD5E1;
+  border: 1px solid #cbd5e1;
   border-radius: 8px;
   padding: 0.75rem 1rem;
   color: var(--primary-text-color);
@@ -322,7 +401,7 @@ label {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.2rem;
-  color: var(--primary-color);
+  color: var(--primary-text-color);
 }
 
 .schedule-creator {
@@ -330,11 +409,6 @@ label {
   grid-template-columns: 2fr 1fr 1fr auto;
   gap: 0.75rem;
   align-items: flex-end;
-}
-
-.add-btn {
-  height: 46px;
-  padding: 0 1.2rem;
 }
 
 .schedule-list {
@@ -379,7 +453,7 @@ label {
   font-size: 1.1rem;
   font-weight: 600;
   margin-bottom: 1.2rem;
-  color: var(--primary-color);
+  color: var(--primary-text-color);
 }
 
 .ratio-inputs {
@@ -399,7 +473,6 @@ label {
 
 .ratio-indicator {
   margin-top: 1.2rem;
-  padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.95rem;
   display: inline-block;
@@ -409,15 +482,11 @@ label {
 }
 
 .ratio-indicator.valid {
-  background: rgba(34, 197, 94, 0.15);
-  color: var(--personal-color-green);
-  border: 1px solid rgba(34, 197, 94, 0.3);
+  color: var(--primary-text-color);
 }
 
 .ratio-indicator.invalid {
-  background: rgba(239, 68, 68, 0.15);
-  color: var(--personal-color-red);
-  border: 1px solid rgba(239, 68, 68, 0.3);
+  color: var(--primary-color);
 }
 
 .form-actions {
@@ -426,7 +495,7 @@ label {
   justify-content: flex-end;
   gap: 1rem;
   margin-top: 1rem;
-  border-top: 1px solid #E2E8F0;
+  border-top: 1px solid #e2e8f0;
   padding-top: 1.5rem;
 }
 </style>

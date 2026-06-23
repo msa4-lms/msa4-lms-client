@@ -64,7 +64,7 @@ button:hover {
 .middle {
   width: 120px;
   height: 38px;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 500;
 }
 
