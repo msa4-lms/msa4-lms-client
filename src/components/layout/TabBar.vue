@@ -38,7 +38,6 @@ const closeTab = (path, event) => {
   padding: 8px 8px 0 8px;
   gap: 4px;
   overflow-x: auto;
-  border-bottom: 1px solid #cbd5e1;
 }
 
 .tab-bar::-webkit-scrollbar {

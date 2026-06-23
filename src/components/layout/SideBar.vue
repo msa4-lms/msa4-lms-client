@@ -47,7 +47,9 @@ const alertReady = () => {
             <router-link to="/profile" class="submenu-item"
               >학적조회</router-link
             >
-            <router-link to="/leave-return" class="submenu-item">휴/복학 신청</router-link>
+            <router-link to="/leave-return" class="submenu-item"
+              >휴/복학 신청</router-link
+            >
           </div>
         </div>
 
@@ -138,7 +140,9 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorStudent">
-            <router-link to="/professor/leave-return" class="submenu-item">휴/복학 결재</router-link>
+            <router-link to="/professor/leave-return" class="submenu-item"
+              >휴/복학 결재</router-link
+            >
           </div>
         </div>
 
@@ -153,8 +157,12 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
-            <router-link to="/professor/lectures/create" class="submenu-item">강의 개설 (수강 계획서)</router-link>
-            <router-link to="/lectures" class="submenu-item">강의 조회 (시간표, 특강)</router-link>
+            <router-link to="/professor/lectures/create" class="submenu-item"
+              >강의 개설 (수강 계획서)</router-link
+            >
+            <router-link to="/lectures" class="submenu-item"
+              >강의 조회 (시간표, 특강)</router-link
+            >
           </div>
         </div>
 
@@ -169,8 +177,12 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorGrade">
-            <router-link to="/professor/grades/input" class="submenu-item">성적 입력</router-link>
-            <a href="#" class="submenu-item" @click.prevent="alertReady">성적 정정</a>
+            <router-link to="/professor/grades/input" class="submenu-item"
+              >성적 입력</router-link
+            >
+            <a href="#" class="submenu-item" @click.prevent="alertReady"
+              >성적 정정</a
+            >
           </div>
         </div>
 
@@ -210,9 +222,8 @@ const alertReady = () => {
 .sidebar {
   width: 240px;
   background-color: #fff;
-  border-right: 1px solid #edf2f7;
-  padding-top: 15px;
-  height: calc(100vh - 64px);
+  padding-top: 47px;
+  height: calc(100vh);
   position: sticky;
   top: 64px;
   box-sizing: border-box;
@@ -309,13 +320,5 @@ const alertReady = () => {
 
 .router-link-active.main-link {
   border-left: 4px solid #1a73e8;
-}
-
-.sidebar {
-  height: calc(100vh - 64px); /* Header 높이랑 맞추기 */
-  position: sticky;
-  top: 64px;
-  align-self: flex-start;
-  overflow-y: auto;
 }
 </style>
