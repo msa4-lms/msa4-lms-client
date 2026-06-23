@@ -16,7 +16,9 @@ export const useAcademicStore = defineStore("academic", () => {
   // 성적 조회 (연도 및 학기 필터링 추가)
   const fetchGrades = async (params = {}) => {
     try {
-      const res = await myAxios.get(`/api/student/academic/grades`);
+      const res = await myAxios.get(`/api/student/academic/grades`, {
+        params,
+      });
       if (res.data.code === "00") {
         gradeSummary.value = res.data.data;
       }
