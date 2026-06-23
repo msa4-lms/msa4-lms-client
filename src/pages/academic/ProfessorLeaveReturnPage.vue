@@ -203,7 +203,6 @@ const handleProcess = async (status) => {
   background: white;
   border-radius: 12px;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 
@@ -272,7 +271,6 @@ const handleProcess = async (status) => {
   width: 100%;
   max-width: 500px;
   padding: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
 }
 
 .modal-card h2 {

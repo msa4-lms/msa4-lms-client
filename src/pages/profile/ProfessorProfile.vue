@@ -165,7 +165,6 @@ const employmentRows = computed(() => [
   background: var(--personal-color-white);
   border: 1px solid #e5eaf2;
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
 }
 
 .profile-hero {

@@ -145,7 +145,6 @@ const handleSubmit = async () => {
   border-radius: 12px;
   padding: 24px;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .apply-section h3, .history-section h3 {
@@ -215,7 +214,6 @@ const handleSubmit = async () => {
   border-radius: 12px;
   padding: 24px;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
 }
 
 .reason-cell {

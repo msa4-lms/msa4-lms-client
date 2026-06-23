@@ -286,36 +286,31 @@ watch(
 .summary-card {
   background: white;
   border-radius: 12px;
-  padding: 24px;
-  display: flex;
-  align-items: center;
-  gap: 20px;
-  border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-}
-
-.card-info {
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid #edf2f7;
 }
 
-.label {
+.summary-card span {
   color: #64748b;
-  font-size: 0.88rem;
+  font-size: 0.95rem;
   font-weight: 600;
 }
 
 .summary-card strong {
-  display: block;
-  margin-top: 10px;
   color: #071f49;
-  font-size: 1.7rem;
+  font-size: 1.5rem;
+  font-weight: 700;
 }
 
 .summary-card strong small {
-  color: #94a3b8;
-  font-size: 1rem;
-  font-weight: 500;
+  color: #64748b;
+  font-size: 1.5rem;
+  font-weight: 700;
   margin-left: 4px;
 }
 
@@ -323,7 +318,6 @@ watch(
   background: var(--personal-color-white, #fff);
   border: 1px solid #e5eaf2;
   border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
   overflow: hidden;
 }
 
