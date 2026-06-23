@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed } from "vue";
+import { reactive, computed, onMounted, ref } from "vue";
 import { useRouter } from "vue-router";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
@@ -11,10 +11,16 @@ const lectureProfessorStore = useLectureProfessorStore();
 
 const form = reactive({
   semesterId: 53,
-  courseId: 61,
+  courseId: "",
+  isNewCourse: false,
+  newCourseName: "",
+  newCourseCredits: 3,
+  newCourseTargetGrade: 1,
+  newCourseCompletionType: "GENERAL_ELECTIVE",
   sectionNo: "01",
   capacity: 40,
   classroom: "",
+  syllabus: "",
   midtermRatio: 30,
   finalRatio: 30,
   assignmentRatio: 30,
@@ -27,6 +33,65 @@ const tempSchedule = reactive({
   startPeriod: 1,
   endPeriod: 2,
 });
+
+onMounted(() => {
+  lectureProfessorStore.fetchPastLectures();
+  lectureProfessorStore.fetchAvailableCourses();
+});
+
+const selectedPastLectureId = ref("");
+
+const handlePastLectureSelect = () => {
+  if (!selectedPastLectureId.value) return;
+  const target = lectureProfessorStore.pastLectures.find(l => l.id === selectedPastLectureId.value);
+  if (target) {
+    form.courseId = target.courseId;
+    form.isNewCourse = false;
+    form.capacity = target.capacity || 40;
+    form.classroom = target.classroom || "";
+    form.midtermRatio = target.midtermRatio || 30;
+    form.finalRatio = target.finalRatio || 30;
+    form.assignmentRatio = target.assignmentRatio || 30;
+    form.attendanceRatio = target.attendanceRatio || 10;
+    form.syllabus = target.syllabus || "";
+    
+    const parsedSchedules = parseScheduleString(target.schedule);
+    if (parsedSchedules.length > 0) {
+      form.schedules = parsedSchedules;
+    }
+    alert("과거 강의 정보를 성공적으로 불러왔습니다. 필요한 경우 과목을 변경하실 수 있습니다.");
+  }
+};
+
+const parseScheduleString = (scheduleStr) => {
+  if (!scheduleStr) return [];
+  const items = scheduleStr.split(', ');
+  const dayMap = { '월요일': 'MON', '화요일': 'TUE', '수요일': 'WED', '목요일': 'THU', '금요일': 'FRI' };
+  const parsed = [];
+  
+  items.forEach(item => {
+    const parts = item.split(' ');
+    if (parts.length >= 4) {
+      const dayLabel = parts[0];
+      const startTime = parts[1];
+      const endTime = parts[3];
+      
+      const dayOfWeek = dayMap[dayLabel];
+      const startHour = parseInt(startTime.split(':')[0], 10);
+      const endHour = parseInt(endTime.split(':')[0], 10);
+      
+      if (dayOfWeek && !isNaN(startHour) && !isNaN(endHour)) {
+        parsed.push({
+          dayOfWeek,
+          startPeriod: startHour - 8,
+          endPeriod: endHour - 8
+        });
+      }
+    }
+  });
+  return parsed;
+};
+
 
 const ratioTotal = computed(() => {
   return (
@@ -102,20 +167,72 @@ const handleSubmit = async () => {
           <div class="section-box">
             <h3 class="section-title">기본 정보 설정</h3>
             <div class="info-grid">
-              <div class="form-group">
-                <label for="courseId">과목</label>
+              <!-- 과거 강의 데이터 불러오기 영역 -->
+              <div class="form-group full-width past-lecture-section" style="background: var(--bg-color);">
+                <label for="pastLecture" style="color: var(--personal-color-black);">기존 개설강의</label>
+                <div style="display: flex; gap: 10px;">
+                  <select
+                    id="pastLecture"
+                    v-model="selectedPastLectureId"
+                    class="form-input select-day"
+                    style="flex: 1;"
+                  >
+                    <option value="">이전에 개설했던 강의를 선택하고 '불러오기'를 누르세요.</option>
+                    <option v-for="l in lectureProfessorStore.pastLectures" :key="l.id" :value="l.id">
+                      [{{ l.academicYear }}학년도 {{ l.term === 'FIRST' ? '1학기' : '2학기' }}] {{ l.courseName }}
+                    </option>
+                  </select>
+                  <MyButton
+                    type="button"
+                    color="deep-blue"
+                    size="middle"
+                    content="불러오기"
+                    @click="handlePastLectureSelect"
+                  />
+                </div>
+              </div>
+
+              <!-- 신규 개설을 위한 과목 선택 -->
+              <div class="form-group full-width">
+                <label for="courseId">과목 선택 (필수)</label>
                 <select
                   id="courseId"
                   v-model.number="form.courseId"
+                  @change="form.isNewCourse = (form.courseId === 0)"
                   required
                   class="form-input select-day"
                 >
-                  <option :value="61">[14101] 컴퓨터학부 전공-1</option>
-                  <option :value="62">[14102] 컴퓨터학부 전공-2</option>
-                  <option :value="63">[14103] 컴퓨터학부 전공-3</option>
-                  <option :value="64">[14104] 컴퓨터학부 전공-4</option>
-                  <option :value="65">[14105] 컴퓨터학부 전공-5</option>
+                  <option value="" disabled selected>개설할 과목을 선택하세요.</option>
+                  <option :value="0">신규과목 개설</option>
+                  <option v-for="c in lectureProfessorStore.availableCourses" :key="c.id" :value="c.id">
+                    [{{ c.code }}] {{ c.name }} ({{ c.credits }}학점 / {{ c.targetGrade }}학년)
+                  </option>
                 </select>
+              </div>
+
+              <!-- 직접 입력(신규 과목) 시 나타나는 추가 입력란 -->
+              <div v-if="form.isNewCourse" class="form-group full-width new-course-box" style="background: #f8fafc; padding: 0.8rem; border-radius: 8px; border: 1px dashed #cbd5e1; display: grid; grid-template-columns: 2fr 1fr 1fr 1.5fr; gap: 10px;">
+                <div style="display: flex; flex-direction: column;">
+                  <label style="font-size: 0.85rem;">과목명 (직접 입력)</label>
+                  <MyInput type="text" v-model="form.newCourseName" placeholder="예: 알기쉬운 현대미술" required class="form-input" />
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <label style="font-size: 0.85rem;">학점</label>
+                  <MyInput type="number" v-model.number="form.newCourseCredits" min="1" max="6" required class="form-input" />
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <label style="font-size: 0.85rem;">대상 학년</label>
+                  <MyInput type="number" v-model.number="form.newCourseTargetGrade" min="1" max="4" required class="form-input" />
+                </div>
+                <div style="display: flex; flex-direction: column;">
+                  <label style="font-size: 0.85rem;">이수 구분</label>
+                  <select v-model="form.newCourseCompletionType" class="form-input select-day" required style="height: 50px;">
+                    <option value="GENERAL_ELECTIVE">교양선택</option>
+                    <option value="GENERAL_REQUIRED">교양필수</option>
+                    <option value="MAJOR_ELECTIVE">전공선택</option>
+                    <option value="MAJOR_REQUIRED">전공필수</option>
+                  </select>
+                </div>
               </div>
 
               <div class="form-group">
@@ -156,6 +273,19 @@ const handleSubmit = async () => {
                   required
                   class="form-input"
                 />
+              </div>
+
+              <!-- 강의계획서 입력 영역 -->
+              <div class="form-group full-width">
+                <label for="syllabus">강의계획서</label>
+                <textarea
+                  id="syllabus"
+                  v-model="form.syllabus"
+                  placeholder="강의 목표, 교재, 주차별 계획 등을 상세히 입력해 주세요."
+                  required
+                  class="form-input"
+                  style="min-height: 150px; resize: vertical;"
+                ></textarea>
               </div>
             </div>
           </div>
@@ -268,7 +398,7 @@ const handleSubmit = async () => {
                 class="schedule-item"
               >
                 <span
-                  >📅 {{ getDayLabel(sched.dayOfWeek) }}
+                  >{{ getDayLabel(sched.dayOfWeek) }}
                   {{ sched.startPeriod }}교시 ~ {{ sched.endPeriod }}교시</span
                 >
                 <MyButton
@@ -427,7 +557,7 @@ label {
   justify-content: space-between;
   align-items: center;
   font-size: 0.95rem;
-  color: var(--secondary-blue);
+  color: var(--personal-color-black);
 }
 
 .schedule-item span {
