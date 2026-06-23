@@ -39,6 +39,24 @@ export const useAcademicStore = defineStore("academic", () => {
     }
   };
 
+  // 이의 신청 제출
+  const applyObjection = async (gradeId, reason) => {
+    try {
+      const res = await myAxios.post(`/api/student/grades/${gradeId}/objection`, reason, {
+        headers: {
+          'Content-Type': 'text/plain'
+        }
+      });
+      if (res.data.code === "00") {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      console.error("이의 신청 실패:", error);
+      throw error;
+    }
+  };
+
   const fetchAttendanceRates = async (params = {}) => {
     try {
       const res = await myAxios.get("/api/student/academic/attendance-rates", {
@@ -112,5 +130,6 @@ export const useAcademicStore = defineStore("academic", () => {
     fetchPendingExcuseRequests,
     requestExcuse,
     decideExcuseRequest,
+    applyObjection,
   };
 });

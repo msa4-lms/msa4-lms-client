@@ -1,7 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import router from "../../routes/router";
-
+import { useAuthStore } from "../auth/useAuthStore";
 export const useTabStore = defineStore("tab", () => {
   const tabs = ref([]);
   const activeTab = ref("");
@@ -51,15 +51,28 @@ export const useTabStore = defineStore("tab", () => {
 
   // 경로(path)나 이름(name)을 기반으로 사용자에게 보여줄 탭 제목 추출
   const getTitleByPath = (path, name) => {
+    const authStore = useAuthStore();
+    const role = authStore.userInfo?.role;
+    
     switch (path) {
       case "/main": return "메인 화면";
-      case "/lectures": return "개설강의조회";
-      case "/enrollments": return "수강신청내역";
-      case "/registration": return "수강신청";
-      case "/grade": return "성적조회";
-      case "/profile": return "내 정보";
-      case "/attendance": return "출석조회";
-      default: return name || "새 탭";
+      case "/profile": 
+        if (role === 'STUDENT') return "학적조회";
+        if (role === 'PROFESSOR') return "교적 조회";
+        return "내 정보";
+      case "/enrollments": return "시간표 조회";
+      case "/registration": return "수강 신청";
+      case "/grade": return "성적 조회";
+      case "/attendance": return "출결 조회";
+      case "/excuses": return "공결 신청";
+      case "/professor/lectures/create": return "강의 개설 (수강 계획서)";
+      case "/lectures": return "강의 조회 (시간표, 특강)";
+      case "/professor/grades/input": return "성적 입력";
+      case "/professor/grades/correct": return "성적 정정";
+      case "/students": return "사용자 관리";
+      case "/leave-return": return "휴/복학 신청";
+      case "/professor/leave-return": return "휴/복학 결재";
+      default: return name || "알 수 없음";
     }
   };
 

@@ -1,6 +1,6 @@
 <script setup>
-import { useTabStore } from '../../store/tab/useTabStore';
-import { useRouter } from 'vue-router';
+import { useTabStore } from "../../store/tab/useTabStore";
+import { useRouter } from "vue-router";
 
 const tabStore = useTabStore();
 const router = useRouter();
@@ -26,9 +26,7 @@ const closeTab = (path, event) => {
       @click="selectTab(tab.path)"
     >
       <span class="tab-title">{{ tab.title }}</span>
-      <button class="close-btn" @click="closeTab(tab.path, $event)">
-        ×
-      </button>
+      <button class="close-btn" @click="closeTab(tab.path, $event)">×</button>
     </div>
   </div>
 </template>
@@ -36,7 +34,7 @@ const closeTab = (path, event) => {
 <style scoped>
 .tab-bar {
   display: flex;
-  background-color: #e2e8f0;
+  background-color: #ffffff;
   padding: 8px 8px 0 8px;
   gap: 4px;
   overflow-x: auto;
@@ -55,8 +53,8 @@ const closeTab = (path, event) => {
 .tab-item {
   display: flex;
   align-items: center;
-  background-color: #f1f5f9;
-  color: #64748b;
+  background-color: #b5bdc9;
+  color: var(--personal-color-white);
   padding: 8px 16px;
   border-radius: 8px 8px 0 0;
   cursor: pointer;
@@ -70,12 +68,13 @@ const closeTab = (path, event) => {
 }
 
 .tab-item:hover {
-  background-color: #e2e8f0;
+  background-color: #eff2f7;
+  color: var(--primary-text-color);
 }
 
 .tab-item.active {
-  background-color: #ffffff;
-  color: #0b3d91;
+  background-color: var(--primary-color);
+  color: var(--personal-color-white);
   border-color: #cbd5e1;
 }
 

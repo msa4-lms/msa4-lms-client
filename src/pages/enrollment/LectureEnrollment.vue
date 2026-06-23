@@ -8,6 +8,7 @@ import MyInput from "../../components/input/MyInput.vue";
 import MyPagination from "../../components/pagination/MyPagination.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import CollegeDepartmentSelect from "../../components/search/CollegeDepartmentSelect.vue";
 import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
 
@@ -173,10 +174,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="lecture-list-container">
-    <div class="page-header">
-      <h2>수강 신청</h2>
-    </div>
+  <MyPageContainer title="수강 신청">
 
     <MySearchFilter @search="onSearch">
         <CollegeDepartmentSelect
@@ -295,15 +293,10 @@ onMounted(async () => {
         </tr>
       </MyTable>
     </section>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.lecture-list-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 50px;
-}
 
 .current-semester-info {
   display: flex;
@@ -340,11 +333,6 @@ onMounted(async () => {
   color: var(--primary-text-color);
   font-size: 0.85rem;
   line-height: 1.5;
-}
-
-.course-name {
-  color: #1a1f36;
-  font-weight: 600;
 }
 
 .my-enrollments-section {

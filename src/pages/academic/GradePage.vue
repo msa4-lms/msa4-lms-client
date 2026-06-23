@@ -1,33 +1,42 @@
 <script setup>
-import { onMounted, ref, computed } from 'vue';
-import { useAcademicStore } from '../../store/academic/useAcademicStore';
-import { useAuthStore } from '../../store/auth/useAuthStore';
-import MyButton from '../../components/button/MyButton.vue';
+import { ref, onMounted } from "vue";
+import { useAcademicStore } from "../../store/academic/useAcademicStore";
+import { useAuthStore } from "../../store/auth/useAuthStore";
+import MyTable from "../../components/table/MyTable.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
+import MyButton from "../../components/button/MyButton.vue";
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
 
-const now = new Date();
-const currentYear = now.getFullYear();
-const currentSemester = now.getMonth() + 1 >= 1 && now.getMonth() + 1 <= 6 ? 1 : 2;
+const gradeColumns = [
+  { key: "semester", label: "연도/학기" },
+  { key: "courseCode", label: "과목코드" },
+  { key: "courseName", label: "과목명" },
+  { key: "credits", label: "학점" },
+  { key: "grade", label: "등급" },
+];
 
-// select 박스에 바인딩된 값 (사용자가 변경하는 값)
-const selectedYear = ref(currentYear);
-const selectedSemester = ref(currentSemester);
+const isConfirmedGrade = (grade) => grade.status != null;
 
-// '조회' 버튼을 눌렀을 때 확정되는 값
-const searchedYear = ref(currentYear);
-const searchedSemester = ref(currentSemester);
+const getGradeLevel = (grade) => {
+  if (!grade) return "low";
+  if (grade.startsWith("A")) return "high";
+  if (grade.startsWith("B")) return "mid";
+  return "low";
+};
 
-const onSearch = () => {
-  // 조회 버튼 클릭 시에만 검색된 연도/학기 상태 업데이트 및 API 호출
-  searchedYear.value = selectedYear.value;
-  searchedSemester.value = selectedSemester.value;
-  
-  academicStore.fetchGrades({
-    year: searchedYear.value,
-    semester: searchedSemester.value
-  });
+// 진행 상태 표시 매핑
+const formatStatus = (status) => {
+  const map = {
+    DRAFT: "임시저장",
+    SUBMITTED: "제출완료",
+    OPENED: "공개됨",
+    OBJECTION: "이의신청 중",
+    APPROVED: "정정승인",
+    FINAL: "최종확정",
+  };
+  return map[status] || "미공개";
 };
 
 onMounted(async () => {
@@ -38,34 +47,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="grade-page">
-    <div class="page-heading">
-      <h2>성적 조회</h2>
-      <p>확정된 성적 및 전체 평균 평점(GPA)을 확인할 수 있습니다.</p>
-    </div>
-
-    <section class="filter-section">
-      <div class="filter-row">
-        <div class="filter-group">
-          <label>조회 연도</label>
-          <select v-model="selectedYear">
-            <option :value="2026">2026년</option>
-            <option :value="2025">2025년</option>
-            <option :value="2024">2024년</option>
-            <option :value="2023">2023년</option>
-          </select>
-        </div>
-        <div class="filter-group">
-          <label>학기</label>
-          <select v-model="selectedSemester">
-            <option :value="1">1학기</option>
-            <option :value="2">2학기</option>
-          </select>
-        </div>
-        <MyButton btnType="button" color="deep-blue" size="small" content="조회" @click="onSearch" />
-      </div>
-    </section>
-
+  <MyPageContainer title="성적 조회" subtitle="학기별 전체 학점 및 평균 평점(GPA)을 확인할 수 있습니다.">
     <div class="summary-grid">
       <section class="summary-card">
         <span>전체 평균 평점 (GPA)</span>
@@ -83,41 +65,31 @@ onMounted(async () => {
       <div class="card-header">
         <h2>학기별 상세 성적</h2>
       </div>
-      <table class="data-table">
-        <thead>
-          <tr>
-            <th>연도/학기</th>
-            <th>학수번호</th>
-            <th>교과목명</th>
-            <th>학점</th>
-            <th>출석률</th>
-            <th>등급</th>
-            <th>평점</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-if="academicStore.gradeSummary.semesterGrades?.length === 0">
-            <td colspan="7" class="no-data">
-              <div class="empty-state">
-                <p>조회된 상세 성적 내역이 없습니다.</p>
-              </div>
-            </td>
-          </tr>
-          <tr v-for="(grade, idx) in academicStore.gradeSummary.semesterGrades" :key="idx">
-            <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
-            <td class="code">{{ grade.courseCode }}</td>
-            <td class="course-name">{{ grade.courseName }}</td>
-            <td class="credit">{{ grade.credits }}</td>
-            <td>{{ grade.attendanceRate ? grade.attendanceRate + '%' : '-' }}</td>
-            <td>
-              <span class="grade-badge">{{ grade.grade || '-' }}</span>
-            </td>
-            <td>{{ grade.gradePoint ? grade.gradePoint.toFixed(1) : '-' }}</td>
-          </tr>
-        </tbody>
-      </table>
+
+      <MyTable
+        :columns="gradeColumns"
+        :empty="academicStore.gradeSummary.semesterGrades.length === 0"
+        emptyMessage="조회된 성적 내역이 없습니다."
+      >
+        <tr
+          v-for="(grade, index) in academicStore.gradeSummary.semesterGrades"
+          :key="index"
+        >
+          <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
+          <td class="code">{{ grade.courseCode }}</td>
+          <td class="name">{{ grade.courseName }}</td>
+          <td class="credit">{{ grade.credits }}</td>
+          <td class="grade">
+            <span v-if="isConfirmedGrade(grade)" :class="['grade-badge', getGradeLevel(grade.grade)]">
+              {{ grade.grade }}
+            </span>
+            <span v-else class="text-secondary">미입력</span>
+          </td>
+
+        </tr>
+      </MyTable>
     </div>
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
@@ -144,45 +116,6 @@ onMounted(async () => {
   font-size: 1rem;
 }
 
-.filter-section {
-  padding: 20px;
-  margin-bottom: 22px;
-  background: var(--personal-color-white, #fff);
-  border: 1px solid #e5eaf2;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
-}
-
-.filter-row {
-  display: flex;
-  gap: 16px;
-  align-items: flex-end;
-  flex-wrap: wrap;
-}
-
-.filter-group {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.filter-group label {
-  font-size: 0.85rem;
-  font-weight: 700;
-  color: #2f3a4f;
-}
-
-.filter-group select {
-  width: 220px;
-  height: 38px;
-  border: 1px solid #d9dee7;
-  border-radius: 4px;
-  padding: 8px 12px;
-  background: #fff;
-  color: #1f2937;
-  font-size: 0.92rem;
-}
-
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -191,17 +124,25 @@ onMounted(async () => {
 }
 
 .summary-card {
-  padding: 18px 20px;
-  background: var(--personal-color-white, #fff);
-  border: 1px solid #e5eaf2;
-  border-radius: 8px;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+  background: white;
+  border-radius: 12px;
+  padding: 24px;
+  display: flex;
+  align-items: center;
+  gap: 20px;
+  border: 1px solid #edf2f7;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
 }
 
-.summary-card span {
+.card-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.label {
   color: #64748b;
   font-size: 0.88rem;
-  font-weight: 700;
+  font-weight: 600;
 }
 
 .summary-card strong {
@@ -262,19 +203,10 @@ onMounted(async () => {
   border-bottom: 0;
 }
 
-.semester {
-  color: #1e293b;
-  font-weight: 600;
-}
 
 .code {
   color: #64748b;
   font-family: monospace;
-}
-
-.course-name {
-  color: #1a1f36;
-  font-weight: 700;
 }
 
 .credit {
@@ -288,7 +220,22 @@ onMounted(async () => {
   padding: 5px 10px;
   font-size: 0.82rem;
   font-weight: 700;
-  color: #0b3d91;
+  color: #1e293b;
+}
+
+.status-badge {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 4px;
+  background: #f1f5f9;
+  color: #94a3b8;
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.status-badge.confirmed {
+  background: #e0e7ff;
+  color: #4338ca;
 }
 
 .no-data {

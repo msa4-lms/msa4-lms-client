@@ -6,6 +6,7 @@ import MyInput from "../../components/input/MyInput.vue";
 import MyPagination from "../../components/pagination/MyPagination.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
+import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
 
 const lectureStore = useLectureStore();
@@ -59,10 +60,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="lecture-list-container">
-    <div class="page-header">
-      <h2>강의 조회</h2>
-    </div>
+  <MyPageContainer title="강의 조회">
 
     <MySearchFilter @search="onSearch">
         <div class="search-group">
@@ -137,15 +135,10 @@ onMounted(() => {
       :totalPages="totalPages"
       @page-change="goToPage"
     />
-  </div>
+  </MyPageContainer>
 </template>
 
 <style scoped>
-.lecture-list-container {
-  max-width: 1400px;
-  margin: 0 auto;
-  padding-bottom: 50px;
-}
 
 .col-classroom {
   width: 15%;
@@ -169,7 +162,4 @@ onMounted(() => {
   line-height: 1.5;
 }
 
-.course-name {
-  color: var(--primary-text-color);
-}
 </style>
