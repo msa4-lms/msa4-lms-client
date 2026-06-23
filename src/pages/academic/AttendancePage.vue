@@ -7,7 +7,6 @@ import { useAuthStore } from "../../store/auth/useAuthStore";
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
-const enrollmentStore = useEnrollmentStore();
 
 const labels = {
   pageStudent: "\uCD9C\uACB0 \uD604\uD669",
