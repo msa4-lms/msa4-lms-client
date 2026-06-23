@@ -67,7 +67,6 @@ const academicRows = computed(() => [
 
 <template>
   <MyPageContainer title="내 정보">
-
     <article class="profile-hero">
       <div class="student-intro">
         <div class="profile-image" aria-hidden="true"></div>
@@ -80,22 +79,19 @@ const academicRows = computed(() => [
 
           <ul class="quick-list" aria-label="학생 기본 요약">
             <li>
-              <span class="icon" aria-hidden="true">◆</span>
               <span>{{ student.department }} {{ student.grade }}</span>
             </li>
             <li>
-              <span class="icon" aria-hidden="true">◆</span>
               <span>학번 {{ student.studentNo }}</span>
             </li>
             <li>
-              <span class="icon" aria-hidden="true">◆</span>
               <span>{{ student.email }}</span>
             </li>
           </ul>
         </div>
       </div>
 
-      <div class="summary-grid">
+      <!-- <div class="summary-grid">
         <div
           v-for="item in summaryItems"
           :key="item.label"
@@ -105,7 +101,7 @@ const academicRows = computed(() => [
           <span class="summary-label">{{ item.label }}</span>
           <span>{{ item.value }}</span>
         </div>
-      </div>
+      </div> -->
     </article>
 
     <div class="info-grid">
