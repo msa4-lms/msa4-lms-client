@@ -12,6 +12,13 @@ const myAxios = axios.create({
 });
 
 myAxios.interceptors.request.use(async (config) => {
+  if (config.method === "get") {
+    config.params = {
+      ...config.params,
+      _t: new Date().getTime(),
+    };
+  }
+
   const authStore = useAuthStore();
   let accessToken = authStore.accessToken;
   const isReissueUrl = /^\/api\/auth\/reissue-token$/.test(config.url || "");

@@ -518,6 +518,24 @@ const handleSave = async () => {
 // 성적 제출
 const handleSubmitGrades = async () => {
   if (!selectedLectureId.value) return;
+
+  // 수정된(저장되지 않은) 성적이 있는지 검사
+  const hasUnsavedChanges = localGrades.value.some((localG) => {
+    const originalG = gradeStore.grades.find((g) => g.id === localG.id);
+    if (!originalG) return false;
+    return (
+      localG.midtermScore !== originalG.midtermScore ||
+      localG.finalScore !== originalG.finalScore ||
+      localG.assignmentScore !== originalG.assignmentScore ||
+      localG.attendanceScore !== originalG.attendanceScore
+    );
+  });
+
+  if (hasUnsavedChanges) {
+    alert("수정된 성적이 있습니다. 먼저 [임시저장]을 눌러 변경사항을 저장한 후 제출해주세요.");
+    return;
+  }
+
   if (
     !confirm(
       "성적을 최종 제출하시겠습니까? 제출 후 학생 공개 여부 결정 전까지만 수정 가능합니다."
