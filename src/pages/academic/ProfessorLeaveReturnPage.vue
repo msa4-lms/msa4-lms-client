@@ -19,11 +19,18 @@
               </span>
             </td>
             <td>{{ req.targetYear }}학년도 {{ req.targetSemester }}학기</td>
-            <td class="reason-cell" :title="req.reason">{{ truncate(req.reason, 20) }}</td>
+            <td class="reason-cell" :title="req.reason">
+              {{ truncate(req.reason, 20) }}
+            </td>
             <td>{{ formatDate(req.createdAt) }}</td>
             <td>
               <div class="action-buttons">
-                <MyButton color="deep-blue" size="small" content="상세/승인" @click="openModal(req)" />
+                <MyButton
+                  color="deep-blue"
+                  size="small"
+                  content="상세/승인"
+                  @click="openModal(req)"
+                />
               </div>
             </td>
           </tr>
@@ -39,7 +46,11 @@
           <div class="info-grid">
             <div class="info-row">
               <span class="label">이름(학번)</span>
-              <span class="value">{{ activeReq.studentName }} ({{ activeReq.studentLoginId }})</span>
+              <span class="value"
+                >{{ activeReq.studentName }} ({{
+                  activeReq.studentLoginId
+                }})</span
+              >
             </div>
             <div class="info-row">
               <span class="label">소속</span>
@@ -47,15 +58,26 @@
             </div>
             <div class="info-row">
               <span class="label">신청 유형</span>
-              <span class="value font-bold">{{ formatRequestType(activeReq.requestType) }}</span>
+              <span class="value font-bold">{{
+                formatRequestType(activeReq.requestType)
+              }}</span>
             </div>
             <div class="info-row">
               <span class="label">적용 학기</span>
-              <span class="value">{{ activeReq.targetYear }}학년도 {{ activeReq.targetSemester }}학기</span>
+              <span class="value"
+                >{{ activeReq.targetYear }}학년도
+                {{ activeReq.targetSemester }}학기</span
+              >
             </div>
-            <div v-if="activeReq.requestType === 'LEAVE' && activeReq.returnYear" class="info-row">
+            <div
+              v-if="activeReq.requestType === 'LEAVE' && activeReq.returnYear"
+              class="info-row"
+            >
               <span class="label">복학 예정</span>
-              <span class="value">{{ activeReq.returnYear }}학년도 {{ activeReq.returnSemester }}학기</span>
+              <span class="value"
+                >{{ activeReq.returnYear }}학년도
+                {{ activeReq.returnSemester }}학기</span
+              >
             </div>
             <div class="info-row reason-row">
               <span class="label">신청 사유</span>
@@ -75,9 +97,24 @@
         </div>
 
         <div class="modal-actions">
-          <MyButton color="white" size="small" content="닫기" @click="closeModal" />
-          <MyButton color="error" size="small" content="반려 처리" @click="handleProcess('REJECTED')" />
-          <MyButton color="deep-blue" size="small" content="승인 처리" @click="handleProcess('APPROVED')" />
+          <MyButton
+            color="white"
+            size="small"
+            content="닫기"
+            @click="closeModal"
+          />
+          <MyButton
+            color="error"
+            size="small"
+            content="반려 처리"
+            @click="handleProcess('REJECTED')"
+          />
+          <MyButton
+            color="deep-blue"
+            size="small"
+            content="승인 처리"
+            @click="handleProcess('APPROVED')"
+          />
         </div>
       </div>
     </div>
@@ -143,14 +180,14 @@ const handleProcess = async (status) => {
     alert("반려 시 반려 사유를 반드시 입력해야 합니다.");
     return;
   }
-  
+
   const actionName = status === "APPROVED" ? "승인" : "반려";
   if (!confirm(`해당 신청을 ${actionName} 처리하시겠습니까?`)) return;
 
   try {
     await store.processRequest(activeReq.value.id, {
       status,
-      rejectReason: status === "REJECTED" ? rejectReason.value : null
+      rejectReason: status === "REJECTED" ? rejectReason.value : null,
     });
     alert(`${actionName} 처리가 완료되었습니다.`);
     closeModal();
@@ -166,7 +203,7 @@ const handleProcess = async (status) => {
   background: white;
   border-radius: 12px;
   border: 1px solid #edf2f7;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   overflow: hidden;
 }
 

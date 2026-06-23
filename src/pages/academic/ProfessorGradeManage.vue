@@ -8,7 +8,6 @@
       style="margin-top: 50px"
     >
       <div class="empty-state">
-        <span class="empty-icon">🚧</span>
         <p>기능 구현 준비 중입니다.</p>
       </div>
     </div>
@@ -169,7 +168,6 @@
     <!-- 미선택 빈 화면 상태 -->
     <div v-else class="welcome-section">
       <div class="empty-state">
-        <span class="empty-icon">🎓</span>
         <p>상단에서 관리하실 강좌를 선택해 주세요.</p>
       </div>
     </div>
@@ -402,10 +400,6 @@ const hasObjectionValidationError = computed(() => {
   );
 });
 
-
-
-
-
 onMounted(async () => {
   try {
     await lectureStore.fetchProfessorLectures();
@@ -507,7 +501,9 @@ const handleSubmitGrades = async () => {
   });
 
   if (hasUnsavedChanges) {
-    alert("수정된 성적이 있습니다. 먼저 [임시저장]을 눌러 변경사항을 저장한 후 제출해주세요.");
+    alert(
+      "수정된 성적이 있습니다. 먼저 [임시저장]을 눌러 변경사항을 저장한 후 제출해주세요."
+    );
     return;
   }
 
@@ -652,12 +648,6 @@ const handleObjectionApprove = async () => {
   display: flex;
   gap: 8px;
 }
-
-
-
-
-
-
 
 /* 입력 필드 크기 및 형태 */
 .table-input {
