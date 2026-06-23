@@ -93,6 +93,29 @@ onMounted(async () => {
 </template>
 
 <style scoped>
+.grade-page {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 20px;
+  color: var(--primary-text-color);
+}
+
+.page-heading {
+  padding-bottom: 10px;
+}
+
+.page-heading h2 {
+  margin-bottom: 8px;
+  color: var(--primary-text-color);
+  letter-spacing: 0;
+  font-size: 1.5rem;
+}
+
+.page-heading p {
+  color: var(--primary-text-color);
+  font-size: 1rem;
+}
+
 .summary-grid {
   display: grid;
   grid-template-columns: repeat(3, minmax(0, 1fr));
@@ -149,12 +172,42 @@ onMounted(async () => {
   border-bottom: 1px solid #edf2f7;
 }
 
-.card-header h3 {
+.card-header h2 {
   color: #1a1f36;
   font-size: 1.1rem;
 }
 
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  text-align: center;
+}
 
+.data-table th {
+  background-color: #f8f9fa;
+  border-bottom: 2px solid #edf2f7;
+  color: #4f566b;
+  font-size: 0.85rem;
+  padding: 13px 16px;
+  white-space: nowrap;
+}
+
+.data-table td {
+  border-bottom: 1px solid #edf2f7;
+  color: #334155;
+  font-size: 0.9rem;
+  padding: 14px 16px;
+}
+
+.data-table tr:last-child td {
+  border-bottom: 0;
+}
+
+
+.code {
+  color: #64748b;
+  font-family: monospace;
+}
 
 .credit {
   font-weight: 500;
@@ -166,125 +219,23 @@ onMounted(async () => {
   border-radius: 8px;
   padding: 5px 10px;
   font-size: 0.82rem;
-  font-weight: 600;
+  font-weight: 700;
   color: #1e293b;
 }
 
 .status-badge {
   display: inline-flex;
-  padding: 4px 8px;
+  padding: 2px 8px;
   border-radius: 4px;
+  background: #f1f5f9;
+  color: #94a3b8;
   font-size: 0.75rem;
   font-weight: 600;
-  border: 1px solid transparent;
 }
 
-.status-badge.draft {
-  background: #f1f5f9;
-  color: #64748b;
-}
-
-.status-badge.submitted {
-  background: #eff6ff;
-  color: #2563eb;
-  border-color: #bfdbfe;
-}
-
-.status-badge.opened {
-  background: #fffbeb;
-  color: #d97706;
-  border-color: #fde68a;
-}
-
-.status-badge.objection {
-  background: #fef2f2;
-  color: #dc2626;
-  border-color: #fca5a5;
-}
-
-.status-badge.approved {
-  background: #ecfdf5;
-  color: #059669;
-  border-color: #a7f3d0;
-}
-
-.status-badge.final {
+.status-badge.confirmed {
   background: #e0e7ff;
   color: #4338ca;
-  border-color: #c7d2fe;
-}
-
-.text-secondary {
-  color: #94a3b8;
-}
-
-/* 모달 디자인 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  backdrop-filter: blur(4px);
-}
-
-.modal-card {
-  background: white;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 500px;
-  padding: 24px;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.modal-card h2 {
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #edf2f7;
-  padding-bottom: 12px;
-  text-align: left;
-  color: #1a1f36;
-  font-weight: 600;
-}
-
-.modal-body {
-  margin-bottom: 24px;
-  text-align: left;
-}
-
-.modal-desc {
-  font-size: 0.9rem;
-  color: #64748b;
-  margin-bottom: 12px;
-  line-height: 1.5;
-}
-
-.form-textarea {
-  width: 100%;
-  border: 1px solid #cbd5e1;
-  border-radius: 6px;
-  padding: 12px;
-  font-size: 0.95rem;
-  font-family: inherit;
-  resize: vertical;
-  box-sizing: border-box;
-}
-
-.form-textarea:focus {
-  outline: none;
-  border-color: #3b82f6;
-  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-}
-
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 12px;
 }
 
 .no-data {
@@ -302,11 +253,6 @@ onMounted(async () => {
 .empty-state p {
   color: #64748b;
   line-height: 1.6;
-}
-
-.empty-state small {
-  font-size: 0.8rem;
-  color: #94a3b8;
 }
 </style>
 

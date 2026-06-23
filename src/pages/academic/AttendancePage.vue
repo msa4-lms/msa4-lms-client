@@ -7,7 +7,6 @@ import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyTable from "../../components/table/MyTable.vue";
-import StatusBadge from "../../components/common/StatusBadge.vue";
 
 const academicStore = useAcademicStore();
 const authStore = useAuthStore();
@@ -27,7 +26,6 @@ const labels = {
   yearSuffix: "\uB144",
   search: "\uC870\uD68C",
   subject: "\uACFC\uBAA9",
-  subjectName: "\uACFC\uBAA9\uBA85",
   date: "\uB0A0\uC9DC",
   period: "\uAD50\uC2DC",
   reason: "\uC0AC\uC720",
@@ -38,13 +36,12 @@ const labels = {
   totalClass: "\uC804\uCCB4 \uC218\uC5C5",
   rate: "\uCD9C\uC11D\uB960",
   status: "\uC0C1\uD0DC",
-  normal: "\uC815\uC0C1",
-  warning: "\uACBD\uACE0",
   emptyRate: "\uCD9C\uC11D\uB960 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.",
   emptyAttendance: "\uB4F1\uB85D\uB41C \uCD9C\uACB0 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
   emptyExcuse: "\uACF5\uACB0 \uC2E0\uCCAD \uB0B4\uC5ED\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
   emptyPending: "\uC2B9\uC778 \uB300\uAE30 \uC911\uC778 \uACF5\uACB0 \uC2E0\uCCAD\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
   loading: "\uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC624\uB294 \uC911\uC785\uB2C8\uB2E4.",
+  back: "뒤로가기",
 };
 
 const rateColumns = [
@@ -52,7 +49,6 @@ const rateColumns = [
   { key: "accepted", label: "인정 출석" },
   { key: "total", label: "전체 수업" },
   { key: "rate", label: "출석률" },
-  { key: "status", label: "상태" },
 ];
 
 const attendanceColumns = [
@@ -70,10 +66,18 @@ const pendingColumns = [
   { key: "status", label: "상태" },
 ];
 
+const attendanceStatusLabel = {
+  PRESENT: "출석",
+  ABSENT: "결석",
+  LATE: "지각",
+  TARDY: "지각",
+  EXCUSED: "공결",
+};
+
 const enrollments = ref([]);
 const loading = ref(false);
+const selectedCourseName = ref("");
 const searchParams = reactive({
-  keyword: "",
   year: 2026,
   semester: 1,
 });
@@ -85,15 +89,13 @@ const targetTermText = computed(() => {
   return `${searchParams.year}${labels.yearSuffix} ${searchParams.semester}${labels.semester}`;
 });
 
-const normalizedKeyword = computed(() => searchParams.keyword.trim().toLowerCase());
-const filteredRates = computed(() => {
-  if (!normalizedKeyword.value) return academicStore.attendanceRates;
-  return academicStore.attendanceRates.filter((item) => item.courseName?.toLowerCase().includes(normalizedKeyword.value));
-});
+const filteredRates = computed(() => academicStore.attendanceRates);
 
 const filteredAttendance = computed(() => {
-  if (!normalizedKeyword.value) return academicStore.attendanceList;
-  return academicStore.attendanceList.filter((item) => item.courseName?.toLowerCase().includes(normalizedKeyword.value));
+  if (selectedCourseName.value) {
+    return academicStore.attendanceList.filter((item) => item.courseName === selectedCourseName.value);
+  }
+  return [];
 });
 
 const formatRate = (rate) => {
@@ -101,7 +103,17 @@ const formatRate = (rate) => {
   return `${Number(rate).toFixed(1)}%`;
 };
 
-const isWarningRate = (rate) => Number(rate.attendanceRate) < 80;
+const getAttendanceStatusClass = (status) => {
+  return `attendance-status ${String(status || "").toLowerCase()}`;
+};
+
+const selectCourse = (courseName) => {
+  selectedCourseName.value = courseName;
+};
+
+const clearSelectedCourse = () => {
+  selectedCourseName.value = "";
+};
 
 const loadEnrollments = async () => {
   try {
@@ -146,6 +158,7 @@ const loadProfessorData = async () => {
 
 const onSearch = async () => {
   if (isStudent.value) {
+    clearSelectedCourse();
     await loadStudentData();
   }
 };
@@ -169,10 +182,6 @@ onMounted(async () => {
   <MyPageContainer :title="isProfessor ? labels.pageProfessor : labels.pageStudent">
     <template v-if="isStudent">
       <MySearchFilter @search="onSearch" :submitText="labels.search">
-          <div class="search-group wide">
-            <label>{{ labels.subjectName }}</label>
-            <input v-model="searchParams.keyword" type="text" placeholder="과목명 입력" @keyup.enter="onSearch" />
-          </div>
           <div class="search-group compact">
             <label>{{ labels.year }}</label>
             <select v-model="searchParams.year">
@@ -195,7 +204,7 @@ onMounted(async () => {
           </div>
       </MySearchFilter>
 
-      <section class="panel">
+      <section v-if="!selectedCourseName" class="panel">
         <div class="panel-title">
           <h3>{{ labels.rateTitle }}</h3>
         </div>
@@ -205,26 +214,37 @@ onMounted(async () => {
           :empty="filteredRates.length === 0"
           :emptyMessage="labels.emptyRate"
         >
-          <tr v-for="rate in filteredRates" :key="rate.enrollmentId">
+          <tr
+            v-for="rate in filteredRates"
+            :key="rate.enrollmentId"
+            :class="['clickable-row', { selected: selectedCourseName === rate.courseName }]"
+            @click="selectCourse(rate.courseName)"
+          >
             <td class="course-name">{{ rate.courseName }}</td>
             <td>{{ rate.attendedCount }}</td>
             <td>{{ rate.totalCount }}</td>
             <td>
-              <span :class="['rate-text', { danger: isWarningRate(rate) }]">
+              <span class="rate-text">
                 {{ formatRate(rate.attendanceRate) }}
               </span>
-            </td>
-            <td>
-              <StatusBadge :status="isWarningRate(rate) ? 'ABSENT' : 'PRESENT'" />
             </td>
           </tr>
         </MyTable>
       </section>
 
-      <div class="table-grid single">
+      <div v-else class="table-grid single">
         <section class="panel">
           <div class="panel-title">
-            <h3>{{ labels.recentTitle }}</h3>
+            <h3>
+              {{ selectedCourseName }}
+            </h3>
+            <MyButton
+              btnType="button"
+              color="deep-blue"
+              size="small"
+              :content="labels.back"
+              @click="clearSelectedCourse"
+            />
           </div>
           <MyTable
             :columns="attendanceColumns"
@@ -240,7 +260,9 @@ onMounted(async () => {
               <td>{{ att.lectureDate }}</td>
               <td>{{ att.period }}</td>
               <td>
-                <StatusBadge :status="att.status" />
+                <span :class="getAttendanceStatusClass(att.status)">
+                  {{ attendanceStatusLabel[att.status] || att.status }}
+                </span>
               </td>
             </tr>
           </MyTable>
@@ -316,8 +338,37 @@ onMounted(async () => {
   background: #2454bf;
 }
 
-.rate-text.danger {
-  color: #dc2626;
+.clickable-row {
+  cursor: pointer;
+}
+
+.clickable-row:hover {
+  background: #f8fbff;
+}
+
+.clickable-row.selected {
+  background: #eef4ff;
+}
+
+.attendance-status {
+  display: inline;
+  background: transparent;
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.attendance-status.present,
+.attendance-status.excused {
+  color: #137333;
+}
+
+.attendance-status.absent {
+  color: #c5221f;
+}
+
+.attendance-status.late,
+.attendance-status.tardy {
+  color: #b06000;
 }
 
 .panel {
@@ -326,6 +377,10 @@ onMounted(async () => {
 }
 
 .panel-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
   padding: 16px 20px;
   border-bottom: 1px solid #edf2f7;
 }
@@ -335,8 +390,6 @@ onMounted(async () => {
   font-size: 1rem;
   font-weight: 600;
 }
-
-
 
 .table-grid {
   display: grid;
