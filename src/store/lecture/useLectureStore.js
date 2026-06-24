@@ -23,6 +23,21 @@ export const useLectureStore = defineStore('lecture', () => {
         }
     };
 
+    const fetchMyLectures = async (searchParams) => {
+        loading.value = true;
+        try {
+            const response = await myAxios.get('/api/professor/lectures', { params: searchParams });
+            if (response.data.code === '00') {
+                lectures.value = response.data.data;
+                totalCount.value = response.data.data.length;
+            }
+        } catch (error) {
+            console.error('나의 강의 조회 실패:', error);
+        } finally {
+            loading.value = false;
+        }
+    };
+
     const fetchColleges = async () => {
         try {
             const response = await myAxios.get('/api/lectures/colleges');
@@ -40,6 +55,7 @@ export const useLectureStore = defineStore('lecture', () => {
         loading,
         colleges,
         fetchLectures,
+        fetchMyLectures,
         fetchColleges,
     };
 });
