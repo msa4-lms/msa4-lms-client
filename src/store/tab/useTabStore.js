@@ -70,8 +70,8 @@ export const useTabStore = defineStore("tab", () => {
       case "/grade": return "성적 조회";
       case "/attendance": return "출결 조회";
       case "/excuses": return "공결 신청";
-      case "/professor/lectures/create": return "강의 개설 (수강 계획서)";
-      case "/lectures": return "강의 조회 (시간표, 특강)";
+      case "/professor/lectures/create": return "강의 개설";
+      case "/lectures": return "강의 조회";
       case "/professor/grades/input": return "성적 입력";
       case "/professor/grades/correct": return "성적 정정";
       case "/students": return "사용자 관리";

@@ -729,7 +729,6 @@ const handleObjectionApprove = async () => {
   width: 100%;
   max-width: 580px;
   padding: 24px;
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
 }
 
 .modal-card h2 {
