@@ -14,11 +14,20 @@ const emit = defineEmits(["update:visibleRange"]);
 const calendarRef = ref(null);
 const calendarTitle = ref("");
 
+const addOneDay = (date) => {
+  if (!date) return null;
+
+  const d = new Date(date);
+  d.setDate(d.getDate() + 1);
+
+  return d.toISOString().split("T")[0];
+};
+
 const events = computed(() =>
   props.schedules.map((schedule) => ({
     title: schedule.title,
     start: schedule.startDate,
-    end: schedule.endDate,
+    end: addOneDay(schedule.endDate || schedule.startDate),
     backgroundColor:
       schedule.targetRole === "STUDENT"
         ? "var(--personal-color-green)"
@@ -64,7 +73,9 @@ const calendarOptions = {
       >
         ‹
       </button>
+
       <h3 class="calendar-title">{{ calendarTitle }}</h3>
+
       <button
         class="calendar-nav-button"
         type="button"
