@@ -697,10 +697,7 @@ const handleObjectionApprove = async () => {
 }
 
 .validation-error-alert {
-  background-color: #fef2f2;
-  border: 1px solid #fca5a5;
-  color: #dc2626;
-  padding: 12px 16px;
+  color: var(--primary-color);
   border-radius: 8px;
   margin-bottom: 20px;
   font-size: 0.9rem;

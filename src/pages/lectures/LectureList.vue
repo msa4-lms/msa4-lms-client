@@ -1,13 +1,10 @@
 <script setup>
-import { computed, onMounted, ref } from "vue";
+import { ref, onMounted } from "vue";
 import { useLectureStore } from "../../store/lecture/useLectureStore";
-import MyButton from "../../components/button/MyButton.vue";
-import MyInput from "../../components/input/MyInput.vue";
-import MyPagination from "../../components/pagination/MyPagination.vue";
 import MyTable from "../../components/table/MyTable.vue";
-import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
+import MySearchFilter from "../../components/search/MySearchFilter.vue";
 
 const lectureStore = useLectureStore();
 
@@ -17,14 +14,13 @@ const currentMonth = now.getMonth() + 1;
 const currentSemester = currentMonth >= 1 && currentMonth <= 6 ? 1 : 2;
 
 const searchParams = ref({
-  courseName: "",
-  professorName: "",
-  departmentName: "",
   year: currentYear,
   semester: currentSemester,
-  page: 1,
-  size: 10,
 });
+
+const onSearch = () => {
+  lectureStore.fetchMyLectures(searchParams.value);
+};
 
 const lectureColumns = [
   { key: "courseCode", label: "과목코드" },
@@ -38,58 +34,17 @@ const lectureColumns = [
   { key: "capacity", label: "정원", class: "col-capacity" },
 ];
 
-const onSearch = () => {
-  searchParams.value.page = 1;
-  lectureStore.fetchLectures(searchParams.value);
-};
-
-const goToPage = (page) => {
-  searchParams.value.page = page;
-  lectureStore.fetchLectures(searchParams.value);
-};
-
-const totalPages = computed(() =>
-  Math.ceil(lectureStore.totalCount / searchParams.value.size)
-);
-
 onMounted(() => {
   lectureStore.lectures = [];
   lectureStore.totalCount = 0;
-  lectureStore.fetchLectures(searchParams.value);
+  lectureStore.fetchMyLectures(searchParams.value);
 });
 </script>
 
 <template>
-  <MyPageContainer title="강의 조회">
+  <MyPageContainer title="나의 강의 조회">
 
     <MySearchFilter @search="onSearch">
-        <div class="search-group">
-          <label>학과</label>
-          <MyInput
-            v-model="searchParams.departmentName"
-            placeholder="학과명 입력"
-            @keyup-enter="onSearch"
-          />
-        </div>
-
-        <div class="search-group">
-          <label>강의명</label>
-          <MyInput
-            v-model="searchParams.courseName"
-            placeholder="강의명 입력"
-            @keyup-enter="onSearch"
-          />
-        </div>
-
-        <div class="search-group">
-          <label>교수명</label>
-          <MyInput
-            v-model="searchParams.professorName"
-            placeholder="교수명 입력"
-            @keyup-enter="onSearch"
-          />
-        </div>
-
         <div class="search-group">
           <label>연도</label>
           <select v-model="searchParams.year">
@@ -129,12 +84,6 @@ onMounted(() => {
         <td>{{ lecture.capacity }}명</td>
       </tr>
     </MyTable>
-
-    <MyPagination
-      :currentPage="searchParams.page"
-      :totalPages="totalPages"
-      @page-change="goToPage"
-    />
   </MyPageContainer>
 </template>
 

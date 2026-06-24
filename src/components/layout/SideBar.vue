@@ -1,6 +1,7 @@
 <script setup>
 import { ref } from "vue";
 import { useAuthStore } from "../../store/auth/useAuthStore";
+import { getMenuTitle } from "../../config/menuConfig";
 
 const authStore = useAuthStore();
 
@@ -29,14 +30,14 @@ const alertReady = () => {
   <aside class="sidebar">
     <nav class="sidebar-nav">
       <!-- 메인 화면 링크 -->
-      <router-link to="/main" class="nav-item main-link">메인 화면</router-link>
+      <router-link to="/main" class="nav-item main-link">{{ getMenuTitle('/main') }}</router-link>
 
       <!-- 학생 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
         <!-- 학사관리 -->
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('studentAcademic')">
-            <span>학사관리</span>
+            <span>학사 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentAcademic }"
@@ -45,10 +46,10 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAcademic">
             <router-link to="/profile" class="submenu-item"
-              >학적조회</router-link
+              >{{ getMenuTitle('/profile', 'STUDENT') }}</router-link
             >
             <router-link to="/leave-return" class="submenu-item"
-              >휴/복학 신청</router-link
+              >{{ getMenuTitle('/leave-return') }}</router-link
             >
           </div>
         </div>
@@ -65,10 +66,10 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.studentCourse">
             <router-link to="/enrollments" class="submenu-item"
-              >시간표 조회</router-link
+              >{{ getMenuTitle('/enrollments') }}</router-link
             >
             <router-link to="/registration" class="submenu-item"
-              >수강 신청</router-link
+              >{{ getMenuTitle('/registration') }}</router-link
             >
           </div>
         </div>
@@ -85,7 +86,7 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.studentGrade">
             <router-link to="/grade" class="submenu-item"
-              >성적 조회</router-link
+              >{{ getMenuTitle('/grade') }}</router-link
             >
           </div>
         </div>
@@ -102,10 +103,10 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAttendance">
             <router-link to="/attendance" class="submenu-item"
-              >출결 조회</router-link
+              >{{ getMenuTitle('/attendance') }}</router-link
             >
             <router-link to="/excuses" class="submenu-item"
-              >공결 신청</router-link
+              >{{ getMenuTitle('/excuses') }}</router-link
             >
           </div>
         </div>
@@ -115,7 +116,7 @@ const alertReady = () => {
         <!-- 교사관리 -->
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('professorTeacher')">
-            <span>교사관리</span>
+            <span>교사 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.professorTeacher }"
@@ -124,7 +125,7 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.professorTeacher">
             <router-link to="/profile" class="submenu-item"
-              >교적 조회</router-link
+              >{{ getMenuTitle('/profile', 'PROFESSOR') }}</router-link
             >
           </div>
         </div>
@@ -141,7 +142,7 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.professorStudent">
             <router-link to="/professor/leave-return" class="submenu-item"
-              >휴/복학 결재</router-link
+              >{{ getMenuTitle('/professor/leave-return') }}</router-link
             >
           </div>
         </div>
@@ -158,10 +159,10 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
             <router-link to="/professor/lectures/create" class="submenu-item"
-              >강의 개설</router-link
+              >{{ getMenuTitle('/professor/lectures/create') }}</router-link
             >
             <router-link to="/lectures" class="submenu-item"
-              >강의 조회</router-link
+              >{{ getMenuTitle('/lectures') }}</router-link
             >
           </div>
         </div>
@@ -178,10 +179,10 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.professorGrade">
             <router-link to="/professor/grades/input" class="submenu-item"
-              >성적 입력</router-link
+              >{{ getMenuTitle('/professor/grades/input') }}</router-link
             >
             <a href="#" class="submenu-item" @click.prevent="alertReady"
-              >성적 정정</a
+              >{{ getMenuTitle('/professor/grades/correct') }}</a
             >
           </div>
         </div>
@@ -211,8 +212,8 @@ const alertReady = () => {
       </template>
 
       <template v-if="authStore.userInfo?.role === 'ADMIN'">
-        <router-link to="/students" class="nav-item">사용자 관리</router-link>
-        <router-link to="/profile" class="nav-item">내 정보</router-link>
+        <router-link to="/students" class="nav-item">{{ getMenuTitle('/students') }}</router-link>
+        <router-link to="/profile" class="nav-item">{{ getMenuTitle('/profile', 'ADMIN') }}</router-link>
       </template>
     </nav>
   </aside>
