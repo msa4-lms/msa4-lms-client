@@ -39,93 +39,92 @@
     </div>
 
     <!-- 결재 처리 모달 -->
-    <div v-if="isModalOpen" class="modal-overlay">
-      <div class="modal-card">
-        <h2>학적 변동 결재</h2>
-        <div class="modal-body">
-          <div class="info-grid">
-            <div class="info-row">
-              <span class="label">이름(학번)</span>
-              <span class="value"
-                >{{ activeReq.studentName }} ({{
-                  activeReq.studentLoginId
-                }})</span
-              >
-            </div>
-            <div class="info-row">
-              <span class="label">소속</span>
-              <span class="value">{{ activeReq.departmentName }}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">신청 유형</span>
-              <span class="value font-bold">{{
-                formatRequestType(activeReq.requestType)
-              }}</span>
-            </div>
-            <div class="info-row">
-              <span class="label">적용 학기</span>
-              <span class="value"
-                >{{ activeReq.targetYear }}학년도
-                {{ activeReq.targetSemester }}학기</span
-              >
-            </div>
-            <div
-              v-if="activeReq.requestType === 'LEAVE' && activeReq.returnYear"
-              class="info-row"
-            >
-              <span class="label">복학 예정</span>
-              <span class="value"
-                >{{ activeReq.returnYear }}학년도
-                {{ activeReq.returnSemester }}학기</span
-              >
-            </div>
-            <div class="info-row reason-row">
-              <span class="label">신청 사유</span>
-              <div class="value reason-box">{{ activeReq.reason }}</div>
-            </div>
-          </div>
-
-          <div class="approval-form">
-            <label>반려 사유 (반려 시 필수)</label>
-            <textarea
-              v-model="rejectReason"
-              rows="3"
-              class="form-textarea"
-              placeholder="반려 사유를 입력하세요."
-            ></textarea>
-          </div>
+    <MyModal
+      :isOpen="isModalOpen"
+      title="학적 변동 결재"
+      @close="closeModal"
+    >
+      <div class="info-grid">
+        <div class="info-row">
+          <span class="label">이름(학번)</span>
+          <span class="value"
+            >{{ activeReq.studentName }} ({{
+              activeReq.studentLoginId
+            }})</span
+          >
         </div>
-
-        <div class="modal-actions">
-          <MyButton
-            color="white"
-            size="small"
-            content="닫기"
-            @click="closeModal"
-          />
-          <MyButton
-            color="error"
-            size="small"
-            content="반려 처리"
-            @click="handleProcess('REJECTED')"
-          />
-          <MyButton
-            color="deep-blue"
-            size="small"
-            content="승인 처리"
-            @click="handleProcess('APPROVED')"
-          />
+        <div class="info-row">
+          <span class="label">소속</span>
+          <span class="value">{{ activeReq.departmentName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">신청 유형</span>
+          <span class="value font-bold">{{
+            formatRequestType(activeReq.requestType)
+          }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">적용 학기</span>
+          <span class="value"
+            >{{ activeReq.targetYear }}학년도
+            {{ activeReq.targetSemester }}학기</span
+          >
+        </div>
+        <div
+          v-if="activeReq.requestType === 'LEAVE' && activeReq.returnYear"
+          class="info-row"
+        >
+          <span class="label">복학 예정</span>
+          <span class="value"
+            >{{ activeReq.returnYear }}학년도
+            {{ activeReq.returnSemester }}학기</span
+          >
+        </div>
+        <div class="info-row reason-row">
+          <span class="label">신청 사유</span>
+          <div class="value reason-box">{{ activeReq.reason }}</div>
         </div>
       </div>
-    </div>
+
+      <div class="approval-form">
+        <label>반려 사유 (반려 시 필수)</label>
+        <textarea
+          v-model="rejectReason"
+          rows="3"
+          class="form-textarea"
+          placeholder="반려 사유를 입력하세요."
+        ></textarea>
+      </div>
+      
+      <template #footer>
+        <MyButton
+          color="white"
+          size="small"
+          content="닫기"
+          @click="closeModal"
+        />
+        <MyButton
+          color="error"
+          size="small"
+          content="반려 처리"
+          @click="handleProcess('REJECTED')"
+        />
+        <MyButton
+          color="deep-blue"
+          size="small"
+          content="승인 처리"
+          @click="handleProcess('APPROVED')"
+        />
+      </template>
+    </MyModal>
   </MyPageContainer>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MyButton from "../../components/button/MyButton.vue";
+import MyModal from "../../components/common/MyModal.vue";
 import { useLeaveReturnStore } from "../../store/leaveReturn/useLeaveReturnStore";
 
 defineOptions({ name: "ProfessorLeaveReturnPage" });
@@ -250,37 +249,6 @@ const handleProcess = async (status) => {
   justify-content: center;
 }
 
-/* 모달 디자인 */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  backdrop-filter: blur(4px);
-}
-
-.modal-card {
-  background: white;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 500px;
-  padding: 24px;
-}
-
-.modal-card h2 {
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #edf2f7;
-  padding-bottom: 12px;
-  color: #1a1f36;
-  font-weight: 600;
-}
 
 .info-grid {
   display: flex;
@@ -343,10 +311,4 @@ const handleProcess = async (status) => {
   outline: none;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 24px;
-}
 </style>

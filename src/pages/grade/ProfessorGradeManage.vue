@@ -173,131 +173,127 @@
     </div>
 
     <!-- 성적 정정 모달 -->
-    <div v-if="isObjectionModalOpen" class="modal-overlay">
-      <div class="modal-card">
-        <h2>성적 정정 처리</h2>
-        <div class="modal-body">
-          <div class="objection-info">
-            <p>
-              <strong>대상 학생:</strong> {{ activeObjection.studentName }} ({{
-                activeObjection.studentLoginId
-              }})
-            </p>
-          </div>
+    <MyModal
+      :isOpen="isObjectionModalOpen"
+      title="성적 정정 처리"
+      maxWidth="600px"
+      @close="closeObjectionModal"
+    >
+      <div class="objection-info">
+        <p>
+          <strong>대상 학생:</strong> {{ activeObjection.studentName }} ({{
+            activeObjection.studentLoginId
+          }})
+        </p>
+      </div>
 
-          <div class="objection-form">
-            <div class="form-group">
-              <label for="objectionReply">정정 사유</label>
-              <textarea
-                id="objectionReply"
-                v-model="objectionReplyText"
-                rows="3"
-                placeholder="성적 정정 사유를 입력해 주세요."
-                class="form-textarea"
-              ></textarea>
-            </div>
-
-            <!-- 승인 시 점수 재입력 폼 -->
-            <div class="score-adjust-section">
-              <h3>점수 재입력 (승인 시 적용)</h3>
-              <div class="adjust-grid">
-                <div class="adjust-item">
-                  <label>중간 ({{ getRatio("midterm") }}%)</label>
-                  <MyInput
-                    type="number"
-                    v-model.number="adjustScores.midtermScore"
-                    min="0"
-                    max="100"
-                    class="form-input"
-                  />
-                  <span class="converted-score-modal"
-                    >{{
-                      convertScore(adjustScores.midtermScore, "midterm")
-                    }}점</span
-                  >
-                </div>
-                <div class="adjust-item">
-                  <label>기말 ({{ getRatio("final") }}%)</label>
-                  <MyInput
-                    type="number"
-                    v-model.number="adjustScores.finalScore"
-                    min="0"
-                    max="100"
-                    class="form-input"
-                  />
-                  <span class="converted-score-modal"
-                    >{{
-                      convertScore(adjustScores.finalScore, "final")
-                    }}점</span
-                  >
-                </div>
-                <div class="adjust-item">
-                  <label>과제 ({{ getRatio("assignment") }}%)</label>
-                  <MyInput
-                    type="number"
-                    v-model.number="adjustScores.assignmentScore"
-                    min="0"
-                    max="100"
-                    class="form-input"
-                  />
-                  <span class="converted-score-modal"
-                    >{{
-                      convertScore(adjustScores.assignmentScore, "assignment")
-                    }}점</span
-                  >
-                </div>
-                <div class="adjust-item">
-                  <label>출결 ({{ getRatio("attendance") }}%)</label>
-                  <MyInput
-                    type="number"
-                    v-model.number="adjustScores.attendanceScore"
-                    min="0"
-                    max="100"
-                    class="form-input"
-                  />
-                  <span class="converted-score-modal"
-                    >{{
-                      convertScore(adjustScores.attendanceScore, "attendance")
-                    }}점</span
-                  >
-                </div>
-              </div>
-              <div
-                v-if="hasObjectionValidationError"
-                class="validation-error-alert modal-error"
-              >
-                0점 이상 100점 이하로만 입력 가능합니다.
-              </div>
-            </div>
-          </div>
+      <div class="objection-form">
+        <div class="form-group">
+          <label for="objectionReply">정정 사유</label>
+          <textarea
+            id="objectionReply"
+            v-model="objectionReplyText"
+            rows="3"
+            placeholder="성적 정정 사유를 입력해 주세요."
+            class="form-textarea"
+          ></textarea>
         </div>
 
-        <div class="modal-actions">
-          <MyButton
-            color="white"
-            size="small"
-            content="취소"
-            @click="closeObjectionModal"
-          />
-          <MyButton
-            color="deep-blue"
-            size="small"
-            content="정정 반영"
-            :disabled="hasObjectionValidationError"
-            @click="handleObjectionApprove"
-          />
+        <!-- 승인 시 점수 재입력 폼 -->
+        <div class="score-adjust-section">
+          <h3>점수 재입력 (승인 시 적용)</h3>
+          <div class="adjust-grid">
+            <div class="adjust-item">
+              <label>중간 ({{ getRatio("midterm") }}%)</label>
+              <MyInput
+                type="number"
+                v-model.number="adjustScores.midtermScore"
+                min="0"
+                max="100"
+                class="form-input"
+              />
+              <span class="converted-score-modal"
+                >{{ convertScore(adjustScores.midtermScore, "midterm") }}점</span
+              >
+            </div>
+            <div class="adjust-item">
+              <label>기말 ({{ getRatio("final") }}%)</label>
+              <MyInput
+                type="number"
+                v-model.number="adjustScores.finalScore"
+                min="0"
+                max="100"
+                class="form-input"
+              />
+              <span class="converted-score-modal"
+                >{{ convertScore(adjustScores.finalScore, "final") }}점</span
+              >
+            </div>
+            <div class="adjust-item">
+              <label>과제 ({{ getRatio("assignment") }}%)</label>
+              <MyInput
+                type="number"
+                v-model.number="adjustScores.assignmentScore"
+                min="0"
+                max="100"
+                class="form-input"
+              />
+              <span class="converted-score-modal"
+                >{{
+                  convertScore(adjustScores.assignmentScore, "assignment")
+                }}점</span
+              >
+            </div>
+            <div class="adjust-item">
+              <label>출결 ({{ getRatio("attendance") }}%)</label>
+              <MyInput
+                type="number"
+                v-model.number="adjustScores.attendanceScore"
+                min="0"
+                max="100"
+                class="form-input"
+              />
+              <span class="converted-score-modal"
+                >{{
+                  convertScore(adjustScores.attendanceScore, "attendance")
+                }}점</span
+              >
+            </div>
+          </div>
+          <div
+            v-if="hasObjectionValidationError"
+            class="validation-error-alert modal-error"
+          >
+            0점 이상 100점 이하로만 입력 가능합니다.
+          </div>
         </div>
       </div>
-    </div>
+      
+      <template #footer>
+        <MyButton
+          color="white"
+          size="small"
+          content="취소"
+          @click="closeObjectionModal"
+        />
+        <MyButton
+          color="deep-blue"
+          size="small"
+          content="정정 반영"
+          :disabled="hasObjectionValidationError"
+          @click="handleObjectionApprove"
+        />
+      </template>
+    </MyModal>
   </MyPageContainer>
 </template>
-
 <script setup>
 import { ref, computed, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import MyTable from "../../components/table/MyTable.vue";
+import MyModal from "../../components/common/MyModal.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
@@ -703,43 +699,6 @@ const handleObjectionApprove = async () => {
   font-size: 0.9rem;
   font-weight: 600;
   text-align: left;
-}
-
-/* 모달 디자인 (부드러운 섀도우 및 보더 처리) */
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background: rgba(15, 23, 42, 0.4);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 100;
-  backdrop-filter: blur(4px);
-}
-
-.modal-card {
-  background: white;
-  border-radius: 12px;
-  width: 100%;
-  max-width: 580px;
-  padding: 24px;
-}
-
-.modal-card h2 {
-  font-size: 1.3rem;
-  margin-bottom: 20px;
-  border-bottom: 1px solid #edf2f7;
-  padding-bottom: 12px;
-  text-align: left;
-  color: #1a1f36;
-  font-weight: 600;
-}
-
-.modal-body {
-  margin-bottom: 24px;
 }
 
 .objection-info {

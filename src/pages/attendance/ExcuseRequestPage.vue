@@ -7,6 +7,7 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
+import MyInput from "../../components/input/MyInput.vue";
 
 const academicStore = useAttendanceStore();
 const authStore = useAuthStore();
@@ -330,7 +331,7 @@ onMounted(async () => {
             <label>{{ labels.date }}</label>
             <div class="date-chip-wrap">
               <span class="date-chip-text">{{ selectedDateLabel }}</span>
-              <input
+              <MyInput
                 v-model="excuseForm.lectureDate"
                 type="date"
                 aria-label="날짜 선택"
@@ -363,7 +364,7 @@ onMounted(async () => {
           </div>
           <div class="search-group reason-field">
             <label>{{ labels.reason }}</label>
-            <input
+            <MyInput
               v-model="excuseForm.reason"
               maxlength="500"
               type="text"
@@ -372,7 +373,7 @@ onMounted(async () => {
           </div>
           <div class="search-group attachment-field">
             <label>{{ labels.attachment }}</label>
-            <input
+            <MyInput
               type="file"
               accept=".pdf,.jpg,.jpeg,.png,.hwp,.hwpx"
               @change="selectAttachment"

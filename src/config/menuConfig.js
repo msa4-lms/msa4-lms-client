@@ -13,7 +13,8 @@ export const MENU_TITLES = {
   "/professor/grades/correct": { default: "성적 정정" },
   "/students": { default: "사용자 관리" },
   "/leave-return": { default: "휴/복학 신청" },
-  "/professor/leave-return": { default: "휴/복학 결재" }
+  "/professor/leave-return": { default: "휴/복학 결재" },
+  "/professor/attendance/approvals": { default: "출결 승인" }
 };
 
 // 권한에 따른 메뉴 타이틀 반환 유틸리티
