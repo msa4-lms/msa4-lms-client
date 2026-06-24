@@ -36,7 +36,7 @@ const alertReady = () => {
         <!-- 학사관리 -->
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('studentAcademic')">
-            <span>학사관리</span>
+            <span>학사 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.studentAcademic }"
@@ -45,7 +45,7 @@ const alertReady = () => {
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAcademic">
             <router-link to="/profile" class="submenu-item"
-              >학적조회</router-link
+              >학적 조회</router-link
             >
             <router-link to="/leave-return" class="submenu-item"
               >휴/복학 신청</router-link
@@ -115,7 +115,7 @@ const alertReady = () => {
         <!-- 교사관리 -->
         <div class="menu-group">
           <div class="menu-header" @click="toggleMenu('professorTeacher')">
-            <span>교사관리</span>
+            <span>교사 관리</span>
             <span
               class="chevron"
               :class="{ rotated: !activeMenus.professorTeacher }"

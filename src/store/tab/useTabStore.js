@@ -62,7 +62,7 @@ export const useTabStore = defineStore("tab", () => {
     switch (path) {
       case "/main": return "메인 화면";
       case "/profile": 
-        if (role === 'STUDENT') return "학적조회";
+        if (role === 'STUDENT') return "학적 조회";
         if (role === 'PROFESSOR') return "교적 조회";
         return "내 정보";
       case "/enrollments": return "시간표 조회";
