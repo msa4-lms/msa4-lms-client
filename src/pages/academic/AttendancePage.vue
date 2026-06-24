@@ -13,11 +13,7 @@ const authStore = useAuthStore();
 
 const labels = {
   pageStudent: "\uCD9C\uACB0 \uD604\uD669",
-  pageProfessor: "\uCD9C\uACB0 \uAD00\uB9AC",
-  pendingExcuse: "\uC2B9\uC778 \uB300\uAE30 \uACF5\uACB0",
   rateTitle: "\uACFC\uBAA9\uBCC4 \uCD9C\uC11D\uB960",
-  recentTitle: "\uCD5C\uADFC \uCD9C\uACB0 \uB0B4\uC5ED",
-  pendingApproval: "\uACF5\uACB0 \uC2B9\uC778 \uB300\uAE30",
   year: "\uC5F0\uB3C4",
   semester: "\uD559\uAE30",
   targetTerm: "\uB300\uC0C1 \uD559\uAE30",
@@ -28,10 +24,6 @@ const labels = {
   subject: "\uACFC\uBAA9",
   date: "\uB0A0\uC9DC",
   period: "\uAD50\uC2DC",
-  reason: "\uC0AC\uC720",
-  select: "\uC120\uD0DD",
-  approve: "\uC2B9\uC778",
-  reject: "\uBC18\uB824",
   accepted: "\uC778\uC815 \uCD9C\uC11D",
   totalClass: "\uC804\uCCB4 \uC218\uC5C5",
   rate: "\uCD9C\uC11D\uB960",
@@ -63,14 +55,6 @@ const attendanceColumns = [
   { key: "status", label: "상태" },
 ];
 
-const pendingColumns = [
-  { key: "subject", label: "과목" },
-  { key: "date", label: "날짜" },
-  { key: "period", label: "교시" },
-  { key: "reason", label: "사유" },
-  { key: "status", label: "상태" },
-];
-
 const attendanceStatusLabel = {
   PRESENT: "출석",
   ABSENT: "결석",
@@ -81,21 +65,21 @@ const attendanceStatusLabel = {
 
 const enrollments = ref([]);
 const loading = ref(false);
-const selectedCourseName = ref("");
+// 선택한과목명
+const selectedCourseName = ref(""); 
 const searchParams = reactive({
   year: 2026,
   semester: 1,
 });
 
 const isStudent = computed(() => authStore.userInfo?.role === "STUDENT");
-const isProfessor = computed(() => authStore.userInfo?.role === "PROFESSOR");
 
 const targetTermText = computed(() => {
   return `${searchParams.year}${labels.yearSuffix} ${searchParams.semester}${labels.semester}`;
 });
 
 const filteredRates = computed(() => academicStore.attendanceRates);
-
+// 선택한 과목에 대한 출석률 필터링
 const filteredAttendance = computed(() => {
   if (selectedCourseName.value) {
     return academicStore.attendanceList.filter(
@@ -104,7 +88,7 @@ const filteredAttendance = computed(() => {
   }
   return [];
 });
-
+// 출석률 퍼센트
 const formatRate = (rate) => {
   if (rate === null || rate === undefined) return "-";
   return `${Number(rate).toFixed(1)}%`;
@@ -114,6 +98,7 @@ const getAttendanceStatusClass = (status) => {
   return `attendance-status ${String(status || "").toLowerCase()}`;
 };
 
+// 과목 선택및 뒤로
 const selectCourse = (courseName) => {
   selectedCourseName.value = courseName;
 };
@@ -121,8 +106,8 @@ const selectCourse = (courseName) => {
 const clearSelectedCourse = () => {
   selectedCourseName.value = "";
 };
-
-const loadEnrollments = async () => {
+// 해당학기 수강내역 조회
+const loadEnrollments = async () => { 
   try {
     const res = await myAxios.get("/api/student/enrollments/my", {
       params: {
@@ -136,8 +121,8 @@ const loadEnrollments = async () => {
     enrollments.value = [];
     console.error("수강 내역 조회 실패:", error);
   }
-};
-
+};  
+// 출석률, 출석내역 조회
 const loadStudentData = async () => {
   loading.value = true;
   try {
@@ -149,15 +134,6 @@ const loadStudentData = async () => {
       }),
       loadEnrollments(),
     ]);
-  } finally {
-    loading.value = false;
-  }
-};
-
-const loadProfessorData = async () => {
-  loading.value = true;
-  try {
-    await academicStore.fetchPendingExcuseRequests();
   } finally {
     loading.value = false;
   }
@@ -186,7 +162,6 @@ onMounted(async () => {
   if (!authStore.isLoggedIn) return;
 
   if (isStudent.value) await loadStudentData();
-  if (isProfessor.value) await loadProfessorData();
 });
 </script>
 

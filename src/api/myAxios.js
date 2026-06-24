@@ -23,6 +23,10 @@ myAxios.interceptors.request.use(async (config) => {
   let accessToken = authStore.accessToken;
   const isReissueUrl = /^\/api\/auth\/reissue-token$/.test(config.url || "");
 
+  if (config.data instanceof FormData) {
+    delete config.headers["Content-Type"];
+  }
+
   if (isReissueUrl) {
     delete config.headers.Authorization;
     return config;

@@ -59,7 +59,7 @@ const allMenuItems = [
     title: "출결 관리",
     description: "학생 공결 신청을 확인하고 승인 또는 반려합니다.",
     icon: "CK",
-    path: "/attendance",
+    path: "/professor/attendance/approvals",
     color: "#eef2ff",
     roles: ["PROFESSOR"],
   },

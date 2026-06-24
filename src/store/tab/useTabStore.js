@@ -74,6 +74,7 @@ export const useTabStore = defineStore("tab", () => {
       case "/lectures": return "강의 조회";
       case "/professor/grades/input": return "성적 입력";
       case "/professor/grades/correct": return "성적 정정";
+      case "/professor/attendance/approvals": return "출결 승인";
       case "/students": return "사용자 관리";
       case "/leave-return": return "휴/복학 신청";
       case "/professor/leave-return": return "휴/복학 결재";

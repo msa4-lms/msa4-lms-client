@@ -11,6 +11,7 @@ const ProfileRouter = () => import("../pages/profile/ProfileRouter.vue");
 const Dashboard = () => import("../pages/dashboard/Dashboard.vue");
 const ProfessorLectureCreate = () => import("../pages/lectures/ProfessorLectureCreate.vue");
 const ProfessorGradeManage = () => import("../pages/academic/ProfessorGradeManage.vue");
+const ProfessorExcuseApprovalPage = () => import("../pages/academic/ProfessorExcuseApprovalPage.vue");
 const LeaveReturnPage = () => import("../pages/academic/LeaveReturnPage.vue");
 const ProfessorLeaveReturnPage = () => import("../pages/academic/ProfessorLeaveReturnPage.vue");
 const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
@@ -68,13 +69,13 @@ const routes = [
     path: "/attendance",
     name: "AttendancePage",
     component: AttendancePage,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["STUDENT"]),
   },
   {
     path: "/excuses",
     name: "ExcuseRequestPage",
     component: ExcuseRequestPage,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["STUDENT"]),
   },
   {
     path: "/professor/lectures/create",
@@ -92,6 +93,12 @@ const routes = [
     path: "/professor/grades/correct",
     name: "ProfessorGradeCorrect",
     component: ProfessorGradeManage,
+    meta: setMeta(true, false, ["PROFESSOR"]),
+  },
+  {
+    path: "/professor/attendance/approvals",
+    name: "ProfessorExcuseApproval",
+    component: ProfessorExcuseApprovalPage,
     meta: setMeta(true, false, ["PROFESSOR"]),
   },
   {
