@@ -126,7 +126,7 @@ import { ref, computed, onMounted } from "vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MyButton from "../../components/button/MyButton.vue";
-import { useLeaveReturnStore } from "../../store/academic/useLeaveReturnStore";
+import { useLeaveReturnStore } from "../../store/leaveReturn/useLeaveReturnStore";
 
 defineOptions({ name: "ProfessorLeaveReturnPage" });
 

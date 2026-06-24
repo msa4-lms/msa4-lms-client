@@ -1,7 +1,7 @@
 import { createRouter, createWebHistory } from "vue-router";
-const GradePage = () => import("../pages/academic/GradePage.vue");
-const AttendancePage = () => import("../pages/academic/AttendancePage.vue");
-const ExcuseRequestPage = () => import("../pages/academic/ExcuseRequestPage.vue");
+const GradePage = () => import("../pages/grade/GradePage.vue");
+const AttendancePage = () => import("../pages/attendance/AttendancePage.vue");
+const ExcuseRequestPage = () => import("../pages/attendance/ExcuseRequestPage.vue");
 const Login = () => import("../pages/auth/Login.vue");
 const LectureList = () => import("../pages/lectures/LectureList.vue");
 const LectureEnrollment = () => import("../pages/enrollment/LectureEnrollment.vue");
@@ -10,10 +10,10 @@ import { useAuthStore } from "../store/auth/useAuthStore.js";
 const ProfileRouter = () => import("../pages/profile/ProfileRouter.vue");
 const Dashboard = () => import("../pages/dashboard/Dashboard.vue");
 const ProfessorLectureCreate = () => import("../pages/lectures/ProfessorLectureCreate.vue");
-const ProfessorGradeManage = () => import("../pages/academic/ProfessorGradeManage.vue");
-const ProfessorExcuseApprovalPage = () => import("../pages/academic/ProfessorExcuseApprovalPage.vue");
-const LeaveReturnPage = () => import("../pages/academic/LeaveReturnPage.vue");
-const ProfessorLeaveReturnPage = () => import("../pages/academic/ProfessorLeaveReturnPage.vue");
+const ProfessorGradeManage = () => import("../pages/grade/ProfessorGradeManage.vue");
+const ProfessorExcuseApprovalPage = () => import("../pages/attendance/ProfessorExcuseApprovalPage.vue");
+const LeaveReturnPage = () => import("../pages/leaveReturn/LeaveReturnPage.vue");
+const ProfessorLeaveReturnPage = () => import("../pages/leaveReturn/ProfessorLeaveReturnPage.vue");
 const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
   return {
     isAuthenticated, // 인증된 사용자
