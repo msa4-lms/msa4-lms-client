@@ -42,7 +42,15 @@ const pendingExcuseColumns = [
   { key: "status", label: "상태" },
 ];
 
-const dayNames = ["일요일", "월요일", "화요일", "수요일", "목요일", "금요일", "토요일"];
+const dayNames = [
+  "일요일",
+  "월요일",
+  "화요일",
+  "수요일",
+  "목요일",
+  "금요일",
+  "토요일",
+];
 const shortDayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
 const enrollments = ref([]);
@@ -64,7 +72,9 @@ const selectedDate = computed(() => {
   return new Date(`${excuseForm.lectureDate}T00:00:00`);
 });
 
-const selectedDayIndex = computed(() => (selectedDate.value ? selectedDate.value.getDay() : null));
+const selectedDayIndex = computed(() =>
+  selectedDate.value ? selectedDate.value.getDay() : null
+);
 
 const selectedDateLabel = computed(() => {
   if (!selectedDate.value) return "날짜 선택";
@@ -86,21 +96,32 @@ const scheduleMatchesSelectedDate = (schedule) => {
   return schedule
     .split(",")
     .map((item) => item.trim().toUpperCase())
-    .some((item) => item.includes(dayName) || item.includes(`${shortDayName}요일`) || item.startsWith(shortDayName) || item.includes(englishDayName));
+    .some(
+      (item) =>
+        item.includes(dayName) ||
+        item.includes(`${shortDayName}요일`) ||
+        item.startsWith(shortDayName) ||
+        item.includes(englishDayName)
+    );
 };
 
 const hasAttendanceOnSelectedDate = (courseName) => {
   if (!excuseForm.lectureDate || !courseName) return false;
 
   return academicStore.attendanceList.some((attendance) => {
-    return attendance.lectureDate === excuseForm.lectureDate && attendance.courseName === courseName;
+    return (
+      attendance.lectureDate === excuseForm.lectureDate &&
+      attendance.courseName === courseName
+    );
   });
 };
 
 const getScheduleStartPeriod = (schedule) => {
   if (!scheduleMatchesSelectedDate(schedule)) return 1;
 
-  const part = schedule.split(",").find((item) => scheduleMatchesSelectedDate(item));
+  const part = schedule
+    .split(",")
+    .find((item) => scheduleMatchesSelectedDate(item));
   const match = part?.match(/(\d{2}):\d{2}/);
   if (!match) return 1;
 
@@ -111,10 +132,16 @@ const excuseCourseOptions = computed(() => {
   if (!excuseForm.lectureDate) return [];
 
   return enrollments.value
-    .filter((enrollment) => scheduleMatchesSelectedDate(enrollment.schedule) || hasAttendanceOnSelectedDate(enrollment.courseName))
+    .filter(
+      (enrollment) =>
+        scheduleMatchesSelectedDate(enrollment.schedule) ||
+        hasAttendanceOnSelectedDate(enrollment.courseName)
+    )
     .map((enrollment) => {
       const id = enrollment.enrollmentId || enrollment.id;
-      return id && enrollment.courseName ? { id, courseName: enrollment.courseName } : null;
+      return id && enrollment.courseName
+        ? { id, courseName: enrollment.courseName }
+        : null;
     })
     .filter(Boolean);
 });
@@ -153,13 +180,18 @@ const loadPageData = async () => {
 };
 
 const decideExcuse = async (requestId, status) => {
-  const rejectReason = status === "REJECTED" ? prompt("반려 사유를 입력해주세요.") : "";
+  const rejectReason =
+    status === "REJECTED" ? prompt("반려 사유를 입력해주세요.") : "";
   if (status === "REJECTED" && !rejectReason) return;
   await academicStore.decideExcuseRequest(requestId, { status, rejectReason });
 };
 
 const submitExcuse = async () => {
-  if (!excuseForm.enrollmentId || !excuseForm.lectureDate || !excuseForm.reason.trim()) {
+  if (
+    !excuseForm.enrollmentId ||
+    !excuseForm.lectureDate ||
+    !excuseForm.reason.trim()
+  ) {
     alert("과목, 날짜, 사유를 입력해주세요.");
     return;
   }
@@ -202,7 +234,10 @@ watch(
   () => excuseForm.enrollmentId,
   () => {
     const selectedEnrollment = enrollments.value.find((enrollment) => {
-      return String(enrollment.enrollmentId || enrollment.id) === String(excuseForm.enrollmentId);
+      return (
+        String(enrollment.enrollmentId || enrollment.id) ===
+        String(excuseForm.enrollmentId)
+      );
     });
 
     excuseForm.period = getScheduleStartPeriod(selectedEnrollment?.schedule);
@@ -218,64 +253,98 @@ onMounted(async () => {
 <template>
   <MyPageContainer :title="isProfessor ? '공결 승인 관리' : labels.pageTitle">
     <template v-if="isStudent">
-      <section class="panel">
-      <div class="panel-title">
-        <h3>{{ labels.pageTitle }}</h3>
-      </div>
-      <form class="excuse-form" @submit.prevent="submitExcuse">
-        <div class="search-group date-chip-field">
-          <label>{{ labels.date }}</label>
-          <div class="date-chip-wrap">
-            <span class="date-chip-text">{{ selectedDateLabel }}</span>
-            <input v-model="excuseForm.lectureDate" type="date" aria-label="날짜 선택" />
+      <section class="panel-top">
+        <div class="panel-title">
+          <h3>{{ labels.pageTitle }}</h3>
+        </div>
+        <form class="excuse-form" @submit.prevent="submitExcuse">
+          <div class="search-group date-chip-field">
+            <label>{{ labels.date }}</label>
+            <div class="date-chip-wrap">
+              <span class="date-chip-text">{{ selectedDateLabel }}</span>
+              <input
+                v-model="excuseForm.lectureDate"
+                type="date"
+                aria-label="날짜 선택"
+              />
+            </div>
           </div>
-        </div>
-        <div class="search-group subject-field">
-          <label>{{ labels.subject }}</label>
-          <select v-model="excuseForm.enrollmentId" :disabled="!excuseForm.lectureDate">
-            <option value="">
-              {{ !excuseForm.lectureDate ? labels.selectDateFirst : (excuseCourseOptions.length === 0 ? labels.noClassOnDate : labels.select) }}
-            </option>
-            <option v-for="course in excuseCourseOptions" :key="course.id" :value="course.id">
-              {{ course.courseName }}
-            </option>
-          </select>
-        </div>
-        <div class="search-group reason-field">
-          <label>{{ labels.reason }}</label>
-          <input v-model="excuseForm.reason" maxlength="500" type="text" placeholder="사유 입력" />
-        </div>
-        <div class="search-group attachment-field">
-          <label>{{ labels.attachment }}</label>
-          <input type="file" accept=".pdf,.jpg,.jpeg,.png,.hwp,.hwpx" @change="selectAttachment" />
-        </div>
-        <div class="search-group button-field">
-          <label>&nbsp;</label>
-          <MyButton btnType="submit" color="deep-blue" size="small" :content="labels.apply" />
-        </div>
-      </form>
-    </section>
+          <div class="search-group subject-field">
+            <label>{{ labels.subject }}</label>
+            <select
+              v-model="excuseForm.enrollmentId"
+              :disabled="!excuseForm.lectureDate"
+            >
+              <option value="">
+                {{
+                  !excuseForm.lectureDate
+                    ? labels.selectDateFirst
+                    : excuseCourseOptions.length === 0
+                    ? labels.noClassOnDate
+                    : labels.select
+                }}
+              </option>
+              <option
+                v-for="course in excuseCourseOptions"
+                :key="course.id"
+                :value="course.id"
+              >
+                {{ course.courseName }}
+              </option>
+            </select>
+          </div>
+          <div class="search-group reason-field">
+            <label>{{ labels.reason }}</label>
+            <input
+              v-model="excuseForm.reason"
+              maxlength="500"
+              type="text"
+              placeholder="사유 입력"
+            />
+          </div>
+          <div class="search-group attachment-field">
+            <label>{{ labels.attachment }}</label>
+            <input
+              type="file"
+              accept=".pdf,.jpg,.jpeg,.png,.hwp,.hwpx"
+              @change="selectAttachment"
+            />
+          </div>
+          <div class="search-group button-field">
+            <label>&nbsp;</label>
+            <MyButton
+              btnType="submit"
+              color="deep-blue"
+              size="small"
+              :content="labels.apply"
+            />
+          </div>
+        </form>
+      </section>
 
-    <section class="panel">
-      <div class="panel-title">
-        <h3>{{ labels.resultTitle }}</h3>
-      </div>
-      <MyTable
-        :columns="myExcuseColumns"
-        :loading="loading"
-        :empty="academicStore.myExcuseRequests.length === 0"
-        :emptyMessage="labels.emptyExcuse"
-      >
-        <tr v-for="request in academicStore.myExcuseRequests" :key="request.id">
-          <td class="course-name">{{ request.courseName }}</td>
-          <td>{{ request.lectureDate }}</td>
-          <td>
-            <StatusBadge :status="request.status" />
-          </td>
-          <td>{{ request.rejectReason || request.reason }}</td>
-        </tr>
-      </MyTable>
-    </section>
+      <section class="panel">
+        <div class="panel-title-bottom">
+          <h3>{{ labels.resultTitle }}</h3>
+        </div>
+        <MyTable
+          :columns="myExcuseColumns"
+          :loading="loading"
+          :empty="academicStore.myExcuseRequests.length === 0"
+          :emptyMessage="labels.emptyExcuse"
+        >
+          <tr
+            v-for="request in academicStore.myExcuseRequests"
+            :key="request.id"
+          >
+            <td class="course-name">{{ request.courseName }}</td>
+            <td>{{ request.lectureDate }}</td>
+            <td>
+              <StatusBadge :status="request.status" />
+            </td>
+            <td>{{ request.rejectReason || request.reason }}</td>
+          </tr>
+        </MyTable>
+      </section>
     </template>
 
     <template v-else-if="isProfessor">
@@ -289,15 +358,32 @@ onMounted(async () => {
           :empty="academicStore.pendingExcuseRequests.length === 0"
           emptyMessage="승인 대기 중인 공결 신청이 없습니다."
         >
-          <tr v-for="request in academicStore.pendingExcuseRequests" :key="request.id">
-            <td class="course-name">{{ request.studentName }} · {{ request.courseName }}</td>
+          <tr
+            v-for="request in academicStore.pendingExcuseRequests"
+            :key="request.id"
+          >
+            <td class="course-name">
+              {{ request.studentName }} · {{ request.courseName }}
+            </td>
             <td>{{ request.lectureDate }}</td>
             <td>{{ request.period }}</td>
             <td>{{ request.reason }}</td>
             <td>
               <div class="button-group">
-                <MyButton btnType="button" color="green" size="small" content="승인" @click="decideExcuse(request.id, 'APPROVED')" />
-                <MyButton btnType="button" color="red" size="small" content="반려" @click="decideExcuse(request.id, 'REJECTED')" />
+                <MyButton
+                  btnType="button"
+                  color="green"
+                  size="small"
+                  content="승인"
+                  @click="decideExcuse(request.id, 'APPROVED')"
+                />
+                <MyButton
+                  btnType="button"
+                  color="red"
+                  size="small"
+                  content="반려"
+                  @click="decideExcuse(request.id, 'REJECTED')"
+                />
               </div>
             </td>
           </tr>
@@ -308,8 +394,7 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-
-.panel {
+.panel-top {
   margin-bottom: 20px;
   overflow: hidden;
   background-color: white;
@@ -328,9 +413,15 @@ onMounted(async () => {
   font-weight: 600;
 }
 
+.panel-title-bottom {
+  padding: 5px;
+}
+
 .excuse-form {
   display: grid;
-  grid-template-columns: 190px minmax(240px, 1fr) minmax(260px, 1.4fr) minmax(220px, 1fr) auto;
+  grid-template-columns:
+    190px minmax(240px, 1fr) minmax(260px, 1.4fr) minmax(220px, 1fr)
+    auto;
   align-items: flex-end;
   gap: 15px;
   padding: 15px;
@@ -442,8 +533,6 @@ onMounted(async () => {
   padding: 0;
   cursor: pointer;
 }
-
-
 
 .button-group {
   display: flex;

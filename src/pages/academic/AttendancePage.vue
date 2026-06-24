@@ -36,11 +36,16 @@ const labels = {
   totalClass: "\uC804\uCCB4 \uC218\uC5C5",
   rate: "\uCD9C\uC11D\uB960",
   status: "\uC0C1\uD0DC",
-  emptyRate: "\uCD9C\uC11D\uB960 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.",
-  emptyAttendance: "\uB4F1\uB85D\uB41C \uCD9C\uACB0 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
-  emptyExcuse: "\uACF5\uACB0 \uC2E0\uCCAD \uB0B4\uC5ED\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
-  emptyPending: "\uC2B9\uC778 \uB300\uAE30 \uC911\uC778 \uACF5\uACB0 \uC2E0\uCCAD\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
-  loading: "\uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC624\uB294 \uC911\uC785\uB2C8\uB2E4.",
+  emptyRate:
+    "\uCD9C\uC11D\uB960 \uB370\uC774\uD130\uAC00 \uC5C6\uC2B5\uB2C8\uB2E4.",
+  emptyAttendance:
+    "\uB4F1\uB85D\uB41C \uCD9C\uACB0 \uAE30\uB85D\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
+  emptyExcuse:
+    "\uACF5\uACB0 \uC2E0\uCCAD \uB0B4\uC5ED\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
+  emptyPending:
+    "\uC2B9\uC778 \uB300\uAE30 \uC911\uC778 \uACF5\uACB0 \uC2E0\uCCAD\uC774 \uC5C6\uC2B5\uB2C8\uB2E4.",
+  loading:
+    "\uB370\uC774\uD130\uB97C \uBD88\uB7EC\uC624\uB294 \uC911\uC785\uB2C8\uB2E4.",
   back: "뒤로가기",
 };
 
@@ -93,7 +98,9 @@ const filteredRates = computed(() => academicStore.attendanceRates);
 
 const filteredAttendance = computed(() => {
   if (selectedCourseName.value) {
-    return academicStore.attendanceList.filter((item) => item.courseName === selectedCourseName.value);
+    return academicStore.attendanceList.filter(
+      (item) => item.courseName === selectedCourseName.value
+    );
   }
   return [];
 });
@@ -164,7 +171,12 @@ const onSearch = async () => {
 };
 
 const decideExcuse = async (requestId, status) => {
-  const rejectReason = status === "REJECTED" ? prompt("\uBC18\uB824 \uC0AC\uC720\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694.") : "";
+  const rejectReason =
+    status === "REJECTED"
+      ? prompt(
+          "\uBC18\uB824 \uC0AC\uC720\uB97C \uC785\uB825\uD574\uC8FC\uC138\uC694."
+        )
+      : "";
   if (status === "REJECTED" && !rejectReason) return;
 
   await academicStore.decideExcuseRequest(requestId, { status, rejectReason });
@@ -179,29 +191,31 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :title="isProfessor ? labels.pageProfessor : labels.pageStudent">
+  <MyPageContainer
+    :title="isProfessor ? labels.pageProfessor : labels.pageStudent"
+  >
     <template v-if="isStudent">
       <MySearchFilter @search="onSearch" :submitText="labels.search">
-          <div class="search-group compact">
-            <label>{{ labels.year }}</label>
-            <select v-model="searchParams.year">
-              <option :value="2026">2026{{ labels.yearSuffix }}</option>
-              <option :value="2025">2025{{ labels.yearSuffix }}</option>
-              <option :value="2024">2024{{ labels.yearSuffix }}</option>
-              <option :value="2023">2023{{ labels.yearSuffix }}</option>
-            </select>
-          </div>
-          <div class="search-group compact">
-            <label>{{ labels.semester }}</label>
-            <select v-model="searchParams.semester">
-              <option :value="1">{{ labels.firstSemester }}</option>
-              <option :value="2">{{ labels.secondSemester }}</option>
-            </select>
-          </div>
-          <div class="term-info">
-            <span class="label">{{ labels.targetTerm }}</span>
-            <span class="value">{{ targetTermText }}</span>
-          </div>
+        <div class="search-group compact">
+          <label>{{ labels.year }}</label>
+          <select v-model="searchParams.year">
+            <option :value="2026">2026{{ labels.yearSuffix }}</option>
+            <option :value="2025">2025{{ labels.yearSuffix }}</option>
+            <option :value="2024">2024{{ labels.yearSuffix }}</option>
+            <option :value="2023">2023{{ labels.yearSuffix }}</option>
+          </select>
+        </div>
+        <div class="search-group compact">
+          <label>{{ labels.semester }}</label>
+          <select v-model="searchParams.semester">
+            <option :value="1">{{ labels.firstSemester }}</option>
+            <option :value="2">{{ labels.secondSemester }}</option>
+          </select>
+        </div>
+        <div class="term-info">
+          <span class="label">{{ labels.targetTerm }}</span>
+          <span class="value">{{ targetTermText }}</span>
+        </div>
       </MySearchFilter>
 
       <section v-if="!selectedCourseName" class="panel">
@@ -217,7 +231,10 @@ onMounted(async () => {
           <tr
             v-for="rate in filteredRates"
             :key="rate.enrollmentId"
-            :class="['clickable-row', { selected: selectedCourseName === rate.courseName }]"
+            :class="[
+              'clickable-row',
+              { selected: selectedCourseName === rate.courseName },
+            ]"
             @click="selectCourse(rate.courseName)"
           >
             <td class="course-name">{{ rate.courseName }}</td>
@@ -267,7 +284,6 @@ onMounted(async () => {
             </tr>
           </MyTable>
         </section>
-
       </div>
     </template>
 
@@ -282,15 +298,32 @@ onMounted(async () => {
           :empty="academicStore.pendingExcuseRequests.length === 0"
           :emptyMessage="labels.emptyPending"
         >
-          <tr v-for="request in academicStore.pendingExcuseRequests" :key="request.id">
-            <td class="course-name">{{ request.studentName }} - {{ request.courseName }}</td>
+          <tr
+            v-for="request in academicStore.pendingExcuseRequests"
+            :key="request.id"
+          >
+            <td class="course-name">
+              {{ request.studentName }} - {{ request.courseName }}
+            </td>
             <td>{{ request.lectureDate }}</td>
             <td>{{ request.period }}</td>
             <td>{{ request.reason }}</td>
             <td>
               <div class="button-group">
-                <MyButton btnType="button" color="green" size="small" :content="labels.approve" @click="decideExcuse(request.id, 'APPROVED')" />
-                <MyButton btnType="button" color="red" size="small" :content="labels.reject" @click="decideExcuse(request.id, 'REJECTED')" />
+                <MyButton
+                  btnType="button"
+                  color="green"
+                  size="small"
+                  :content="labels.approve"
+                  @click="decideExcuse(request.id, 'APPROVED')"
+                />
+                <MyButton
+                  btnType="button"
+                  color="red"
+                  size="small"
+                  :content="labels.reject"
+                  @click="decideExcuse(request.id, 'REJECTED')"
+                />
               </div>
             </td>
           </tr>
@@ -301,12 +334,6 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-.panel {
-  background: #fff;
-  border: 1px solid #edf2f7;
-  border-radius: 6px;
-}
-
 .wide {
   flex: 0 0 260px;
 }
@@ -381,14 +408,12 @@ onMounted(async () => {
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 16px 20px;
+  padding: 5px;
   border-bottom: 1px solid #edf2f7;
 }
 
 .panel-title h3 {
   color: #1a1f36;
-  font-size: 1rem;
-  font-weight: 600;
 }
 
 .table-grid {

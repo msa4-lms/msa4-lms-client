@@ -2,12 +2,12 @@
 defineProps({
   title: {
     type: String,
-    required: false
+    required: false,
   },
   subtitle: {
     type: String,
-    required: false
-  }
+    required: false,
+  },
 });
 </script>
 

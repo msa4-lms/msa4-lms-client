@@ -213,6 +213,14 @@ const formatSchedule = (schedule) => {
   margin-bottom: 40px;
 }
 
+.timetable-section > h3 {
+  padding: 5px;
+}
+
+.list-section > h3 {
+  padding: 5px;
+}
+
 .grid-cell {
   border: 0.5px solid #eee;
   padding: 8px;

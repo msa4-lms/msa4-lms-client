@@ -42,17 +42,26 @@ const appliedSearchParams = reactive({
 });
 
 const targetTermText = () => {
-  if (searchParams.year === "" && searchParams.semester === "") return labels.all;
-  if (searchParams.year === "") return `${labels.all} ${searchParams.semester}${labels.semester}`;
-  if (searchParams.semester === "") return `${searchParams.year}${labels.yearSuffix} ${labels.all}`;
+  if (searchParams.year === "" && searchParams.semester === "")
+    return labels.all;
+  if (searchParams.year === "")
+    return `${labels.all} ${searchParams.semester}${labels.semester}`;
+  if (searchParams.semester === "")
+    return `${searchParams.year}${labels.yearSuffix} ${labels.all}`;
   return `${searchParams.year}${labels.yearSuffix} ${searchParams.semester}${labels.semester}`;
 };
 
 const displayedGrades = computed(() => {
   return academicStore.gradeSummary.semesterGrades.filter((grade) => {
-    const matchesYear = appliedSearchParams.year === "" || Number(grade.year) === Number(appliedSearchParams.year);
-    const matchesSemester = appliedSearchParams.semester === "" || Number(grade.semester) === Number(appliedSearchParams.semester);
-    const matchesCourse = appliedSearchParams.courseName === "" || grade.courseName === appliedSearchParams.courseName;
+    const matchesYear =
+      appliedSearchParams.year === "" ||
+      Number(grade.year) === Number(appliedSearchParams.year);
+    const matchesSemester =
+      appliedSearchParams.semester === "" ||
+      Number(grade.semester) === Number(appliedSearchParams.semester);
+    const matchesCourse =
+      appliedSearchParams.courseName === "" ||
+      grade.courseName === appliedSearchParams.courseName;
     return matchesYear && matchesSemester && matchesCourse;
   });
 });
@@ -62,8 +71,12 @@ const allGrades = computed(() => academicStore.gradeSummary.semesterGrades);
 const courseOptions = computed(() => {
   const courses = academicStore.gradeSummary.semesterGrades
     .filter((grade) => {
-      const matchesYear = searchParams.year === "" || Number(grade.year) === Number(searchParams.year);
-      const matchesSemester = searchParams.semester === "" || Number(grade.semester) === Number(searchParams.semester);
+      const matchesYear =
+        searchParams.year === "" ||
+        Number(grade.year) === Number(searchParams.year);
+      const matchesSemester =
+        searchParams.semester === "" ||
+        Number(grade.semester) === Number(searchParams.semester);
       return matchesYear && matchesSemester;
     })
     .map((grade) => grade.courseName)
@@ -73,11 +86,17 @@ const courseOptions = computed(() => {
 });
 
 const displayedTotalCredits = computed(() => {
-  return displayedGrades.value.reduce((total, grade) => total + Number(grade.credits || 0), 0);
+  return displayedGrades.value.reduce(
+    (total, grade) => total + Number(grade.credits || 0),
+    0
+  );
 });
 
 const calculateGpa = (grades) => {
-  const totalCredits = grades.reduce((total, grade) => total + Number(grade.credits || 0), 0);
+  const totalCredits = grades.reduce(
+    (total, grade) => total + Number(grade.credits || 0),
+    0
+  );
   if (totalCredits === 0) return "0.0";
 
   const gradePointSum = grades.reduce((total, grade) => {
@@ -92,7 +111,10 @@ const displayedTotalGpa = computed(() => {
 });
 
 const allTotalCredits = computed(() => {
-  return allGrades.value.reduce((total, grade) => total + Number(grade.credits || 0), 0);
+  return allGrades.value.reduce(
+    (total, grade) => total + Number(grade.credits || 0),
+    0
+  );
 });
 
 const allTotalGpa = computed(() => {
@@ -184,7 +206,7 @@ watch(
     <!-- 상세 성적 테이블 -->
     <div class="content-card table-section">
       <div class="card-header">
-        <h2>학기별 상세 성적</h2>
+        <h3>학기별 상세 성적</h3>
       </div>
 
       <MyTable
@@ -192,10 +214,7 @@ watch(
         :empty="displayedGrades.length === 0"
         emptyMessage="조회된 성적 내역이 없습니다."
       >
-        <tr
-          v-for="(grade, index) in displayedGrades"
-          :key="index"
-        >
+        <tr v-for="(grade, index) in displayedGrades" :key="index">
           <td class="semester">{{ grade.year }}년 {{ grade.semester }}학기</td>
           <td>{{ grade.courseCode }}</td>
           <td class="name">{{ grade.courseName }}</td>
@@ -204,7 +223,6 @@ watch(
             <span v-if="isConfirmedGrade(grade)">{{ grade.grade }}</span>
             <span v-else class="text-secondary">미입력</span>
           </td>
-
         </tr>
       </MyTable>
     </div>
@@ -314,21 +332,9 @@ watch(
   margin-left: 4px;
 }
 
-.content-card {
-  background: var(--personal-color-white, #fff);
-  border: 1px solid #e5eaf2;
-  border-radius: 8px;
-  overflow: hidden;
-}
-
 .card-header {
-  padding: 18px 20px;
   border-bottom: 1px solid #edf2f7;
-}
-
-.card-header h2 {
-  color: #1a1f36;
-  font-size: 1.1rem;
+  padding: 5px;
 }
 
 .data-table {
@@ -380,4 +386,3 @@ watch(
   }
 }
 </style>
-
