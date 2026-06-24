@@ -574,6 +574,13 @@ label {
   box-sizing: border-box;
 }
 
+.form-input::placeholder {
+  color: #aebccf;
+  font-family: sans-serif;
+  font-size: 0.9rem;
+  opacity: 1;
+}
+
 .form-input:focus {
   border-color: var(--secondary-blue);
 }
