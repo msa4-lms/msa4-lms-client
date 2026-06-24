@@ -31,8 +31,7 @@ defineEmits(["search"]);
   </div>
 </template>
 
-<style>
-/* Scoped를 제거하거나 다른 검색 그룹에서 쓰일 수 있게 공통 제공 */
+<style scoped>
 .search-section {
   background: white;
   padding: 20px;
@@ -48,19 +47,21 @@ defineEmits(["search"]);
   flex-wrap: wrap;
 }
 
-.search-group {
+/* Scoped 캡슐화를 유지하면서 슬롯으로 들어오는 자식 요소에 스타일을 적용하기 위해 :deep() 사용 */
+:deep(.search-group) {
   display: flex;
   flex-direction: column;
   gap: 6px;
 }
 
-.search-group label {
+:deep(.search-group label) {
   color: #4f566b;
   font-size: 0.85rem;
   font-weight: 600;
 }
 
-.search-group select {
+:deep(.search-group select),
+:deep(.search-group input) {
   min-width: 160px;
   padding: 8px 12px;
   border: 1px solid #ddd;

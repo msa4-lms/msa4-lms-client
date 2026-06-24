@@ -4,6 +4,8 @@ import { useAttendanceStore } from "../../store/attendance/useAttendanceStore";
 import MyButton from "../../components/button/MyButton.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyTable from "../../components/table/MyTable.vue";
+import MyTabs from "../../components/common/MyTabs.vue";
+import MyModal from "../../components/common/MyModal.vue";
 import myAxios from "../../api/myAxios";
 
 defineOptions({ name: "ProfessorExcuseApprovalPage" });
@@ -12,6 +14,10 @@ const academicStore = useAttendanceStore();
 
 const loading = ref(false);
 const activeTab = ref("PENDING");
+const tabOptions = [
+  { value: "PENDING", label: "승인 대기" },
+  { value: "COMPLETED", label: "처리 완료" }
+];
 const rejectTarget = ref(null);
 const rejectReason = ref("");
 
@@ -145,22 +151,7 @@ onMounted(loadRequests);
     <section class="card">
       <div class="card-header">
         <h3>{{ activeTab === "PENDING" ? "승인 대기 공결 신청" : "처리 완료 내역" }}</h3>
-        <div class="tab-bar">
-          <button
-            type="button"
-            :class="['tab-button', { active: activeTab === 'PENDING' }]"
-            @click="activeTab = 'PENDING'"
-          >
-            승인 대기
-          </button>
-          <button
-            type="button"
-            :class="['tab-button', { active: activeTab === 'COMPLETED' }]"
-            @click="activeTab = 'COMPLETED'"
-          >
-            처리 완료
-          </button>
-        </div>
+        <MyTabs :tabs="tabOptions" v-model="activeTab" />
       </div>
 
       <div class="card-body">
@@ -221,36 +212,35 @@ onMounted(loadRequests);
       </div>
     </section>
 
-    <div v-if="rejectTarget" class="modal-overlay" @click.self="closeRejectModal">
-      <section class="modal-card">
-        <h2>공결 신청 반려</h2>
-        <div class="modal-body">
-          <dl class="request-summary">
-            <dt>학생</dt>
-            <dd>{{ rejectTarget.studentName }} ({{ rejectTarget.studentNo }})</dd>
-            <dt>과목</dt>
-            <dd>{{ rejectTarget.courseName }}</dd>
-            <dt>날짜</dt>
-            <dd>{{ rejectTarget.lectureDate }} {{ rejectTarget.period }}교시</dd>
-          </dl>
-          <div class="approval-form">
-            <label for="reject-reason">반려 사유</label>
-            <textarea
-              id="reject-reason"
-              v-model="rejectReason"
-              class="form-textarea"
-              maxlength="500"
-              rows="5"
-              placeholder="학생에게 전달할 반려 사유를 입력해주세요."
-            />
-          </div>
-        </div>
-        <div class="modal-actions">
-          <MyButton btnType="button" color="white" size="small" content="닫기" @click="closeRejectModal" />
-          <MyButton btnType="button" color="red" size="small" content="반려" @click="rejectRequest" />
-        </div>
-      </section>
-    </div>
+    <MyModal
+      :isOpen="!!rejectTarget"
+      title="공결 신청 반려"
+      @close="closeRejectModal"
+    >
+      <dl class="request-summary" v-if="rejectTarget">
+        <dt>학생</dt>
+        <dd>{{ rejectTarget.studentName }} ({{ rejectTarget.studentNo }})</dd>
+        <dt>과목</dt>
+        <dd>{{ rejectTarget.courseName }}</dd>
+        <dt>날짜</dt>
+        <dd>{{ rejectTarget.lectureDate }} {{ rejectTarget.period }}교시</dd>
+      </dl>
+      <div class="approval-form">
+        <label for="reject-reason">반려 사유</label>
+        <textarea
+          id="reject-reason"
+          v-model="rejectReason"
+          class="form-textarea"
+          maxlength="500"
+          rows="5"
+          placeholder="학생에게 전달할 반려 사유를 입력해주세요."
+        />
+      </div>
+      <template #footer>
+        <MyButton btnType="button" color="white" size="small" content="닫기" @click="closeRejectModal" />
+        <MyButton btnType="button" color="red" size="small" content="반려" @click="rejectRequest" />
+      </template>
+    </MyModal>
   </MyPageContainer>
 </template>
 
@@ -279,29 +269,6 @@ onMounted(loadRequests);
 
 .card-body {
   padding: 20px;
-}
-
-.tab-bar {
-  display: flex;
-  gap: 8px;
-}
-
-.tab-button {
-  height: 36px;
-  border: 1px solid #d8dde6;
-  border-radius: 4px;
-  padding: 0 14px;
-  background: #fff;
-  color: #697386;
-  cursor: pointer;
-  font-size: 0.9rem;
-  font-weight: 600;
-}
-
-.tab-button.active {
-  border-color: var(--primary-color);
-  background: var(--primary-color);
-  color: #fff;
 }
 
 .student-name,
@@ -355,36 +322,6 @@ onMounted(loadRequests);
   color: #c5221f;
 }
 
-.modal-overlay {
-  position: fixed;
-  top: 0;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-  background: rgba(15, 23, 42, 0.4);
-  backdrop-filter: blur(4px);
-}
-
-.modal-card {
-  width: 100%;
-  max-width: 500px;
-  padding: 24px;
-  background: #fff;
-  border-radius: 12px;
-}
-
-.modal-card h2 {
-  margin-bottom: 20px;
-  padding-bottom: 12px;
-  border-bottom: 1px solid #edf2f7;
-  color: #1a1f36;
-  font-size: 1.3rem;
-  font-weight: 600;
-}
 
 .request-summary {
   display: grid;
@@ -434,25 +371,11 @@ onMounted(loadRequests);
   outline: none;
 }
 
-.modal-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 24px;
-}
 
 @media (max-width: 760px) {
   .card-header {
     align-items: stretch;
     flex-direction: column;
-  }
-
-  .tab-bar {
-    width: 100%;
-  }
-
-  .tab-button {
-    flex: 1;
   }
 }
 </style>
