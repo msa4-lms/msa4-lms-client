@@ -302,7 +302,7 @@ import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
-import { useGradeProfessorStore } from "../../store/academic/useGradeProfessorStore";
+import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
 
 const route = useRoute();
 const isCorrectionMode = computed(() => route.path.includes("correct"));

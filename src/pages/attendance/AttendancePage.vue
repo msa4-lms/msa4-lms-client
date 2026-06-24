@@ -1,14 +1,14 @@
 <script setup>
 import { computed, onMounted, reactive, ref } from "vue";
 import myAxios from "../../api/myAxios";
-import { useAcademicStore } from "../../store/academic/useAcademicStore";
+import { useAttendanceStore } from "../../store/attendance/useAttendanceStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyTable from "../../components/table/MyTable.vue";
 
-const academicStore = useAcademicStore();
+const academicStore = useAttendanceStore();
 const authStore = useAuthStore();
 
 const labels = {

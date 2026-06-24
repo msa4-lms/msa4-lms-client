@@ -79,7 +79,7 @@ import MyInput from "../../components/input/MyInput.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
-import { useLeaveReturnStore } from "../../store/academic/useLeaveReturnStore";
+import { useLeaveReturnStore } from "../../store/leaveReturn/useLeaveReturnStore";
 
 defineOptions({ name: "LeaveReturnPage" });
 

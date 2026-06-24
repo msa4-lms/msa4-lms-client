@@ -1,6 +1,6 @@
 <script setup>
 import { computed, onMounted, ref } from "vue";
-import { useAcademicStore } from "../../store/academic/useAcademicStore";
+import { useAttendanceStore } from "../../store/attendance/useAttendanceStore";
 import MyButton from "../../components/button/MyButton.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyTable from "../../components/table/MyTable.vue";
@@ -8,7 +8,7 @@ import myAxios from "../../api/myAxios";
 
 defineOptions({ name: "ProfessorExcuseApprovalPage" });
 
-const academicStore = useAcademicStore();
+const academicStore = useAttendanceStore();
 
 const loading = ref(false);
 const activeTab = ref("PENDING");

@@ -1,12 +1,12 @@
 <script setup>
 import { computed, onMounted, reactive, watch } from "vue";
-import { useAcademicStore } from "../../store/academic/useAcademicStore";
+import { useGradeStore } from "../../store/grade/useGradeStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyTable from "../../components/table/MyTable.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 
-const academicStore = useAcademicStore();
+const academicStore = useGradeStore();
 const authStore = useAuthStore();
 
 const gradeColumns = [
