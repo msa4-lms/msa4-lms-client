@@ -69,32 +69,29 @@ const employmentRows = computed(() => [
 
           <ul class="quick-list" aria-label="교수 기본 요약">
             <li>
-              <span class="icon" aria-hidden="true">◆</span>
               <span>{{ professor.department }}</span>
             </li>
             <li>
-              <span class="icon" aria-hidden="true">◆</span>
               <span>교번 {{ professor.professorNo }}</span>
             </li>
             <li>
-              <span class="icon" aria-hidden="true">◆</span>
               <span>{{ professor.email }}</span>
             </li>
           </ul>
         </div>
       </div>
 
-      <div class="summary-grid">
+      <!-- <div class="summary-grid">
         <div
           v-for="item in summaryItems"
           :key="item.label"
           class="summary-item"
         >
-          <span aria-hidden="true">◆</span>
+          <span aria-hidden="true"></span>
           <span class="summary-label">{{ item.label }}</span>
           <span>{{ item.value }}</span>
         </div>
-      </div>
+      </div> -->
     </article>
 
     <div class="info-grid">
