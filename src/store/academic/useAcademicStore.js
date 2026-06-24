@@ -12,6 +12,7 @@ export const useAcademicStore = defineStore("academic", () => {
   const attendanceRates = ref([]);
   const myExcuseRequests = ref([]);
   const pendingExcuseRequests = ref([]);
+  const professorExcuseRequests = ref([]);
 
   // 성적 조회 (연도 및 학기 필터링 추가)
   const fetchGrades = async (params = {}) => {
@@ -102,6 +103,20 @@ export const useAcademicStore = defineStore("academic", () => {
     }
   };
 
+  const fetchProfessorExcuseRequests = async () => {
+    try {
+      const res = await myAxios.get("/api/professor/academic/excuses", {
+        suppressErrorAlert: true,
+      });
+      if (res.data.code === "00") {
+        professorExcuseRequests.value = res.data.data;
+      }
+    } catch (error) {
+      professorExcuseRequests.value = [];
+      console.error("교수 공결 신청 목록 조회 실패:", error);
+    }
+  };
+
   const requestExcuse = async (payload) => {
     const res = await myAxios.post("/api/student/academic/excuses", payload);
     if (res.data.code === "00") {
@@ -114,7 +129,7 @@ export const useAcademicStore = defineStore("academic", () => {
     const res = await myAxios.patch(`/api/professor/academic/excuses/${requestId}`, payload);
     if (res.data.code === "00") {
       await fetchPendingExcuseRequests();
-      await fetchAttendanceRates();
+      await fetchProfessorExcuseRequests();
     }
     return res.data;
   };
@@ -125,11 +140,13 @@ export const useAcademicStore = defineStore("academic", () => {
     attendanceRates,
     myExcuseRequests,
     pendingExcuseRequests,
+    professorExcuseRequests,
     fetchGrades,
     fetchAttendance,
     fetchAttendanceRates,
     fetchMyExcuseRequests,
     fetchPendingExcuseRequests,
+    fetchProfessorExcuseRequests,
     requestExcuse,
     decideExcuseRequest,
     applyObjection,

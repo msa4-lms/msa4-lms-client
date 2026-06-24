@@ -32,6 +32,7 @@ const myExcuseColumns = [
   { key: "date", label: "날짜" },
   { key: "status", label: "상태" },
   { key: "reason", label: "사유" },
+  { key: "attachment", label: "첨부파일" },
 ];
 
 const pendingExcuseColumns = [
@@ -55,6 +56,7 @@ const shortDayNames = ["일", "월", "화", "수", "목", "금", "토"];
 
 const enrollments = ref([]);
 const loading = ref(false);
+const attachmentInput = ref(null);
 const searchParams = reactive({ year: 2026, semester: 1 });
 const excuseForm = reactive({
   enrollmentId: "",
@@ -62,10 +64,60 @@ const excuseForm = reactive({
   period: 1,
   reason: "",
   attachmentName: "",
+  attachmentFile: null,
 });
 
 const isStudent = computed(() => authStore.userInfo?.role === "STUDENT");
-const isProfessor = computed(() => authStore.userInfo?.role === "PROFESSOR");
+
+const extractAttachmentName = (reason = "") => {
+  const match = reason.match(/\[첨부파일:\s*(.+?)\]$/);
+  return match?.[1] || "";
+};
+
+const cleanReason = (reason = "") => {
+  return reason.replace(/\s*\[첨부파일:\s*.+?\]$/, "").trim();
+};
+
+const attachmentName = (request) => {
+  return request.attachmentOriginalName || extractAttachmentName(request.reason);
+};
+
+const openAttachment = async (request) => {
+  if (!request.attachmentOriginalName) return;
+
+  const contentType = request.attachmentContentType || "";
+  const canPreview =
+    contentType === "application/pdf" || contentType.startsWith("image/");
+  const previewWindow = canPreview ? window.open("", "_blank") : null;
+
+  try {
+    const response = await myAxios.get(
+      `/api/student/academic/excuses/${request.id}/attachment`,
+      { responseType: "blob" }
+    );
+    const blobUrl = URL.createObjectURL(response.data);
+
+    if (canPreview) {
+      if (previewWindow) {
+        previewWindow.opener = null;
+        previewWindow.location.href = blobUrl;
+      } else {
+        window.open(blobUrl, "_blank", "noopener,noreferrer");
+      }
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      return;
+    }
+
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = request.attachmentOriginalName;
+    link.click();
+    URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    if (previewWindow) previewWindow.close();
+    console.error("첨부파일 열기 실패:", error);
+  }
+};
 
 const selectedDate = computed(() => {
   if (!excuseForm.lectureDate) return null;
@@ -128,6 +180,17 @@ const getScheduleStartPeriod = (schedule) => {
   return Math.max(1, Number(match[1]) - 8);
 };
 
+const hasExistingExcuseRequest = (enrollment, period) => {
+  const enrollmentId = enrollment.enrollmentId || enrollment.id;
+
+  return academicStore.myExcuseRequests.some(
+    (request) =>
+      String(request.enrollmentId) === String(enrollmentId) &&
+      request.lectureDate === excuseForm.lectureDate &&
+      Number(request.period) === Number(period)
+  );
+};
+
 const excuseCourseOptions = computed(() => {
   if (!excuseForm.lectureDate) return [];
 
@@ -139,8 +202,12 @@ const excuseCourseOptions = computed(() => {
     )
     .map((enrollment) => {
       const id = enrollment.enrollmentId || enrollment.id;
+      const period = getScheduleStartPeriod(enrollment.schedule);
+
+      if (hasExistingExcuseRequest(enrollment, period)) return null;
+
       return id && enrollment.courseName
-        ? { id, courseName: enrollment.courseName }
+        ? { id, courseName: enrollment.courseName, period }
         : null;
     })
     .filter(Boolean);
@@ -171,8 +238,6 @@ const loadPageData = async () => {
         academicStore.fetchMyExcuseRequests(),
         loadEnrollments(),
       ]);
-    } else if (isProfessor.value) {
-      await academicStore.fetchPendingExcuseRequests();
     }
   } finally {
     loading.value = false;
@@ -196,22 +261,24 @@ const submitExcuse = async () => {
     return;
   }
 
-  const reason = excuseForm.attachmentName
-    ? `${excuseForm.reason.trim()} [첨부파일: ${excuseForm.attachmentName}]`
-    : excuseForm.reason.trim();
+  const formData = new FormData();
+  formData.append("enrollmentId", excuseForm.enrollmentId);
+  formData.append("lectureDate", excuseForm.lectureDate);
+  formData.append("period", excuseForm.period);
+  formData.append("reason", excuseForm.reason.trim());
+  if (excuseForm.attachmentFile) {
+    formData.append("attachment", excuseForm.attachmentFile);
+  }
 
   try {
-    await academicStore.requestExcuse({
-      enrollmentId: Number(excuseForm.enrollmentId),
-      lectureDate: excuseForm.lectureDate,
-      period: Number(excuseForm.period),
-      reason,
-    });
+    await academicStore.requestExcuse(formData);
 
     excuseForm.lectureDate = "";
     excuseForm.period = 1;
     excuseForm.reason = "";
     excuseForm.attachmentName = "";
+    excuseForm.attachmentFile = null;
+    if (attachmentInput.value) attachmentInput.value.value = "";
     alert("공결 신청이 완료되었습니다.");
   } catch (error) {
     console.error("공결 신청 실패:", error);
@@ -221,6 +288,7 @@ const submitExcuse = async () => {
 const selectAttachment = (event) => {
   const file = event.target.files?.[0];
   excuseForm.attachmentName = file?.name || "";
+  excuseForm.attachmentFile = file || null;
 };
 
 watch(
@@ -251,7 +319,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer :title="isProfessor ? '공결 승인 관리' : labels.pageTitle">
+  <MyPageContainer :title="labels.pageTitle">
     <template v-if="isStudent">
       <section class="panel-top">
         <div class="panel-title">
@@ -338,10 +406,26 @@ onMounted(async () => {
           >
             <td class="course-name">{{ request.courseName }}</td>
             <td>{{ request.lectureDate }}</td>
-            <td>
+            <td class="student-status-cell">
               <StatusBadge :status="request.status" />
             </td>
-            <td>{{ request.rejectReason || request.reason }}</td>
+            <td class="reason-cell">
+              {{ request.rejectReason || cleanReason(request.reason) }}
+            </td>
+            <td class="attachment-cell">
+              <button
+                v-if="request.attachmentOriginalName"
+                class="attachment-button"
+                type="button"
+                @click="openAttachment(request)"
+              >
+                {{ attachmentName(request) }}
+              </button>
+              <span v-else-if="attachmentName(request)" class="attachment-name">
+                {{ attachmentName(request) }}
+              </span>
+              <span v-else class="empty-value">없음</span>
+            </td>
           </tr>
         </MyTable>
       </section>
@@ -538,6 +622,44 @@ onMounted(async () => {
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+.reason-cell {
+  min-width: 180px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.attachment-cell {
+  min-width: 150px;
+  max-width: 240px;
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.attachment-button {
+  border: 0;
+  padding: 0;
+  background: transparent;
+  color: #0b3d91;
+  cursor: pointer;
+  font: inherit;
+  text-align: left;
+  text-decoration: underline;
+}
+
+.attachment-name {
+  color: #475569;
+}
+
+.empty-value {
+  color: #94a3b8;
+}
+
+.student-status-cell :deep(.status-badge) {
+  padding: 0;
+  background-color: transparent;
+  border-radius: 0;
 }
 
 @media (max-width: 1100px) {
