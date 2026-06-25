@@ -299,13 +299,11 @@ import MyModal from "../../components/common/MyModal.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
-import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
 import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
 
 const route = useRoute();
 const isCorrectionMode = computed(() => route.path.includes("correct"));
 
-const lectureStore = useLectureProfessorStore();
 const gradeStore = useGradeProfessorStore();
 
 const selectedLectureId = ref(null);
@@ -369,7 +367,7 @@ const handleStrictInput = (event, obj, field) => {
   obj[field] = val === "" ? null : val;
 };
 
-const lectures = computed(() => lectureStore.lectures);
+const lectures = computed(() => gradeStore.lectures);
 const currentLecture = computed(() =>
   lectures.value.find((l) => l.id === selectedLectureId.value)
 );
@@ -447,7 +445,7 @@ const hasObjectionValidationError = computed(() => {
 
 onMounted(async () => {
   try {
-    await lectureStore.fetchProfessorLectures();
+    await gradeStore.getLectures();
   } catch (error) {
     alert("개설 강좌를 불러오는 데 실패했습니다.");
   }
