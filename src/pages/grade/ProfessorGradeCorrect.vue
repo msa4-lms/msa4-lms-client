@@ -171,15 +171,7 @@ const selectScoreMode = (grade) => {
 
 const handleScoreInput = (grade, fieldKey, value) => {
   if (!canCorrect(grade)) return;
-
-  const numbersOnly = String(value ?? "").replace(/\D/g, "");
-
-  if (numbersOnly === "") {
-    grade[fieldKey] = "";
-  } else {
-    grade[fieldKey] = Math.min(Number(numbersOnly), 100);
-  }
-
+  grade[fieldKey] = value === "" ? "" : Number(value);
   selectScoreMode(grade);
 };
 
@@ -331,6 +323,8 @@ onMounted(async () => {
                 type="text"
                 inputmode="numeric"
                 maxlength="3"
+                numeric-only
+                :max-number="100"
                 :disabled="!canCorrect(grade) || grade.editMode === 'GRADE'"
                 class="score-input"
                 @update:model-value="

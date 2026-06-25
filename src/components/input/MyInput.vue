@@ -6,6 +6,14 @@ const props = defineProps({
     default: "text",
   },
   placeholder: String,
+  numericOnly: {
+    type: Boolean,
+    default: false,
+  },
+  maxNumber: {
+    type: Number,
+    default: null,
+  },
   modelModifiers: {
     type: Object,
     default: () => ({}),
@@ -15,9 +23,23 @@ const props = defineProps({
 const emit = defineEmits(["update:modelValue", "keyup-enter"]);
 
 const updateValue = (event) => {
-  const value = props.modelModifiers.trim
+  let value = props.modelModifiers.trim
     ? event.target.value.trim()
     : event.target.value;
+
+  if (props.numericOnly) {
+    value = value.replace(/\D/g, "");
+
+    if (
+      value !== "" &&
+      props.maxNumber !== null &&
+      Number(value) > props.maxNumber
+    ) {
+      value = String(props.maxNumber);
+    }
+
+    event.target.value = value;
+  }
 
   emit("update:modelValue", value);
 };
