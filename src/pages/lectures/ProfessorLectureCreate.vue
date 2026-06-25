@@ -1,5 +1,5 @@
 <script setup>
-import { reactive, computed, onMounted, ref } from "vue";
+import { reactive, computed, onMounted, ref, watch } from "vue";
 import { useRouter } from "vue-router";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
@@ -26,6 +26,24 @@ const form = reactive({
   assignmentRatio: 30,
   attendanceRatio: 10,
   schedules: [], // 시간표 배열
+});
+
+['midtermRatio', 'finalRatio', 'assignmentRatio', 'attendanceRatio'].forEach(field => {
+  watch(() => form[field], (newVal) => {
+    if (newVal !== '' && newVal !== null && newVal !== undefined) {
+      let str = String(newVal).replace(/[^0-9]/g, '');
+      if (str.length > 3) str = str.slice(0, 3);
+      let finalVal = str === '' ? '' : Number(str);
+      
+      if (finalVal !== '' && finalVal > 100) {
+        finalVal = 100;
+      }
+
+      if (newVal !== finalVal) {
+        form[field] = finalVal;
+      }
+    }
+  });
 });
 
 const tempSchedule = reactive({
@@ -104,10 +122,10 @@ const parseScheduleString = (scheduleStr) => {
 
 const ratioTotal = computed(() => {
   return (
-    (form.midtermRatio || 0) +
-    (form.finalRatio || 0) +
-    (form.assignmentRatio || 0) +
-    (form.attendanceRatio || 0)
+    Number(form.midtermRatio || 0) +
+    Number(form.finalRatio || 0) +
+    Number(form.assignmentRatio || 0) +
+    Number(form.attendanceRatio || 0)
   );
 });
 
@@ -140,10 +158,6 @@ const getDayLabel = (day) => {
   return map[day] || day;
 };
 
-const goBack = () => {
-  router.push("/main");
-};
-
 const handleSubmit = async () => {
   if (!isRatioValid.value) {
     alert("성적 비율의 합계가 100%여야 합니다.");
@@ -157,7 +171,28 @@ const handleSubmit = async () => {
   try {
     await lectureProfessorStore.createLecture({ ...form });
     alert("강의 개설 신청이 정상 처리되었습니다.");
-    router.push("/main");
+    
+    // 페이지 이동 대신 폼 데이터 초기화
+    Object.assign(form, {
+      semesterId: 53,
+      courseId: "",
+      isNewCourse: false,
+      newCourseName: "",
+      newCourseCredits: 3,
+      newCourseTargetGrade: 1,
+      newCourseCompletionType: "GENERAL_ELECTIVE",
+      sectionNo: "01",
+      capacity: 40,
+      classroom: "",
+      syllabus: "",
+      midtermRatio: 30,
+      finalRatio: 30,
+      assignmentRatio: 30,
+      attendanceRatio: 10,
+      schedules: [],
+    });
+    selectedPastLectureId.value = "";
+    
   } catch (error) {
     alert(
       error.response?.data?.message || "강의 개설 신청 중 오류가 발생했습니다."
@@ -342,76 +377,9 @@ const handleSubmit = async () => {
                 />
               </div>
 
-              <!-- 강의계획서 입력 영역 -->
-              <div class="form-group full-width">
-                <label for="syllabus">강의계획서</label>
-                <textarea
-                  id="syllabus"
-                  v-model="form.syllabus"
-                  placeholder="강의 목표, 교재, 주차별 계획 등을 상세히 입력해 주세요."
-                  required
-                  class="form-input"
-                  style="min-height: 150px; resize: vertical"
-                ></textarea>
-              </div>
             </div>
           </div>
 
-          <div class="ratio-section">
-            <h3>성적 평가 비율 설정 (합계 100%)</h3>
-            <div class="ratio-inputs">
-              <div class="ratio-group">
-                <label>중간고사 (%)</label>
-                <MyInput
-                  type="number"
-                  v-model.number="form.midtermRatio"
-                  min="0"
-                  max="100"
-                  class="form-input ratio-box"
-                />
-              </div>
-              <div class="ratio-group">
-                <label>기말고사 (%)</label>
-                <MyInput
-                  type="number"
-                  v-model.number="form.finalRatio"
-                  min="0"
-                  max="100"
-                  class="form-input ratio-box"
-                />
-              </div>
-              <div class="ratio-group">
-                <label>과제 비율 (%)</label>
-                <MyInput
-                  type="number"
-                  v-model.number="form.assignmentRatio"
-                  min="0"
-                  max="100"
-                  class="form-input ratio-box"
-                />
-              </div>
-              <div class="ratio-group">
-                <label>출결 비율 (%)</label>
-                <MyInput
-                  type="number"
-                  v-model.number="form.attendanceRatio"
-                  min="0"
-                  max="100"
-                  class="form-input ratio-box"
-                />
-              </div>
-            </div>
-            <div
-              :class="['ratio-indicator', isRatioValid ? 'valid' : 'invalid']"
-            >
-              현재 평가 비율 합계: <strong>{{ ratioTotal }}%</strong>
-              <span v-if="!isRatioValid">(100%가 되어야 개설 가능합니다)</span>
-            </div>
-          </div>
-        </div>
-
-        <!-- 우측 컬럼: 강의 시간표 설정 -->
-        <div class="form-column">
           <div class="schedule-section">
             <h3>강의 시간표 설정</h3>
             <div class="schedule-creator">
@@ -480,16 +448,77 @@ const handleSubmit = async () => {
               등록된 강의 시간이 없습니다. 최소 1개 이상 추가해야 합니다.
             </div>
           </div>
+
+          <div class="ratio-section">
+            <h3>성적 평가 비율 설정 (합계 100%)</h3>
+            <div class="ratio-inputs">
+              <div class="ratio-group">
+                <label>중간고사 (%)</label>
+                <MyInput
+                  type="text"
+                  v-model="form.midtermRatio"
+                  maxlength="3"
+                  class="form-input ratio-box"
+                  @input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')"
+                />
+              </div>
+              <div class="ratio-group">
+                <label>기말고사 (%)</label>
+                <MyInput
+                  type="text"
+                  v-model="form.finalRatio"
+                  maxlength="3"
+                  class="form-input ratio-box"
+                  @input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')"
+                />
+              </div>
+              <div class="ratio-group">
+                <label>과제 비율 (%)</label>
+                <MyInput
+                  type="text"
+                  v-model="form.assignmentRatio"
+                  maxlength="3"
+                  class="form-input ratio-box"
+                  @input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')"
+                />
+              </div>
+              <div class="ratio-group">
+                <label>출결 비율 (%)</label>
+                <MyInput
+                  type="text"
+                  v-model="form.attendanceRatio"
+                  maxlength="3"
+                  class="form-input ratio-box"
+                  @input="$event.target.value = $event.target.value.replace(/[^0-9]/g, '')"
+                />
+              </div>
+            </div>
+            <div
+              :class="['ratio-indicator', isRatioValid ? 'valid' : 'invalid']"
+            >
+              현재 평가 비율 합계: <strong>{{ ratioTotal }}%</strong>
+              <span v-if="!isRatioValid">(100%가 되어야 개설 가능합니다)</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 우측 컬럼: 강의계획서 -->
+        <div class="form-column">
+          <div class="syllabus-section">
+            <h3>강의계획서</h3>
+            <textarea
+              id="syllabus"
+              v-model="form.syllabus"
+              placeholder="강의 목표, 교재, 주차별 계획 등을 상세히 입력해 주세요."
+              required
+              class="form-input"
+              style="flex: 1; resize: none; width: 100%; box-sizing: border-box;"
+            ></textarea>
+          </div>
         </div>
 
         <!-- 하단: 폼 액션 버튼들 -->
         <div class="form-actions full-width">
-          <MyButton
-            color="white"
-            size="middle"
-            content="이전으로"
-            @click="goBack"
-          />
           <MyButton
             btnType="submit"
             color="deep-blue"
@@ -513,7 +542,7 @@ const handleSubmit = async () => {
 
 .create-form-layout {
   display: grid;
-  grid-template-columns: 1.2fr 1fr;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   gap: 2.5rem;
 }
 
@@ -576,6 +605,8 @@ label {
   outline: none;
   transition: all 0.2s ease-in-out;
   box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
 }
 
 .form-input::placeholder {
@@ -600,7 +631,24 @@ label {
   padding: 1.5rem;
   border: 1px solid #edf2f7;
   text-align: left;
+}
+
+.syllabus-section {
+  background: var(--bg-color);
+  border-radius: 12px;
+  padding: 1.5rem;
+  border: 1px solid #edf2f7;
+  text-align: left;
   height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.syllabus-section h3 {
+  font-size: 1.1rem;
+  font-weight: 600;
+  margin-bottom: 1.2rem;
+  color: var(--primary-text-color);
 }
 
 .schedule-section h3 {
@@ -671,10 +719,12 @@ label {
 .ratio-group {
   display: flex;
   flex-direction: column;
+  min-width: 0;
 }
 
 .ratio-box {
   text-align: center;
+  width: 100%;
 }
 
 .ratio-indicator {
