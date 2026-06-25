@@ -114,8 +114,18 @@ const hasSavedScore = (grade) =>
       grade[field.key] !== ""
   );
 
+const displayStatus = (grade) => {
+  if ((grade.status === "DRAFT" || !grade.status) && !hasSavedScore(grade)) {
+    return "UNENTERED";
+  }
+  return grade.status || "DRAFT";
+};
+
+const isUnentered = (grade) => displayStatus(grade) === "UNENTERED";
+
 const canCorrect = (grade) =>
-  grade.status === "DRAFT" || (!grade.status && hasSavedScore(grade));
+  !isUnentered(grade) &&
+  (grade.status === "DRAFT" || (!grade.status && hasSavedScore(grade)));
 
 const termLabel = (term) => {
   if (term === "FIRST" || term === 1 || term === "1") return "1학기";
@@ -353,7 +363,7 @@ onMounted(async () => {
             </td>
 
             <td>
-              <StatusBadge :status="grade.status || 'DRAFT'" />
+              <StatusBadge :status="displayStatus(grade)" />
             </td>
 
             <td>
@@ -392,9 +402,13 @@ onMounted(async () => {
                     {{ option }}
                   </option>
                 </select>
-                <span v-if="!canCorrect(grade)" class="locked-text">
-                  제출된 성적은 수정할 수 없습니다.
-                </span>
+              <span v-if="!canCorrect(grade)" class="locked-text">
+                {{
+                  isUnentered(grade)
+                    ? "미입력 성적은 정정할 수 없습니다."
+                    : "제출된 성적은 수정할 수 없습니다."
+                }}
+              </span>
               </div>
             </td>
           </tr>
