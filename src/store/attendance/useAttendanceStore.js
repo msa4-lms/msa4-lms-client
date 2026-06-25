@@ -97,6 +97,25 @@ export const useAttendanceStore = defineStore("attendance", () => {
     return res.data;
   };
 
+  const fetchLectureAttendances = async (lectureId, date) => {
+    const res = await myAxios.get(`/api/professor/attendances/lecture/${lectureId}`, {
+      params: { date },
+    });
+    return res.data.data;
+  };
+
+  const saveAttendance = async (payload) => {
+    const res = await myAxios.post(`/api/professor/attendances`, payload);
+    return res.data;
+  };
+
+  const updateAttendance = async (id, payload) => {
+    const res = await myAxios.patch(`/api/professor/attendances/${id}`, null, {
+      params: payload,
+    });
+    return res.data;
+  };
+
   return {
     attendanceList,
     attendanceRates,
@@ -110,5 +129,8 @@ export const useAttendanceStore = defineStore("attendance", () => {
     fetchProfessorExcuseRequests,
     requestExcuse,
     decideExcuseRequest,
+    fetchLectureAttendances,
+    saveAttendance,
+    updateAttendance,
   };
 });

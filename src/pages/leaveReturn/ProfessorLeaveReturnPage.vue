@@ -1,10 +1,10 @@
 <template>
   <MyPageContainer title="휴/복학 결재 관리">
-    <div class="card">
-      <div class="card-header">
+    <div class="attendance-section">
+      <div class="section-header">
         <h3>결재 대기 목록</h3>
       </div>
-      <div class="card-body">
+      <div class="table-wrapper">
         <MyTable
           :columns="columns"
           :empty="pendingRequests.length === 0"
@@ -83,6 +83,14 @@
         <div class="info-row reason-row">
           <span class="label">신청 사유</span>
           <div class="value reason-box">{{ activeReq.reason }}</div>
+        </div>
+        <div v-if="activeReq.attachmentFilePath" class="info-row">
+          <span class="label">증빙 서류</span>
+          <span class="value">
+            <a :href="`http://localhost:8080/api/files?path=${encodeURIComponent(activeReq.attachmentFilePath)}`" target="_blank" class="download-link">
+              첨부파일 다운로드
+            </a>
+          </span>
         </div>
       </div>
 
@@ -198,26 +206,24 @@ const handleProcess = async (status) => {
 </script>
 
 <style scoped>
-.card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #edf2f7;
-  overflow: hidden;
+.attendance-section {
+  margin-top: 32px;
 }
 
-.card-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #edf2f7;
+.section-header {
+  margin-bottom: 16px;
+  padding: 0 4px;
 }
 
-.card-header h3 {
-  color: #1a1f36;
-  font-size: 1.1rem;
+.section-header h3 {
+  font-size: 1.25rem;
   font-weight: 700;
+  color: #1a1f36;
+  margin: 0;
 }
 
-.card-body {
-  padding: 20px;
+.table-wrapper {
+  overflow: hidden;
 }
 
 .type-badge {
@@ -247,6 +253,16 @@ const handleProcess = async (status) => {
   display: flex;
   gap: 8px;
   justify-content: center;
+}
+
+.download-link {
+  color: #3b82f6;
+  text-decoration: underline;
+  cursor: pointer;
+  font-weight: 500;
+}
+.download-link:hover {
+  color: #2563eb;
 }
 
 

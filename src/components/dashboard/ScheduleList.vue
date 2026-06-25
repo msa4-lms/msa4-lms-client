@@ -8,9 +8,11 @@ defineProps({
 </script>
 
 <template>
-  <div class="schedule-list">
-    <h3>학사일정</h3>
-
+  <div class="schedule-section">
+    <div class="section-header">
+      <h3>학사일정</h3>
+    </div>
+    <div class="schedule-list">
     <div class="schedule-container">
       <div
         v-for="schedule in schedules"
@@ -27,22 +29,35 @@ defineProps({
         </div>
       </div>
     </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.schedule-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+.section-header {
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.section-header h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1f36;
+  margin: 0;
+}
+
 .schedule-list {
   background: #ffffff;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
-}
-
-.schedule-list h3 {
-  padding-bottom: 12px;
-  margin-bottom: 16px;
-  font-size: 23px;
-  border-bottom: 1px solid #eeeeee;
+  flex: 1;
 }
 
 .schedule-container {

@@ -148,13 +148,13 @@ onMounted(loadRequests);
 
 <template>
   <MyPageContainer title="출결 승인">
-    <section class="card">
-      <div class="card-header">
+    <div class="attendance-section">
+      <div class="section-header">
         <h3>{{ activeTab === "PENDING" ? "승인 대기 공결 신청" : "처리 완료 내역" }}</h3>
         <MyTabs :tabs="tabOptions" v-model="activeTab" />
       </div>
 
-      <div class="card-body">
+      <div class="table-wrapper">
         <MyTable
           :columns="columns"
           :loading="loading"
@@ -210,7 +210,7 @@ onMounted(loadRequests);
           </tr>
         </MyTable>
       </div>
-    </section>
+    </div>
 
     <MyModal
       :isOpen="!!rejectTarget"
@@ -245,30 +245,28 @@ onMounted(loadRequests);
 </template>
 
 <style scoped>
-.card {
-  overflow: hidden;
-  background: #fff;
-  border: 1px solid #edf2f7;
-  border-radius: 12px;
+.attendance-section {
+  margin-top: 32px;
 }
 
-.card-header {
+.table-wrapper {
+  overflow: hidden;
+}
+
+.section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 20px 24px;
-  border-bottom: 1px solid #edf2f7;
+  margin-bottom: 16px;
+  padding: 0 4px;
 }
 
-.card-header h3 {
+.section-header h3 {
   color: #1a1f36;
-  font-size: 1.1rem;
+  font-size: 1.25rem;
   font-weight: 700;
-}
-
-.card-body {
-  padding: 20px;
+  margin: 0;
 }
 
 .student-name,

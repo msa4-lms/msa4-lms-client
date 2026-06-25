@@ -8,9 +8,11 @@ defineProps({
 </script>
 
 <template>
-  <div class="notice-list">
-    <h2>공지사항</h2>
-
+  <div class="notice-section">
+    <div class="section-header">
+      <h2>공지사항</h2>
+    </div>
+    <div class="notice-list">
     <div v-for="notice in notices" :key="notice.id" class="notice-item">
       <div class="notice-title">
         {{ notice.title }}
@@ -20,24 +22,37 @@ defineProps({
         {{ notice.content }}
       </div>
     </div>
+    </div>
   </div>
 </template>
 
 <style scoped>
+.notice-section {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.section-header {
+  margin-bottom: 16px;
+  padding: 0 4px;
+}
+
+.section-header h2 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a1f36;
+  margin: 0;
+}
+
 .notice-list {
   background: #ffffff;
   border-radius: 8px;
   padding: 16px;
   box-shadow: 0 4px 14px rgba(0, 0, 0, 0.06);
   flex: 1;
-  min-height: 0;
   overflow-y: auto;
-}
-
-.notice-list h2 {
-  padding-bottom: 12px;
-  font-size: 23px;
-  border-bottom: 1px solid #eeeeee;
 }
 
 .notice-item {
