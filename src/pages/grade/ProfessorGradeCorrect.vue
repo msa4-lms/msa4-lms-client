@@ -638,6 +638,8 @@ onMounted(async () => {
   padding: 80px 20px;
   color: #697386;
   text-align: center;
+  background-color: var(--personal-color-white);
+  border-radius: 6px;
 }
 
 @media (max-width: 720px) {
