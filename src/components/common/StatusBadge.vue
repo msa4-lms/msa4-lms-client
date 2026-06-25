@@ -16,6 +16,8 @@ const props = defineProps({
 
 const statusLabel = computed(() => {
   switch (props.status) {
+    case "UNENTERED":
+      return "미입력";
     case "PENDING":
       return "대기중";
     case "APPROVED":
@@ -61,6 +63,8 @@ const statusClass = computed(() => {
     case "ABSENT":
     case "OBJECTION":
       return "rejected";
+    case "UNENTERED":
+      return "unentered";
     case "PENDING":
     case "LATE":
     case "DRAFT":
@@ -101,5 +105,10 @@ const statusClass = computed(() => {
 .status-badge.submitted {
   background-color: #cce5ff;
   color: #004085;
+}
+
+.status-badge.unentered {
+  background-color:#abababc5;
+  color: var(--personal-color-white);
 }
 </style>
