@@ -282,8 +282,8 @@ onMounted(async () => {
       </div>
     </MySearchFilter>
 
-    <section v-if="selectedLectureId" class="content-card">
-      <div class="card-header">
+    <section v-if="selectedLectureId" class="grade-section">
+      <div class="section-header">
         <div>
           <h3>수강생 성적 정정</h3>
         </div>
@@ -300,107 +300,109 @@ onMounted(async () => {
         점수는 0점 이상 100점 이하로 입력해 주세요.
       </div>
 
-      <MyTable
-        :columns="columns"
-        :loading="isLoading"
-        :empty="!isLoading && editableGrades.length === 0"
-        emptyMessage="정정할 수강생 성적이 없습니다."
-      >
-        <tr
-          v-for="grade in editableGrades"
-          :key="grade.id || grade.enrollmentId"
-          :class="{ 'changed-row': isChanged(grade) }"
+      <div class="table-card">
+        <MyTable
+          :columns="columns"
+          :loading="isLoading"
+          :empty="!isLoading && editableGrades.length === 0"
+          emptyMessage="정정할 수강생 성적이 없습니다."
         >
-          <td class="student-cell">
-            <strong>{{ grade.studentName }}</strong>
-            <span>{{ grade.studentLoginId }}</span>
-          </td>
+          <tr
+            v-for="grade in editableGrades"
+            :key="grade.id || grade.enrollmentId"
+            :class="{ 'changed-row': isChanged(grade) }"
+          >
+            <td class="student-cell">
+              <strong>{{ grade.studentName }}</strong>
+              <span>{{ grade.studentLoginId }}</span>
+            </td>
 
-          <td v-for="scoreField in scoreFields" :key="scoreField.key">
-            <div class="score-cell">
-              <MyInput
-                :model-value="grade[scoreField.key]"
-                type="text"
-                inputmode="numeric"
-                maxlength="3"
-                numeric-only
-                :max-number="100"
-                :disabled="!canCorrect(grade) || grade.editMode === 'GRADE'"
-                class="score-input"
-                @update:model-value="
-                  handleScoreInput(grade, scoreField.key, $event)
-                "
-              />
-              <span class="original-value">
-                기존 {{ displayScore(grade.original[scoreField.key]) }}
-              </span>
-            </div>
-          </td>
-
-          <td>
-            <div class="result-cell">
-              <strong>{{ calculateTotal(grade) }}</strong>
-              <span>기존 {{ grade.originalTotal }}</span>
-            </div>
-          </td>
-
-          <td>
-            <div class="result-cell">
-              <strong>{{ resolvedGrade(grade) }}</strong>
-              <span>기존 {{ grade.originalGrade }}</span>
-            </div>
-          </td>
-
-          <td>
-            <StatusBadge :status="grade.status || 'DRAFT'" />
-          </td>
-
-          <td>
-            <div class="correction-controls">
-              <div class="mode-buttons">
-                <button
-                  type="button"
-                  :class="{ active: grade.editMode === 'SCORE' }"
-                  :disabled="!canCorrect(grade)"
-                  @click="setEditMode(grade, 'SCORE')"
-                >
-                  점수로 수정
-                </button>
-                <button
-                  type="button"
-                  :class="{ active: grade.editMode === 'GRADE' }"
-                  :disabled="!canCorrect(grade)"
-                  @click="setEditMode(grade, 'GRADE')"
-                >
-                  등급 직접 수정
-                </button>
+            <td v-for="scoreField in scoreFields" :key="scoreField.key">
+              <div class="score-cell">
+                <MyInput
+                  :model-value="grade[scoreField.key]"
+                  type="text"
+                  inputmode="numeric"
+                  maxlength="3"
+                  numeric-only
+                  :max-number="100"
+                  :disabled="!canCorrect(grade) || grade.editMode === 'GRADE'"
+                  class="score-input"
+                  @update:model-value="
+                    handleScoreInput(grade, scoreField.key, $event)
+                  "
+                />
+                <span class="original-value">
+                  기존 {{ displayScore(grade.original[scoreField.key]) }}
+                </span>
               </div>
+            </td>
 
-              <select
-                v-if="grade.editMode === 'GRADE'"
-                v-model="grade.selectedGrade"
-                class="grade-select"
-                aria-label="정정 등급"
-                :disabled="!canCorrect(grade)"
-              >
-                <option
-                  v-for="option in gradeOptions"
-                  :key="option"
-                  :value="option"
+            <td>
+              <div class="result-cell">
+                <strong>{{ calculateTotal(grade) }}</strong>
+                <span>기존 {{ grade.originalTotal }}</span>
+              </div>
+            </td>
+
+            <td>
+              <div class="result-cell">
+                <strong>{{ resolvedGrade(grade) }}</strong>
+                <span>기존 {{ grade.originalGrade }}</span>
+              </div>
+            </td>
+
+            <td>
+              <StatusBadge :status="grade.status || 'DRAFT'" />
+            </td>
+
+            <td>
+              <div class="correction-controls">
+                <div class="mode-buttons">
+                  <button
+                    type="button"
+                    :class="{ active: grade.editMode === 'SCORE' }"
+                    :disabled="!canCorrect(grade)"
+                    @click="setEditMode(grade, 'SCORE')"
+                  >
+                    점수로 수정
+                  </button>
+                  <button
+                    type="button"
+                    :class="{ active: grade.editMode === 'GRADE' }"
+                    :disabled="!canCorrect(grade)"
+                    @click="setEditMode(grade, 'GRADE')"
+                  >
+                    등급 직접 수정
+                  </button>
+                </div>
+
+                <select
+                  v-if="grade.editMode === 'GRADE'"
+                  v-model="grade.selectedGrade"
+                  class="grade-select"
+                  aria-label="정정 등급"
+                  :disabled="!canCorrect(grade)"
                 >
-                  {{ option }}
-                </option>
-              </select>
-              <span v-if="!canCorrect(grade)" class="locked-text">
-                제출된 성적은 수정할 수 없습니다.
-              </span>
-            </div>
-          </td>
-        </tr>
-      </MyTable>
+                  <option
+                    v-for="option in gradeOptions"
+                    :key="option"
+                    :value="option"
+                  >
+                    {{ option }}
+                  </option>
+                </select>
+                <span v-if="!canCorrect(grade)" class="locked-text">
+                  제출된 성적은 수정할 수 없습니다.
+                </span>
+              </div>
+            </td>
+          </tr>
+        </MyTable>
 
-      <div v-if="hasChanges" class="change-summary">
-        {{ changedCount }}명의 성적이 변경되었습니다.
+        <div v-if="hasChanges" class="change-summary">
+          {{ changedCount }}명의 성적이 변경되었습니다.
+        </div>
       </div>
     </section>
 
@@ -438,39 +440,28 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.content-card {
+.grade-section {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-  overflow: hidden;
-  border: 1px solid #edf2f7;
-  border-radius: 8px;
-  background: #fff;
 }
 
-.card-header {
+.section-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 20px;
-  padding: 5px;
-  border-bottom: 1px solid #edf2f7;
+  padding: 4px 4px 14px;
 }
 
-.card-header h3 {
-  margin: 0 0 6px;
+.section-header h3 {
+  margin: 0;
   color: #1a1f36;
   font-size: 1.1rem;
 }
 
-.card-header p {
-  margin: 0;
-  color: #697386;
-  font-size: 0.85rem;
-}
-
 .validation-alert {
-  margin: 16px 20px 0;
+  margin: 0 0 12px;
   padding: 12px 14px;
   border-radius: 8px;
   background: #fff4f4;
@@ -479,7 +470,16 @@ onMounted(async () => {
   font-weight: 600;
 }
 
-.content-card :deep(.table-container) {
+.table-card {
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  border: 1px solid #edf2f7;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.table-card :deep(.table-container) {
   display: block;
   width: 100%;
   max-width: 100%;
@@ -487,32 +487,32 @@ onMounted(async () => {
   border-radius: 0;
   overflow-x: auto !important;
   overflow-y: hidden;
-  scrollbar-gutter: stable;
   -webkit-overflow-scrolling: touch;
 }
 
-.content-card :deep(.my-table) {
+.table-card :deep(.my-table) {
   width: 100%;
-  min-width: 1120px;
+  min-width: 1080px;
 }
 
-.content-card :deep(th) {
+.table-card :deep(th) {
   padding: 14px 10px;
 }
 
-.content-card :deep(td) {
+.table-card :deep(td) {
   min-width: 96px;
   padding: 12px 8px;
 }
 
-.content-card :deep(th:first-child),
-.content-card :deep(td:first-child) {
+.table-card :deep(th:first-child),
+.table-card :deep(td:first-child) {
   min-width: 100px;
 }
 
-.content-card :deep(th:last-child),
-.content-card :deep(td:last-child) {
-  min-width: 210px;
+.table-card :deep(th:last-child),
+.table-card :deep(td:last-child) {
+  min-width: 190px;
+  padding-right: 14px;
 }
 
 .changed-row {
@@ -641,7 +641,7 @@ onMounted(async () => {
 }
 
 @media (max-width: 720px) {
-  .card-header {
+  .section-header {
     align-items: flex-start;
     flex-direction: column;
   }
@@ -651,12 +651,12 @@ onMounted(async () => {
     width: 100%;
   }
 
-  .content-card :deep(th) {
+  .table-card :deep(th) {
     padding: 12px 8px;
     font-size: 0.78rem;
   }
 
-  .content-card :deep(td) {
+  .table-card :deep(td) {
     min-width: 88px;
     padding: 10px 6px;
   }
