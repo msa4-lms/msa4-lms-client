@@ -550,6 +550,10 @@ const handleSubmit = async () => {
   text-align: left;
 }
 
+.form-group > textarea {
+  font-family: sans-serif;
+}
+
 .form-group.full-width {
   grid-column: span 2;
 }
@@ -699,5 +703,9 @@ label {
   margin-top: 1rem;
   border-top: 1px solid #e2e8f0;
   padding-top: 1.5rem;
+}
+
+.add-btn {
+  margin-bottom: 5px;
 }
 </style>
