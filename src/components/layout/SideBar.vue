@@ -50,8 +50,11 @@ const alertReady = () => {
             <router-link to="/profile" class="submenu-item">{{
               getMenuTitle("/profile", "STUDENT")
             }}</router-link>
-            <router-link to="/leave-return" class="submenu-item">{{
-              getMenuTitle("/leave-return")
+            <router-link to="/leave-return/general" class="submenu-item">{{
+              getMenuTitle("/leave-return/general")
+            }}</router-link>
+            <router-link to="/leave-return/military" class="submenu-item">{{
+              getMenuTitle("/leave-return/military")
             }}</router-link>
           </div>
         </div>
@@ -203,13 +206,12 @@ const alertReady = () => {
             <router-link
               to="/professor/attendance/approvals"
               class="submenu-item"
-              >출결 승인</router-link
+              >{{ getMenuTitle("/professor/attendance/approvals") }}</router-link
             >
-            <a href="#" class="submenu-item" @click.prevent="alertReady"
-              >출결 확인</a
-            >
-            <a href="#" class="submenu-item" @click.prevent="alertReady"
-              >출석부</a
+            <router-link
+              to="/professor/attendance"
+              class="submenu-item"
+              >{{ getMenuTitle("/professor/attendance") }}</router-link
             >
           </div>
         </div>

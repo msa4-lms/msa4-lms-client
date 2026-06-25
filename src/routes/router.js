@@ -22,6 +22,8 @@ const LeaveReturnPage = () =>
   import("../pages/leaveReturn/LeaveReturnPage.vue");
 const ProfessorLeaveReturnPage = () =>
   import("../pages/leaveReturn/ProfessorLeaveReturnPage.vue");
+const ProfessorAttendancePage = () =>
+  import("../pages/attendance/ProfessorAttendancePage.vue");
 const setMeta = (isAuthenticated, isGuestOnly, roles = []) => {
   return {
     isAuthenticated, // 인증된 사용자
@@ -110,8 +112,20 @@ const routes = [
     meta: setMeta(true, false, ["PROFESSOR"]),
   },
   {
-    path: "/leave-return",
-    name: "LeaveReturnPage",
+    path: "/professor/attendance",
+    name: "ProfessorAttendancePage",
+    component: ProfessorAttendancePage,
+    meta: setMeta(true, false, ["PROFESSOR"]),
+  },
+  {
+    path: "/leave-return/general",
+    name: "LeaveReturnGeneralPage",
+    component: LeaveReturnPage,
+    meta: setMeta(true, false),
+  },
+  {
+    path: "/leave-return/military",
+    name: "LeaveReturnMilitaryPage",
     component: LeaveReturnPage,
     meta: setMeta(true, false),
   },
