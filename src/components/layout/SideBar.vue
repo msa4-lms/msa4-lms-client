@@ -30,7 +30,9 @@ const alertReady = () => {
   <aside class="sidebar">
     <nav class="sidebar-nav">
       <!-- 메인 화면 링크 -->
-      <router-link to="/main" class="nav-item main-link">{{ getMenuTitle('/main') }}</router-link>
+      <router-link to="/main" class="nav-item main-link">{{
+        getMenuTitle("/main")
+      }}</router-link>
 
       <!-- 학생 전용 메뉴 -->
       <template v-if="authStore.userInfo?.role === 'STUDENT'">
@@ -45,12 +47,12 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAcademic">
-            <router-link to="/profile" class="submenu-item"
-              >{{ getMenuTitle('/profile', 'STUDENT') }}</router-link
-            >
-            <router-link to="/leave-return" class="submenu-item"
-              >{{ getMenuTitle('/leave-return') }}</router-link
-            >
+            <router-link to="/profile" class="submenu-item">{{
+              getMenuTitle("/profile", "STUDENT")
+            }}</router-link>
+            <router-link to="/leave-return" class="submenu-item">{{
+              getMenuTitle("/leave-return")
+            }}</router-link>
           </div>
         </div>
 
@@ -65,12 +67,12 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentCourse">
-            <router-link to="/enrollments" class="submenu-item"
-              >{{ getMenuTitle('/enrollments') }}</router-link
-            >
-            <router-link to="/registration" class="submenu-item"
-              >{{ getMenuTitle('/registration') }}</router-link
-            >
+            <router-link to="/enrollments" class="submenu-item">{{
+              getMenuTitle("/enrollments")
+            }}</router-link>
+            <router-link to="/registration" class="submenu-item">{{
+              getMenuTitle("/registration")
+            }}</router-link>
           </div>
         </div>
 
@@ -85,9 +87,9 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentGrade">
-            <router-link to="/grade" class="submenu-item"
-              >{{ getMenuTitle('/grade') }}</router-link
-            >
+            <router-link to="/grade" class="submenu-item">{{
+              getMenuTitle("/grade")
+            }}</router-link>
           </div>
         </div>
 
@@ -102,12 +104,12 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentAttendance">
-            <router-link to="/attendance" class="submenu-item"
-              >{{ getMenuTitle('/attendance') }}</router-link
-            >
-            <router-link to="/excuses" class="submenu-item"
-              >{{ getMenuTitle('/excuses') }}</router-link
-            >
+            <router-link to="/attendance" class="submenu-item">{{
+              getMenuTitle("/attendance")
+            }}</router-link>
+            <router-link to="/excuses" class="submenu-item">{{
+              getMenuTitle("/excuses")
+            }}</router-link>
           </div>
         </div>
       </template>
@@ -124,9 +126,9 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorTeacher">
-            <router-link to="/profile" class="submenu-item"
-              >{{ getMenuTitle('/profile', 'PROFESSOR') }}</router-link
-            >
+            <router-link to="/profile" class="submenu-item">{{
+              getMenuTitle("/profile", "PROFESSOR")
+            }}</router-link>
           </div>
         </div>
 
@@ -141,9 +143,9 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorStudent">
-            <router-link to="/professor/leave-return" class="submenu-item"
-              >{{ getMenuTitle('/professor/leave-return') }}</router-link
-            >
+            <router-link to="/professor/leave-return" class="submenu-item">{{
+              getMenuTitle("/professor/leave-return")
+            }}</router-link>
           </div>
         </div>
 
@@ -158,12 +160,12 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorCourse">
-            <router-link to="/professor/lectures/create" class="submenu-item"
-              >{{ getMenuTitle('/professor/lectures/create') }}</router-link
-            >
-            <router-link to="/lectures" class="submenu-item"
-              >{{ getMenuTitle('/lectures') }}</router-link
-            >
+            <router-link to="/professor/lectures/create" class="submenu-item">{{
+              getMenuTitle("/professor/lectures/create")
+            }}</router-link>
+            <router-link to="/lectures" class="submenu-item">{{
+              getMenuTitle("/lectures")
+            }}</router-link>
           </div>
         </div>
 
@@ -178,12 +180,12 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorGrade">
-            <router-link to="/professor/grades/input" class="submenu-item"
-              >{{ getMenuTitle('/professor/grades/input') }}</router-link
-            >
-            <a href="#" class="submenu-item" @click.prevent="alertReady"
-              >{{ getMenuTitle('/professor/grades/correct') }}</a
-            >
+            <router-link to="/professor/grades/input" class="submenu-item">{{
+              getMenuTitle("/professor/grades/input")
+            }}</router-link>
+            <router-link to="/professor/grades/correct" class="submenu-item">{{
+              getMenuTitle("/professor/grades/correct")
+            }}</router-link>
           </div>
         </div>
 
@@ -198,7 +200,9 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.professorAttendance">
-            <router-link to="/professor/attendance/approvals" class="submenu-item"
+            <router-link
+              to="/professor/attendance/approvals"
+              class="submenu-item"
               >출결 승인</router-link
             >
             <a href="#" class="submenu-item" @click.prevent="alertReady"
@@ -212,8 +216,12 @@ const alertReady = () => {
       </template>
 
       <template v-if="authStore.userInfo?.role === 'ADMIN'">
-        <router-link to="/students" class="nav-item">{{ getMenuTitle('/students') }}</router-link>
-        <router-link to="/profile" class="nav-item">{{ getMenuTitle('/profile', 'ADMIN') }}</router-link>
+        <router-link to="/students" class="nav-item">{{
+          getMenuTitle("/students")
+        }}</router-link>
+        <router-link to="/profile" class="nav-item">{{
+          getMenuTitle("/profile", "ADMIN")
+        }}</router-link>
       </template>
     </nav>
   </aside>
