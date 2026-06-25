@@ -398,23 +398,21 @@ const handleSubmit = async () => {
               </div>
               <div class="form-group">
                 <label>시작 교시</label>
-                <MyInput
-                  type="number"
+                <select
                   v-model.number="tempSchedule.startPeriod"
-                  min="1"
-                  max="9"
-                  class="form-input"
-                />
+                  class="form-input select-day"
+                >
+                  <option v-for="n in 9" :key="'start-'+n" :value="n">{{ n }}교시</option>
+                </select>
               </div>
               <div class="form-group">
                 <label>종료 교시</label>
-                <MyInput
-                  type="number"
+                <select
                   v-model.number="tempSchedule.endPeriod"
-                  min="1"
-                  max="9"
-                  class="form-input"
-                />
+                  class="form-input select-day"
+                >
+                  <option v-for="n in 9" :key="'end-'+n" :value="n">{{ n }}교시</option>
+                </select>
               </div>
               <MyButton
                 color="deep-blue"
