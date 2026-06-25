@@ -88,27 +88,22 @@ const statusClass = computed(() => {
 }
 
 .status-badge.pending {
-  background-color: #fff3cd;
-  color: #856404;
+  color: var(--primary-text-color);
 }
 
 .status-badge.approved {
-  background-color: #d4edda;
-  color: #155724;
+  color: var(--primary-text-color);
 }
 
 .status-badge.rejected {
-  background-color: #f8d7da;
-  color: #721c24;
+  color: var(--personal-color-red);
 }
 
 .status-badge.submitted {
-  background-color: #cce5ff;
-  color: #004085;
+  color: var(--primary-text-color);
 }
 
 .status-badge.unentered {
-  background-color:#abababc5;
-  color: var(--personal-color-white);
+  color: var(--personal-color-red);
 }
 </style>
