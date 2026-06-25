@@ -86,7 +86,7 @@
                   :modelValue="g.midtermScore"
                   :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
                   class="table-input"
-                  @input="e => handleStrictInput(e, g, 'midtermScore')"
+                  @input="(e) => handleStrictInput(e, g, 'midtermScore')"
                 />
                 <span class="converted-score"
                   >{{ convertScore(g.midtermScore, "midterm") }}점</span
@@ -100,7 +100,7 @@
                   :modelValue="g.finalScore"
                   :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
                   class="table-input"
-                  @input="e => handleStrictInput(e, g, 'finalScore')"
+                  @input="(e) => handleStrictInput(e, g, 'finalScore')"
                 />
                 <span class="converted-score"
                   >{{ convertScore(g.finalScore, "final") }}점</span
@@ -114,7 +114,7 @@
                   :modelValue="g.assignmentScore"
                   :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
                   class="table-input"
-                  @input="e => handleStrictInput(e, g, 'assignmentScore')"
+                  @input="(e) => handleStrictInput(e, g, 'assignmentScore')"
                 />
                 <span class="converted-score"
                   >{{ convertScore(g.assignmentScore, "assignment") }}점</span
@@ -128,7 +128,7 @@
                   :modelValue="g.attendanceScore"
                   :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
                   class="table-input"
-                  @input="e => handleStrictInput(e, g, 'attendanceScore')"
+                  @input="(e) => handleStrictInput(e, g, 'attendanceScore')"
                 />
                 <span class="converted-score"
                   >{{ convertScore(g.attendanceScore, "attendance") }}점</span
@@ -140,7 +140,13 @@
               <span>{{ determineGrade(calculateTotal(g)) }}</span>
             </td>
             <td>
-              <StatusBadge :status="g.status === 'DRAFT' && !isGradeSaved(g) ? 'UNENTERED' : g.status" />
+              <StatusBadge
+                :status="
+                  g.status === 'DRAFT' && !isGradeSaved(g)
+                    ? 'UNENTERED'
+                    : g.status
+                "
+              />
             </td>
             <td v-if="isCorrectionMode">
               <MyButton
@@ -160,7 +166,7 @@
     <!-- 미선택 빈 화면 상태 -->
     <div v-else class="welcome-section">
       <div class="empty-state">
-        <p>상단에서 관리하실 강좌를 선택해 주세요.</p>
+        <p>상단에서 관리하실 강의를 선택해 주세요.</p>
       </div>
     </div>
 
@@ -201,10 +207,14 @@
                 type="text"
                 :modelValue="adjustScores.midtermScore"
                 class="form-input"
-                @input="e => handleStrictInput(e, adjustScores, 'midtermScore')"
+                @input="
+                  (e) => handleStrictInput(e, adjustScores, 'midtermScore')
+                "
               />
               <span class="converted-score-modal"
-                >{{ convertScore(adjustScores.midtermScore, "midterm") }}점</span
+                >{{
+                  convertScore(adjustScores.midtermScore, "midterm")
+                }}점</span
               >
             </div>
             <div class="adjust-item">
@@ -213,7 +223,7 @@
                 type="text"
                 :modelValue="adjustScores.finalScore"
                 class="form-input"
-                @input="e => handleStrictInput(e, adjustScores, 'finalScore')"
+                @input="(e) => handleStrictInput(e, adjustScores, 'finalScore')"
               />
               <span class="converted-score-modal"
                 >{{ convertScore(adjustScores.finalScore, "final") }}점</span
@@ -225,7 +235,9 @@
                 type="text"
                 :modelValue="adjustScores.assignmentScore"
                 class="form-input"
-                @input="e => handleStrictInput(e, adjustScores, 'assignmentScore')"
+                @input="
+                  (e) => handleStrictInput(e, adjustScores, 'assignmentScore')
+                "
               />
               <span class="converted-score-modal"
                 >{{
@@ -239,7 +251,9 @@
                 type="text"
                 :modelValue="adjustScores.attendanceScore"
                 class="form-input"
-                @input="e => handleStrictInput(e, adjustScores, 'attendanceScore')"
+                @input="
+                  (e) => handleStrictInput(e, adjustScores, 'attendanceScore')
+                "
               />
               <span class="converted-score-modal"
                 >{{
@@ -256,7 +270,7 @@
           </div>
         </div>
       </div>
-      
+
       <template #footer>
         <MyButton
           color="white"
@@ -311,46 +325,48 @@ const adjustScores = ref({
 // 기존 DB에 성적이 하나라도 입력된 적 있는지 확인 (임시저장 판별)
 const isGradeSaved = (g) => {
   if (!gradeStore.grades) return false;
-  const originalG = gradeStore.grades.find(og => og.id === g.id);
+  const originalG = gradeStore.grades.find((og) => og.id === g.id);
   if (!originalG) return false;
-  return originalG.midtermScore !== null || 
-         originalG.finalScore !== null || 
-         originalG.assignmentScore !== null || 
-         originalG.attendanceScore !== null;
+  return (
+    originalG.midtermScore !== null ||
+    originalG.finalScore !== null ||
+    originalG.assignmentScore !== null ||
+    originalG.attendanceScore !== null
+  );
 };
 
 // 성적 입력 시 즉각적인 100점 제한 및 3자리수 제한 로직
 const handleStrictInput = (event, obj, field) => {
   let val = event.target.value;
-  
+
   // 1. 숫자와 소수점만 허용
-  val = val.replace(/[^0-9.]/g, '');
-  
+  val = val.replace(/[^0-9.]/g, "");
+
   // 2. 소수점 여러 개 입력 방지
-  const parts = val.split('.');
+  const parts = val.split(".");
   if (parts.length > 2) {
-    val = parts[0] + '.' + parts.slice(1).join('');
+    val = parts[0] + "." + parts.slice(1).join("");
   }
-  
+
   // 3. 정수부 세자리수 제한
-  const p = val.split('.');
+  const p = val.split(".");
   if (p[0].length > 3) {
     p[0] = p[0].substring(0, 3);
-    val = p.length > 1 ? p[0] + '.' + p[1] : p[0];
+    val = p.length > 1 ? p[0] + "." + p[1] : p[0];
   }
-  
+
   // 4. 100 초과 시 즉시 100으로 고정
   if (parseFloat(val) > 100) {
-    val = '100';
+    val = "100";
   }
-  
+
   // 5. DOM에 즉시 반영하여 사용자 입력 시각적 차단
   if (event.target.value !== val) {
     event.target.value = val;
   }
-  
+
   // 6. 객체에 반영
-  obj[field] = val === '' ? null : val;
+  obj[field] = val === "" ? null : val;
 };
 
 const lectures = computed(() => lectureStore.lectures);
@@ -712,17 +728,12 @@ const handleObjectionApprove = async () => {
   flex-direction: column;
   align-items: center;
   gap: 16px;
+  color: #6a7387;
 }
 
 .empty-icon {
   font-size: 48px;
   opacity: 0.5;
-}
-
-.empty-state p {
-  color: #64748b;
-  font-size: 1.05rem;
-  font-weight: 500;
 }
 
 .validation-error-alert {

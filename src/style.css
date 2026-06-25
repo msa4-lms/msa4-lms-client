@@ -46,6 +46,9 @@ input {
   border-radius: 8px;
   margin-bottom: 15px;
   border-left: 5px solid #0b3d91;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
 }
 
+textarea {
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+}
