@@ -55,18 +55,6 @@ export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
     }
   };
 
-  // 이의신청 답변 처리 (승인/반려)
-  const replyObjection = async (gradeId, { approve, reply, newScores }) => {
-    try {
-      const url = `/api/professor/grades/${gradeId}/objection?approve=${approve}&reply=${encodeURIComponent(
-        reply
-      )}`;
-      await myAxios.patch(url, newScores || {});
-    } catch (error) {
-      console.error("이의신청 답변 처리 실패:", error);
-      throw error;
-    }
-  };
 
   // 교수 현재 강의 조회
   const getLectures = async () => {
@@ -91,7 +79,6 @@ export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
     saveGrades,
     correctGrades,
     updateGradesStatus,
-    replyObjection,
     getLectures,
   };
 });

@@ -209,7 +209,9 @@ const handleSubmit = async () => {
         <!-- 좌측 컬럼: 기본 정보 및 성적 평가 비율 -->
         <div class="form-column">
           <div class="section-box">
-            <h3 class="section-title">기본 정보 설정</h3>
+            <div class="common-section-header">
+              <h3>기본 정보 설정</h3>
+            </div>
             <div class="info-grid">
               <!-- 과거 강의 데이터 불러오기 영역 -->
               <div
@@ -381,7 +383,9 @@ const handleSubmit = async () => {
           </div>
 
           <div class="schedule-section">
-            <h3>강의 시간표 설정</h3>
+            <div class="common-section-header">
+              <h3>강의 시간표 설정</h3>
+            </div>
             <div class="schedule-creator">
               <div class="form-group">
                 <label>요일</label>
@@ -448,7 +452,9 @@ const handleSubmit = async () => {
           </div>
 
           <div class="ratio-section">
-            <h3>성적 평가 비율 설정 (합계 100%)</h3>
+            <div class="common-section-header">
+              <h3>성적 평가 비율 설정 (합계 100%)</h3>
+            </div>
             <div class="ratio-inputs">
               <div class="ratio-group">
                 <label>중간고사 (%)</label>
@@ -503,7 +509,9 @@ const handleSubmit = async () => {
         <!-- 우측 컬럼: 강의계획서 -->
         <div class="form-column">
           <div class="syllabus-section">
-            <h3>강의계획서</h3>
+            <div class="common-section-header">
+              <h3>강의계획서</h3>
+            </div>
             <textarea
               id="syllabus"
               v-model="form.syllabus"
@@ -555,14 +563,6 @@ const handleSubmit = async () => {
   border: 1px solid #edf2f7;
   border-radius: 12px;
   padding: 1.5rem;
-}
-
-.section-title {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1.2rem;
-  color: var(--primary-text-color);
-  text-align: left;
 }
 
 .info-grid {
@@ -642,19 +642,7 @@ label {
   flex-direction: column;
 }
 
-.syllabus-section h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1.2rem;
-  color: var(--primary-text-color);
-}
 
-.schedule-section h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1.2rem;
-  color: var(--primary-text-color);
-}
 
 .schedule-creator {
   display: grid;
@@ -701,12 +689,6 @@ label {
   text-align: left;
 }
 
-.ratio-section h3 {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin-bottom: 1.2rem;
-  color: var(--primary-text-color);
-}
 
 .ratio-inputs {
   display: grid;

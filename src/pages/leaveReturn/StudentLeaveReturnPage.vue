@@ -2,7 +2,7 @@
   <MyPageContainer :title="pageTitle">
     <!-- 신청 폼 (좌측/상단) -->
     <div class="attendance-section">
-      <div class="section-header">
+      <div class="common-section-header">
         <h3>학적 변동 신청서 작성</h3>
       </div>
       <div class="apply-section">
@@ -11,7 +11,7 @@
           <label>신청 유형</label>
           <select v-model="form.requestType" class="form-select">
             <option :value="isMilitary ? 'MILITARY_LEAVE' : 'GENERAL_LEAVE'">휴학</option>
-            <option :value="isMilitary ? 'MILITARY_RETURN' : 'GENERAL_RETURN'">복학</option>
+            <option v-if="!isMilitary" value="GENERAL_RETURN">복학</option>
           </select>
         </div>
 
@@ -44,7 +44,7 @@
 
     <!-- 신청 내역 (우측/하단) -->
     <div class="attendance-section" style="margin-top: 30px;">
-      <div class="section-header">
+      <div class="common-section-header">
         <h3>나의 신청 내역</h3>
       </div>
       <div class="table-wrapper">
@@ -79,13 +79,13 @@ import MyTable from "../../components/table/MyTable.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useLeaveReturnStore } from "../../store/leaveReturn/useLeaveReturnStore";
 
-defineOptions({ name: "LeaveReturnPage" });
+defineOptions({ name: "StudentLeaveReturnPage" });
 
 const route = useRoute();
 const store = useLeaveReturnStore();
 
 const isMilitary = computed(() => route.path.includes("military"));
-const pageTitle = computed(() => (isMilitary.value ? "군휴학/복학 신청" : "일반휴학/복학 신청"));
+const pageTitle = computed(() => (isMilitary.value ? "군휴학 신청" : "일반휴학/복학 신청"));
 
 const form = ref({
   requestType: "GENERAL_LEAVE",
@@ -171,9 +171,11 @@ watch(
 const myRequests = computed(() => {
   return store.myRequests.filter(req => {
     if (isMilitary.value) {
-      return req.requestType.includes("MILITARY");
+      // 군휴학 탭: 군휴학 신청 이력만
+      return req.requestType === "MILITARY_LEAVE";
     } else {
-      return !req.requestType.includes("MILITARY");
+      // 일반휴학 탭: 군휴학 신청을 제외한 나머지(일반휴학/일반복학/군복학) 모두
+      return req.requestType !== "MILITARY_LEAVE";
     }
   });
 });
@@ -218,7 +220,7 @@ const handleSubmit = async () => {
   if (isMilitary.value) {
     form.value.reason = form.value.requestType === "MILITARY_LEAVE" ? "군입대" : "군제대 후 복학";
   } else if (form.value.requestType.includes('RETURN')) {
-    form.value.reason = "일반 복학";
+    form.value.reason = "복학";
   } else if (!form.value.reason.trim()) {
     alert("사유를 입력해주세요.");
     return;
@@ -239,7 +241,8 @@ const handleSubmit = async () => {
     if (fileInput.value) fileInput.value.value = "";
     await store.fetchMyRequests();
   } catch (error) {
-    alert("신청 중 오류가 발생했습니다.");
+    const serverMessage = error.response?.data?.message;
+    alert(serverMessage || "신청 중 오류가 발생했습니다.");
   }
 };
 </script>
@@ -256,17 +259,7 @@ const handleSubmit = async () => {
   margin-top: 32px;
 }
 
-.section-header {
-  margin-bottom: 16px;
-  padding: 0 4px;
-}
 
-.section-header h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1f36;
-  margin: 0;
-}
 
 .form-grid {
   display: grid;

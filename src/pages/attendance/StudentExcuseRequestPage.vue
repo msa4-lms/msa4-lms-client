@@ -323,7 +323,7 @@ onMounted(async () => {
   <MyPageContainer :title="labels.pageTitle">
     <template v-if="isStudent">
       <section class="panel-top">
-        <div class="panel-title">
+        <div class="common-section-header">
           <h3>{{ labels.pageTitle }}</h3>
         </div>
         <form class="excuse-form" @submit.prevent="submitExcuse">
@@ -392,7 +392,7 @@ onMounted(async () => {
       </section>
 
       <section class="panel">
-        <div class="panel-title-bottom">
+        <div class="common-section-header">
           <h3>{{ labels.resultTitle }}</h3>
         </div>
         <MyTable
@@ -434,8 +434,8 @@ onMounted(async () => {
 
     <template v-else-if="isProfessor">
       <section class="panel">
-        <div class="panel-title">
-          <h3>공결 승인 대기</h3>
+        <div class="common-section-header">
+          <h3>공결 확인 대기</h3>
         </div>
         <MyTable
           :columns="pendingExcuseColumns"
@@ -487,20 +487,7 @@ onMounted(async () => {
   border-radius: 8px;
 }
 
-.panel-title {
-  padding: 15px;
-  border-bottom: 1px solid #edf2f7;
-}
 
-.panel-title h3 {
-  color: var(--primary-text-color);
-  font-size: 1rem;
-  font-weight: 600;
-}
-
-.panel-title-bottom {
-  padding: 5px;
-}
 
 .excuse-form {
   display: grid;

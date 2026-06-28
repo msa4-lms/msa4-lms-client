@@ -52,3 +52,17 @@ input {
 textarea {
   font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
 }
+
+.common-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.common-section-header h3 {
+  color: #1a1f36;
+}
+

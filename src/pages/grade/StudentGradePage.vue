@@ -205,7 +205,7 @@ watch(
 
     <!-- 상세 성적 테이블 -->
     <div class="content-card table-section">
-      <div class="card-header">
+      <div class="common-section-header">
         <h3>학기별 상세 성적</h3>
       </div>
 
@@ -332,10 +332,7 @@ watch(
   margin-left: 4px;
 }
 
-.card-header {
-  border-bottom: 1px solid #edf2f7;
-  padding: 5px;
-}
+
 
 .data-table {
   width: 100%;

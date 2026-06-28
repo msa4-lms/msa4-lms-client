@@ -1,18 +1,6 @@
 <template>
-  <MyPageContainer
-    :title="isCorrectionMode ? '성적 정정 관리' : '성적 입력 관리'"
-  >
-    <div
-      v-if="isCorrectionMode"
-      class="welcome-section"
-      style="margin-top: 50px"
-    >
-      <div class="empty-state">
-        <p>기능 구현 준비 중입니다.</p>
-      </div>
-    </div>
-
-    <div v-else>
+  <MyPageContainer title="성적 입력 관리">
+    <div>
       <!-- 상단 강의 선택 (MySearchFilter 사용) -->
       <MySearchFilter :showSubmit="false">
         <div class="search-group">
@@ -42,251 +30,111 @@
     </div>
 
     <!-- 성적 관리 테이블 섹션 (하단 카드) -->
-    <div v-if="selectedLectureId" class="content-card">
-      <div class="card-header">
-        <h3>
-          {{ isCorrectionMode ? "이의신청 수강생 목록" : "수강생 성적 입력" }}
-        </h3>
-        <div class="control-buttons">
-          <MyButton
-            color="gray"
-            size="middle"
-            content="임시저장"
-            :disabled="hasValidationError || isAllSubmitted"
-            @click="handleSave"
-          />
-          <MyButton
-            color="deep-blue"
-            size="middle"
-            content="성적 일괄 제출"
-            :disabled="hasValidationError || isAllSubmitted"
-            @click="handleSubmitGrades"
-          />
-        </div>
-      </div>
-
-      <div class="card-body">
-        <div v-if="hasValidationError" class="validation-error-alert">
-          입력된 성적 중 0점 미만이거나 100점을 초과한 점수가 존재합니다. (0 ~
-          100점 사이로 정상 입력하셔야 저장이 가능합니다.)
-        </div>
-
-        <MyTable
-          :columns="gradeColumns"
-          :empty="localGrades.length === 0"
-          emptyMessage="수강생이 존재하지 않거나 수강 내역이 없습니다."
-        >
-          <tr v-for="g in localGrades" :key="g.id">
-            <td class="student-name">{{ g.studentName }}</td>
-            <td class="code">{{ g.studentLoginId }}</td>
-            <td>
-              <div class="score-input-cell">
-                <MyInput
-                  type="text"
-                  :modelValue="g.midtermScore"
-                  :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
-                  class="table-input"
-                  @input="(e) => handleStrictInput(e, g, 'midtermScore')"
-                />
-                <span class="converted-score"
-                  >{{ convertScore(g.midtermScore, "midterm") }}점</span
-                >
-              </div>
-            </td>
-            <td>
-              <div class="score-input-cell">
-                <MyInput
-                  type="text"
-                  :modelValue="g.finalScore"
-                  :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
-                  class="table-input"
-                  @input="(e) => handleStrictInput(e, g, 'finalScore')"
-                />
-                <span class="converted-score"
-                  >{{ convertScore(g.finalScore, "final") }}점</span
-                >
-              </div>
-            </td>
-            <td>
-              <div class="score-input-cell">
-                <MyInput
-                  type="text"
-                  :modelValue="g.assignmentScore"
-                  :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
-                  class="table-input"
-                  @input="(e) => handleStrictInput(e, g, 'assignmentScore')"
-                />
-                <span class="converted-score"
-                  >{{ convertScore(g.assignmentScore, "assignment") }}점</span
-                >
-              </div>
-            </td>
-            <td>
-              <div class="score-input-cell">
-                <MyInput
-                  type="text"
-                  :modelValue="g.attendanceScore"
-                  :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
-                  class="table-input"
-                  @input="(e) => handleStrictInput(e, g, 'attendanceScore')"
-                />
-                <span class="converted-score"
-                  >{{ convertScore(g.attendanceScore, "attendance") }}점</span
-                >
-              </div>
-            </td>
-            <td>{{ calculateTotal(g) }}점</td>
-            <td>
-              <span>{{ determineGrade(calculateTotal(g)) }}</span>
-            </td>
-            <td>
-              <StatusBadge
-                :status="
-                  g.status === 'DRAFT' && !isGradeSaved(g)
-                    ? 'UNENTERED'
-                    : g.status
-                "
-              />
-            </td>
-            <td v-if="isCorrectionMode">
-              <MyButton
-                v-if="g.status === 'OPENED' || g.status === 'APPROVED'"
-                color="deep-blue"
-                size="small"
-                content="성적 정정"
-                @click="openObjectionModal(g)"
-              />
-              <span v-else class="text-secondary">-</span>
-            </td>
-          </tr>
-        </MyTable>
-      </div>
-    </div>
-
-    <!-- 미선택 빈 화면 상태 -->
-    <div v-else class="welcome-section">
-      <div class="empty-state">
-        <p>상단에서 관리하실 강의를 선택해 주세요.</p>
-      </div>
-    </div>
-
-    <!-- 성적 정정 모달 -->
-    <MyModal
-      :isOpen="isObjectionModalOpen"
-      title="성적 정정 처리"
-      maxWidth="600px"
-      @close="closeObjectionModal"
-    >
-      <div class="objection-info">
-        <p>
-          <strong>대상 학생:</strong> {{ activeObjection.studentName }} ({{
-            activeObjection.studentLoginId
-          }})
-        </p>
-      </div>
-
-      <div class="objection-form">
-        <div class="form-group">
-          <label for="objectionReply">정정 사유</label>
-          <textarea
-            id="objectionReply"
-            v-model="objectionReplyText"
-            rows="3"
-            placeholder="성적 정정 사유를 입력해 주세요."
-            class="form-textarea"
-          ></textarea>
-        </div>
-
-        <!-- 승인 시 점수 재입력 폼 -->
-        <div class="score-adjust-section">
-          <h3>점수 재입력 (승인 시 적용)</h3>
-          <div class="adjust-grid">
-            <div class="adjust-item">
-              <label>중간 ({{ getRatio("midterm") }}%)</label>
-              <MyInput
-                type="text"
-                :modelValue="adjustScores.midtermScore"
-                class="form-input"
-                @input="
-                  (e) => handleStrictInput(e, adjustScores, 'midtermScore')
-                "
-              />
-              <span class="converted-score-modal"
-                >{{
-                  convertScore(adjustScores.midtermScore, "midterm")
-                }}점</span
-              >
-            </div>
-            <div class="adjust-item">
-              <label>기말 ({{ getRatio("final") }}%)</label>
-              <MyInput
-                type="text"
-                :modelValue="adjustScores.finalScore"
-                class="form-input"
-                @input="(e) => handleStrictInput(e, adjustScores, 'finalScore')"
-              />
-              <span class="converted-score-modal"
-                >{{ convertScore(adjustScores.finalScore, "final") }}점</span
-              >
-            </div>
-            <div class="adjust-item">
-              <label>과제 ({{ getRatio("assignment") }}%)</label>
-              <MyInput
-                type="text"
-                :modelValue="adjustScores.assignmentScore"
-                class="form-input"
-                @input="
-                  (e) => handleStrictInput(e, adjustScores, 'assignmentScore')
-                "
-              />
-              <span class="converted-score-modal"
-                >{{
-                  convertScore(adjustScores.assignmentScore, "assignment")
-                }}점</span
-              >
-            </div>
-            <div class="adjust-item">
-              <label>출결 ({{ getRatio("attendance") }}%)</label>
-              <MyInput
-                type="text"
-                :modelValue="adjustScores.attendanceScore"
-                class="form-input"
-                @input="
-                  (e) => handleStrictInput(e, adjustScores, 'attendanceScore')
-                "
-              />
-              <span class="converted-score-modal"
-                >{{
-                  convertScore(adjustScores.attendanceScore, "attendance")
-                }}점</span
-              >
-            </div>
-          </div>
-          <div
-            v-if="hasObjectionValidationError"
-            class="validation-error-alert modal-error"
-          >
-            0점 이상 100점 이하로만 입력 가능합니다.
-          </div>
-        </div>
-      </div>
-
-      <template #footer>
+    <div class="common-section-header">
+      <h3>수강생 성적 입력</h3>
+      <div class="control-buttons">
         <MyButton
-          color="white"
-          size="small"
-          content="취소"
-          @click="closeObjectionModal"
+          color="gray"
+          size="middle"
+          content="임시저장"
+          :disabled="hasValidationError || isAllSubmitted"
+          @click="handleSave"
         />
         <MyButton
           color="deep-blue"
-          size="small"
-          content="정정 반영"
-          :disabled="hasObjectionValidationError"
-          @click="handleObjectionApprove"
+          size="middle"
+          content="성적 일괄 제출"
+          :disabled="hasValidationError || isAllSubmitted"
+          @click="handleSubmitGrades"
         />
-      </template>
-    </MyModal>
+      </div>
+    </div>
+
+    <div v-if="hasValidationError" class="validation-error-alert">
+      입력된 성적 중 0점 미만이거나 100점을 초과한 점수가 존재합니다. (0 ~
+      100점 사이로 정상 입력하셔야 저장이 가능합니다.)
+    </div>
+
+    <MyTable
+      :columns="gradeColumns"
+      :empty="localGrades.length === 0"
+      emptyMessage="수강생이 존재하지 않거나 수강 내역이 없습니다."
+    >
+      <tr v-for="g in localGrades" :key="g.id">
+        <td>{{ g.studentName }}</td>
+        <td>{{ g.studentLoginId }}</td>
+        <td>
+          <div class="score-input-cell">
+            <MyInput
+              type="text"
+              :modelValue="g.midtermScore"
+              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              class="table-input"
+              @input="(e) => handleStrictInput(e, g, 'midtermScore')"
+            />
+            <span class="converted-score"
+              >{{ convertScore(g.midtermScore, "midterm") }}점</span
+            >
+          </div>
+        </td>
+        <td>
+          <div class="score-input-cell">
+            <MyInput
+              type="text"
+              :modelValue="g.finalScore"
+              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              class="table-input"
+              @input="(e) => handleStrictInput(e, g, 'finalScore')"
+            />
+            <span class="converted-score"
+              >{{ convertScore(g.finalScore, "final") }}점</span
+            >
+          </div>
+        </td>
+        <td>
+          <div class="score-input-cell">
+            <MyInput
+              type="text"
+              :modelValue="g.assignmentScore"
+              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              class="table-input"
+              @input="(e) => handleStrictInput(e, g, 'assignmentScore')"
+            />
+            <span class="converted-score"
+              >{{ convertScore(g.assignmentScore, "assignment") }}점</span
+            >
+          </div>
+        </td>
+        <td>
+          <div class="score-input-cell">
+            <MyInput
+              type="text"
+              :modelValue="g.attendanceScore"
+              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              class="table-input"
+              @input="(e) => handleStrictInput(e, g, 'attendanceScore')"
+            />
+            <span class="converted-score"
+              >{{ convertScore(g.attendanceScore, "attendance") }}점</span
+            >
+          </div>
+        </td>
+        <td>{{ calculateTotal(g) }}점</td>
+        <td>
+          <span>{{ determineGrade(calculateTotal(g)) }}</span>
+        </td>
+        <td>
+          <StatusBadge
+            :status="
+              g.status === 'DRAFT' && !isGradeSaved(g)
+                ? 'UNENTERED'
+                : g.status
+            "
+          />
+        </td>
+      </tr>
+    </MyTable>
+
   </MyPageContainer>
 </template>
 <script setup>
@@ -295,32 +143,17 @@ import { useRoute } from "vue-router";
 import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import MyTable from "../../components/table/MyTable.vue";
-import MyModal from "../../components/common/MyModal.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
-
-const route = useRoute();
-const isCorrectionMode = computed(() => route.path.includes("correct"));
-
 const gradeStore = useGradeProfessorStore();
 
 const selectedLectureId = ref(null);
 const localGrades = ref([]);
 
-// 이의신청 모달 관리
-const isObjectionModalOpen = ref(false);
-const activeObjection = ref(null);
-const objectionReplyText = ref("");
-const adjustScores = ref({
-  midtermScore: 0,
-  finalScore: 0,
-  assignmentScore: 0,
-  attendanceScore: 0,
-});
 
-// 기존 DB에 성적이 하나라도 입력된 적 있는지 확인 (임시저장 판별)
+// 기존 DB에 성적이 하나라도 입력된 적 있는지 확인 (임시저장 후 잠금 판별용)
 const isGradeSaved = (g) => {
   if (!gradeStore.grades) return false;
   const originalG = gradeStore.grades.find((og) => og.id === g.id);
@@ -375,7 +208,7 @@ const currentLecture = computed(() =>
 // 테이블 컬럼 정의
 const gradeColumns = computed(() => {
   const cols = [
-    { key: "studentName", label: "학생 이름" },
+    { key: "studentName", label: "이름" },
     { key: "studentLoginId", label: "학번" },
     { key: "midtermScore", label: `중간고사 (${getRatio("midterm")}%)` },
     { key: "finalScore", label: `기말고사 (${getRatio("final")}%)` },
@@ -385,9 +218,6 @@ const gradeColumns = computed(() => {
     { key: "grade", label: "등급" },
     { key: "status", label: "진행 상태" },
   ];
-  if (isCorrectionMode.value) {
-    cols.push({ key: "correction", label: "성적 정정" });
-  }
   return cols;
 });
 
@@ -429,19 +259,6 @@ const isAllSubmitted = computed(() => {
   return localGrades.value.every((g) => g.status && g.status !== "DRAFT");
 });
 
-const hasObjectionValidationError = computed(() => {
-  const scores = adjustScores.value;
-  return (
-    (scores.midtermScore !== null &&
-      (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
-    (scores.finalScore !== null &&
-      (scores.finalScore < 0 || scores.finalScore > 100)) ||
-    (scores.assignmentScore !== null &&
-      (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
-    (scores.attendanceScore !== null &&
-      (scores.attendanceScore < 0 || scores.attendanceScore > 100))
-  );
-});
 
 onMounted(async () => {
   try {
@@ -566,62 +383,7 @@ const handleSubmitGrades = async () => {
   }
 };
 
-// 이의신청 모달 팝업 오픈 (이제 성적 정정으로 사용)
-const openObjectionModal = (g) => {
-  activeObjection.value = g;
-  objectionReplyText.value = g.objectionReply || "";
-  adjustScores.value = {
-    midtermScore: g.midtermScore,
-    finalScore: g.finalScore,
-    assignmentScore: g.assignmentScore,
-    attendanceScore: g.attendanceScore,
-  };
-  isObjectionModalOpen.value = true;
-};
 
-const closeObjectionModal = () => {
-  isObjectionModalOpen.value = false;
-  activeObjection.value = null;
-};
-
-// 성적 정정 승인 (APPROVED 처리 및 성적 갱신)
-const handleObjectionApprove = async () => {
-  if (!activeObjection.value) return;
-
-  const scores = adjustScores.value;
-  if (
-    (scores.midtermScore !== null &&
-      (scores.midtermScore < 0 || scores.midtermScore > 100)) ||
-    (scores.finalScore !== null &&
-      (scores.finalScore < 0 || scores.finalScore > 100)) ||
-    (scores.assignmentScore !== null &&
-      (scores.assignmentScore < 0 || scores.assignmentScore > 100)) ||
-    (scores.attendanceScore !== null &&
-      (scores.attendanceScore < 0 || scores.attendanceScore > 100))
-  ) {
-    alert("성적 점수는 0점 이상 100점 이하로만 입력 가능합니다.");
-    return;
-  }
-
-  try {
-    await gradeStore.replyObjection(activeObjection.value.id, {
-      approve: true,
-      reply: objectionReplyText.value,
-      newScores: {
-        enrollmentId: activeObjection.value.enrollmentId,
-        midtermScore: adjustScores.value.midtermScore,
-        finalScore: adjustScores.value.finalScore,
-        assignmentScore: adjustScores.value.assignmentScore,
-        attendanceScore: adjustScores.value.attendanceScore,
-      },
-    });
-    alert("성적 정정이 완료되었습니다.");
-    closeObjectionModal();
-    await loadGrades();
-  } catch (error) {
-    alert("정정 처리 중 오류가 발생했습니다.");
-  }
-};
 </script>
 
 <style scoped>
@@ -661,26 +423,8 @@ const handleObjectionApprove = async () => {
 }
 
 /* 성적 상세 내용 카드 */
-.content-card {
-  background: white;
-  border-radius: 12px;
-  border: 1px solid #edf2f7;
-  overflow: hidden;
-}
 
-.card-header {
-  padding: 20px 24px;
-  border-bottom: 1px solid #edf2f7;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
-.card-header h3 {
-  color: #1a1f36;
-  font-size: 1.1rem;
-  font-weight: 700;
-}
 
 .card-body {
   padding: 20px;

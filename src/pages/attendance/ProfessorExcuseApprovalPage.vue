@@ -149,8 +149,8 @@ onMounted(loadRequests);
 <template>
   <MyPageContainer title="출결 승인">
     <div class="attendance-section">
-      <div class="section-header">
-        <h3>{{ activeTab === "PENDING" ? "승인 대기 공결 신청" : "처리 완료 내역" }}</h3>
+      <div class="common-section-header">
+        <h3>{{ activeTab === "PENDING" ? "확인 대기 공결 신청" : "처리 완료 내역" }}</h3>
         <MyTabs :tabs="tabOptions" v-model="activeTab" />
       </div>
 
@@ -162,9 +162,9 @@ onMounted(loadRequests);
           :emptyMessage="activeTab === 'PENDING' ? '승인 대기 중인 공결 신청이 없습니다.' : '처리 완료된 공결 신청이 없습니다.'"
         >
           <tr v-for="request in visibleRequests" :key="request.id">
-            <td class="student-name">{{ request.studentName }}</td>
+            <td>{{ request.studentName }}</td>
             <td>{{ request.studentNo }}</td>
-            <td class="course-name">{{ request.courseName }}</td>
+            <td>{{ request.courseName }}</td>
             <td>
               <div>{{ request.lectureDate }}</div>
               <small>{{ request.period }}교시</small>
@@ -253,27 +253,6 @@ onMounted(loadRequests);
   overflow: hidden;
 }
 
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  margin-bottom: 16px;
-  padding: 0 4px;
-}
-
-.section-header h3 {
-  color: #1a1f36;
-  font-size: 1.25rem;
-  font-weight: 700;
-  margin: 0;
-}
-
-.student-name,
-.course-name {
-  color: #071f49;
-  font-weight: 700;
-}
 
 .reason-cell {
   min-width: 220px;
@@ -371,7 +350,7 @@ onMounted(loadRequests);
 
 
 @media (max-width: 760px) {
-  .card-header {
+  .common-section-header {
     align-items: stretch;
     flex-direction: column;
   }

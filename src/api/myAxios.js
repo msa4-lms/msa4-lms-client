@@ -76,13 +76,18 @@ myAxios.interceptors.response.use(
       return Promise.reject(error);
     }
 
-    if (status === 401 || status === 403) {
-      // 인증 및 권한 에러 처리
+    if (status === 401) {
+      // 인증 실패/세션 만료 → 로그아웃 후 로그인 화면으로
       if (!suppressErrorAlert) {
-        alert(errorData?.data || "접근 권한이 없거나 세션이 만료되었습니다.");
+        alert(errorData?.data || "세션이 만료되었습니다. 다시 로그인해주세요.");
       }
       authStore.clearAuthStore();
       window.location.href = "/";
+    } else if (status === 403) {
+      // 권한 없는 요청 → 세션은 유지하고 안내만 표시
+      if (!suppressErrorAlert) {
+        alert(errorData?.data || "접근 권한이 없습니다.");
+      }
     } else if (status === 400) {
       // 잘못된 요청 (Validation 에러 등)
       let msg = errorData?.message || "잘못된 요청입니다.";

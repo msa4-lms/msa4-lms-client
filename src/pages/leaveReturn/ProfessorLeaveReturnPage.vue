@@ -1,7 +1,7 @@
 <template>
   <MyPageContainer title="휴/복학 결재 관리">
     <div class="attendance-section">
-      <div class="section-header">
+      <div class="common-section-header">
         <h3>결재 대기 목록</h3>
       </div>
       <div class="table-wrapper">
@@ -11,7 +11,8 @@
           emptyMessage="대기 중인 신청이 없습니다."
         >
           <tr v-for="req in pendingRequests" :key="req.id">
-            <td>{{ req.studentName }} ({{ req.studentLoginId }})</td>
+            <td>{{ req.studentName }}</td>
+            <td>{{ req.studentLoginId }}</td>
             <td>{{ req.departmentName }}</td>
             <td>
               <span :class="['type-badge', req.requestType.toLowerCase()]">
@@ -28,8 +29,14 @@
                 <MyButton
                   color="deep-blue"
                   size="small"
-                  content="상세/승인"
-                  @click="openModal(req)"
+                  content="승인"
+                  @click="handleApproveDirect(req)"
+                />
+                <MyButton
+                  color="error"
+                  size="small"
+                  content="반려"
+                  @click="openRejectModal(req)"
                 />
               </div>
             </td>
@@ -41,17 +48,17 @@
     <!-- 결재 처리 모달 -->
     <MyModal
       :isOpen="isModalOpen"
-      title="학적 변동 결재"
+      title="학적 변동 상세 및 반려 처리"
       @close="closeModal"
     >
       <div class="info-grid">
         <div class="info-row">
-          <span class="label">이름(학번)</span>
-          <span class="value"
-            >{{ activeReq.studentName }} ({{
-              activeReq.studentLoginId
-            }})</span
-          >
+          <span class="label">이름</span>
+          <span class="value">{{ activeReq.studentName }}</span>
+        </div>
+        <div class="info-row">
+          <span class="label">학번</span>
+          <span class="value">{{ activeReq.studentLoginId }}</span>
         </div>
         <div class="info-row">
           <span class="label">소속</span>
@@ -87,7 +94,7 @@
         <div v-if="activeReq.attachmentFilePath" class="info-row">
           <span class="label">증빙 서류</span>
           <span class="value">
-            <a :href="`http://localhost:8080/api/files?path=${encodeURIComponent(activeReq.attachmentFilePath)}`" target="_blank" class="download-link">
+            <a href="#" @click.prevent="openAttachment(activeReq)" class="download-link">
               첨부파일 다운로드
             </a>
           </span>
@@ -108,20 +115,14 @@
         <MyButton
           color="white"
           size="small"
-          content="닫기"
+          content="취소"
           @click="closeModal"
         />
         <MyButton
           color="error"
           size="small"
-          content="반려 처리"
+          content="반려 확인"
           @click="handleProcess('REJECTED')"
-        />
-        <MyButton
-          color="deep-blue"
-          size="small"
-          content="승인 처리"
-          @click="handleProcess('APPROVED')"
         />
       </template>
     </MyModal>
@@ -133,6 +134,7 @@ import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MyModal from "../../components/common/MyModal.vue";
+import myAxios from "../../api/myAxios";
 import { useLeaveReturnStore } from "../../store/leaveReturn/useLeaveReturnStore";
 
 defineOptions({ name: "ProfessorLeaveReturnPage" });
@@ -142,7 +144,8 @@ const store = useLeaveReturnStore();
 const pendingRequests = computed(() => store.pendingRequests);
 
 const columns = [
-  { key: "student", label: "학생(학번)" },
+  { key: "studentName", label: "이름" },
+  { key: "studentNo", label: "학번" },
   { key: "dept", label: "소속" },
   { key: "type", label: "유형" },
   { key: "target", label: "적용 학기" },
@@ -159,7 +162,33 @@ onMounted(async () => {
   await store.fetchPendingRequests();
 });
 
-const formatRequestType = (type) => (type === "LEAVE" ? "휴학" : "복학");
+const formatRequestType = (type) => {
+  if (type === "LEAVE" || type === "GENERAL_LEAVE") return "일반휴학";
+  if (type === "RETURN" || type === "GENERAL_RETURN") return "일반복학";
+  if (type === "MILITARY_LEAVE") return "군휴학";
+  if (type === "MILITARY_RETURN") return "군복학";
+  return type;
+};
+
+const openAttachment = async (request) => {
+  if (!request?.id) return;
+  try {
+    const response = await myAxios.get(
+      `/api/professor/academic-requests/${request.id}/attachment`,
+      { responseType: "blob" }
+    );
+    const blobUrl = URL.createObjectURL(response.data);
+    const fileName = (request.attachmentFilePath || "attachment").split("/").pop();
+    const link = document.createElement("a");
+    link.href = blobUrl;
+    link.download = fileName;
+    link.click();
+    URL.revokeObjectURL(blobUrl);
+  } catch (error) {
+    console.error("첨부파일 다운로드 실패:", error);
+    alert("첨부파일 다운로드에 실패했습니다.");
+  }
+};
 
 const truncate = (text, len) => {
   if (!text) return "";
@@ -171,7 +200,22 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString("ko-KR");
 };
 
-const openModal = (req) => {
+const handleApproveDirect = async (req) => {
+  if (!confirm(`${req.studentName} 학생의 학적 변동 신청을 승인하시겠습니까?`)) return;
+
+  try {
+    await store.processRequest(req.id, {
+      status: "APPROVED",
+      rejectReason: null,
+    });
+    alert("승인 처리가 완료되었습니다.");
+    await store.fetchPendingRequests();
+  } catch (error) {
+    alert("처리 중 오류가 발생했습니다.");
+  }
+};
+
+const openRejectModal = (req) => {
   activeReq.value = req;
   rejectReason.value = "";
   isModalOpen.value = true;
@@ -188,15 +232,14 @@ const handleProcess = async (status) => {
     return;
   }
 
-  const actionName = status === "APPROVED" ? "승인" : "반려";
-  if (!confirm(`해당 신청을 ${actionName} 처리하시겠습니까?`)) return;
+  if (!confirm(`해당 신청을 반려 처리하시겠습니까?`)) return;
 
   try {
     await store.processRequest(activeReq.value.id, {
       status,
-      rejectReason: status === "REJECTED" ? rejectReason.value : null,
+      rejectReason: rejectReason.value,
     });
-    alert(`${actionName} 처리가 완료되었습니다.`);
+    alert("반려 처리가 완료되었습니다.");
     closeModal();
     await store.fetchPendingRequests();
   } catch (error) {
@@ -210,17 +253,7 @@ const handleProcess = async (status) => {
   margin-top: 32px;
 }
 
-.section-header {
-  margin-bottom: 16px;
-  padding: 0 4px;
-}
 
-.section-header h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1f36;
-  margin: 0;
-}
 
 .table-wrapper {
   overflow: hidden;
@@ -248,6 +281,7 @@ const handleProcess = async (status) => {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+
 
 .action-buttons {
   display: flex;

@@ -96,10 +96,12 @@ const employmentRows = computed(() => [
 
     <div class="info-grid">
       <article class="info-card">
-        <header class="card-title">
-          <span class="title-icon person" aria-hidden="true"></span>
-          <h2>기본 정보</h2>
-        </header>
+        <div class="common-section-header">
+          <h3 style="display:flex; align-items:center; gap:8px;">
+            <span class="title-icon person" aria-hidden="true"></span>
+            기본 정보
+          </h3>
+        </div>
 
         <dl class="info-list">
           <div v-for="row in basicRows" :key="row.label" class="info-row">
@@ -110,10 +112,12 @@ const employmentRows = computed(() => [
       </article>
 
       <article class="info-card">
-        <header class="card-title">
-          <span class="title-icon cap" aria-hidden="true"></span>
-          <h2>교직 정보</h2>
-        </header>
+        <div class="common-section-header">
+          <h3 style="display:flex; align-items:center; gap:8px;">
+            <span class="title-icon cap" aria-hidden="true"></span>
+            교직 정보
+          </h3>
+        </div>
 
         <dl class="info-list">
           <div v-for="row in employmentRows" :key="row.label" class="info-row">
@@ -128,7 +132,7 @@ const employmentRows = computed(() => [
       <div class="security-copy">
         <span class="security-icon" aria-hidden="true"></span>
         <div>
-          <h2>계정 보안</h2>
+          <h3>계정 보안</h3>
           <p>비밀번호를 변경하고 계정을 안전하게 관리하세요.</p>
         </div>
       </div>
@@ -350,16 +354,7 @@ const employmentRows = computed(() => [
   padding: 26px 30px;
 }
 
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding-bottom: 18px;
-  border-bottom: 2px solid #e5eaf2;
-}
-
-.card-title h2,
-.security-copy h2 {
+.security-copy h3 {
   color: var(--primary-text-color);
   font-size: 1.25rem;
   letter-spacing: 0;
