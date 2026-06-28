@@ -9,8 +9,8 @@ defineProps({
 
 <template>
   <div class="notice-section">
-    <div class="section-header">
-      <h2>공지사항</h2>
+    <div class="common-section-header">
+      <h3>공지사항</h3>
     </div>
     <div class="notice-list">
     <div v-for="notice in notices" :key="notice.id" class="notice-item">
@@ -34,17 +34,7 @@ defineProps({
   min-height: 0;
 }
 
-.section-header {
-  margin-bottom: 16px;
-  padding: 0 4px;
-}
 
-.section-header h2 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1f36;
-  margin: 0;
-}
 
 .notice-list {
   background: #ffffff;

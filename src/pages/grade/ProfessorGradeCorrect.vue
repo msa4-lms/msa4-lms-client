@@ -50,8 +50,10 @@ const getRatio = (type) => {
   return Number(lecture[ratioKeys[type]] ?? defaults[type]);
 };
 
+// [수정됨] 이름 컬럼 라벨 변경 및 '+ 부여' 컬럼 제거
 const columns = computed(() => [
-  { key: "student", label: "수강생" },
+  { key: "studentName", label: "이름" },
+  { key: "studentNo", label: "학번" },
   ...scoreFields.map((field) => ({
     key: field.key,
     label: `${field.label} (${getRatio(field.ratioKey)}%)`,
@@ -59,7 +61,6 @@ const columns = computed(() => [
   { key: "total", label: "총점" },
   { key: "grade", label: "등급" },
   { key: "status", label: "진행 상태" },
-  { key: "correction", label: "정정 방식" },
 ]);
 
 const normalizeScore = (score) => {
@@ -98,9 +99,20 @@ const hasScoreChanges = (grade) =>
   );
 
 const resolvedGrade = (grade) => {
-  if (grade.editMode === "GRADE") return grade.selectedGrade;
-  if (hasScoreChanges(grade)) return determineGrade(calculateTotal(grade));
-  return grade.originalGrade;
+  let baseGrade;
+  if (grade.editMode === "GRADE") {
+    baseGrade = grade.selectedGrade;
+  } else if (hasScoreChanges(grade)) {
+    baseGrade = determineGrade(calculateTotal(grade));
+  } else {
+    baseGrade = grade.originalGrade;
+  }
+
+  // hasPlus 체크박스 반영: F 등급은 +가 없음
+  if (baseGrade.includes('F')) return 'F';
+
+  const letter = baseGrade.replace('+', '');
+  return grade.hasPlus ? letter + '+' : letter;
 };
 
 const displayScore = (score) =>
@@ -143,8 +155,7 @@ const createEditableGrade = (grade) => {
   return {
     ...grade,
     ...original,
-    editMode: "SCORE",
-    selectedGrade: originalGrade,
+    hasPlus: originalGrade.includes('+'),
     original,
     originalTotal,
     originalGrade,
@@ -167,22 +178,13 @@ const loadGrades = async () => {
   }
 };
 
-const setEditMode = (grade, mode) => {
-  if (!canCorrect(grade)) return;
-  grade.editMode = mode;
-  if (mode === "GRADE" && !grade.selectedGrade) {
-    grade.selectedGrade = determineGrade(calculateTotal(grade));
-  }
-};
-
-const selectScoreMode = (grade) => {
-  grade.editMode = "SCORE";
-};
-
 const handleScoreInput = (grade, fieldKey, value) => {
   if (!canCorrect(grade)) return;
   grade[fieldKey] = value === "" ? "" : Number(value);
-  selectScoreMode(grade);
+  
+  const newTotal = calculateTotal(grade);
+  const autoGrade = determineGrade(newTotal);
+  grade.hasPlus = autoGrade.includes('+');
 };
 
 const isScoreInvalid = (score) => {
@@ -199,19 +201,17 @@ const hasValidationError = computed(() =>
   )
 );
 
-const isChanged = (grade) => {
-  if (!canCorrect(grade)) return false;
+const hasChanges = computed(() => {
+  return editableGrades.value.some(
+    (grade) => canCorrect(grade) && (hasScoreChanges(grade) || resolvedGrade(grade) !== grade.originalGrade)
+  );
+});
 
-  const scoreChanged = hasScoreChanges(grade);
-  const gradeChanged =
-    grade.editMode === "GRADE" && grade.selectedGrade !== grade.originalGrade;
-
-  return scoreChanged || gradeChanged;
-};
-
-const changedGrades = computed(() => editableGrades.value.filter(isChanged));
-const changedCount = computed(() => changedGrades.value.length);
-const hasChanges = computed(() => changedCount.value > 0);
+const changedCount = computed(() => {
+  return editableGrades.value.filter(
+    (grade) => canCorrect(grade) && (hasScoreChanges(grade) || resolvedGrade(grade) !== grade.originalGrade)
+  ).length;
+});
 
 const saveCorrections = async () => {
   if (!hasChanges.value || hasValidationError.value) return;
@@ -224,15 +224,16 @@ const saveCorrections = async () => {
     return;
   }
 
-  const gradeList = changedGrades.value.map((grade) => ({
-    enrollmentId: grade.enrollmentId,
-    midtermScore: grade.midtermScore,
-    finalScore: grade.finalScore,
-    assignmentScore: grade.assignmentScore,
-    attendanceScore: grade.attendanceScore,
-    grade: resolvedGrade(grade),
-    correctionType: grade.editMode,
-  }));
+  const gradeList = editableGrades.value
+    .filter((grade) => canCorrect(grade) && (hasScoreChanges(grade) || resolvedGrade(grade) !== grade.originalGrade))
+    .map((grade) => ({
+      enrollmentId: grade.enrollmentId,
+      midtermScore: grade.midtermScore,
+      finalScore: grade.finalScore,
+      assignmentScore: grade.assignmentScore,
+      attendanceScore: grade.attendanceScore,
+      grade: resolvedGrade(grade),
+    }));
 
   isSaving.value = true;
   try {
@@ -256,7 +257,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <MyPageContainer title="성적 정정">
+  <MyPageContainer title="성적 정정 기간 관리">
     <MySearchFilter :showSubmit="false">
       <div class="search-group">
         <label for="lectureSelect">강의 선택</label>
@@ -292,8 +293,8 @@ onMounted(async () => {
       </div>
     </MySearchFilter>
 
-    <section v-if="selectedLectureId" class="grade-section">
-      <div class="section-header">
+    <section class="grade-section">
+      <div class="common-section-header">
         <div>
           <h3>수강생 성적 정정</h3>
         </div>
@@ -320,12 +321,10 @@ onMounted(async () => {
           <tr
             v-for="grade in editableGrades"
             :key="grade.id || grade.enrollmentId"
-            :class="{ 'changed-row': isChanged(grade) }"
+            :class="{ 'changed-row': canCorrect(grade) && (hasScoreChanges(grade) || resolvedGrade(grade) !== grade.originalGrade) }"
           >
-            <td class="student-cell">
-              <strong>{{ grade.studentName }}</strong>
-              <span>{{ grade.studentLoginId }}</span>
-            </td>
+            <td>{{ grade.studentName }}</td>
+            <td>{{ grade.studentLoginId }}</td>
 
             <td v-for="scoreField in scoreFields" :key="scoreField.key">
               <div class="score-cell">
@@ -336,7 +335,7 @@ onMounted(async () => {
                   maxlength="3"
                   numeric-only
                   :max-number="100"
-                  :disabled="!canCorrect(grade) || grade.editMode === 'GRADE'"
+                  :disabled="!canCorrect(grade)"
                   class="score-input"
                   @update:model-value="
                     handleScoreInput(grade, scoreField.key, $event)
@@ -351,65 +350,26 @@ onMounted(async () => {
             <td>
               <div class="result-cell">
                 <strong>{{ calculateTotal(grade) }}</strong>
-                <span>기존 {{ grade.originalTotal }}</span>
+                <span class="original-value">기존 {{ grade.originalTotal }}</span>
               </div>
             </td>
 
             <td>
               <div class="result-cell">
-                <strong>{{ resolvedGrade(grade) }}</strong>
-                <span>기존 {{ grade.originalGrade }}</span>
+                <div class="grade-with-checkbox">
+                  <strong>{{ resolvedGrade(grade) }}</strong>
+                  <input
+                    v-if="canCorrect(grade) && !resolvedGrade(grade).includes('F')"
+                    type="checkbox"
+                    v-model="grade.hasPlus"
+                  />
+                </div>
+                <span class="original-value">기존 {{ grade.originalGrade }}</span>
               </div>
             </td>
 
             <td>
               <StatusBadge :status="displayStatus(grade)" />
-            </td>
-
-            <td>
-              <div class="correction-controls">
-                <div class="mode-buttons">
-                  <button
-                    type="button"
-                    :class="{ active: grade.editMode === 'SCORE' }"
-                    :disabled="!canCorrect(grade)"
-                    @click="setEditMode(grade, 'SCORE')"
-                  >
-                    점수로 수정
-                  </button>
-                  <button
-                    type="button"
-                    :class="{ active: grade.editMode === 'GRADE' }"
-                    :disabled="!canCorrect(grade)"
-                    @click="setEditMode(grade, 'GRADE')"
-                  >
-                    등급 직접 수정
-                  </button>
-                </div>
-
-                <select
-                  v-if="grade.editMode === 'GRADE'"
-                  v-model="grade.selectedGrade"
-                  class="grade-select"
-                  aria-label="정정 등급"
-                  :disabled="!canCorrect(grade)"
-                >
-                  <option
-                    v-for="option in gradeOptions"
-                    :key="option"
-                    :value="option"
-                  >
-                    {{ option }}
-                  </option>
-                </select>
-              <span v-if="!canCorrect(grade)" class="locked-text">
-                {{
-                  isUnentered(grade)
-                    ? "미입력 성적은 정정할 수 없습니다."
-                    : "제출된 성적은 수정할 수 없습니다."
-                }}
-              </span>
-              </div>
             </td>
           </tr>
         </MyTable>
@@ -418,10 +378,6 @@ onMounted(async () => {
           {{ changedCount }}명의 성적이 변경되었습니다.
         </div>
       </div>
-    </section>
-
-    <section v-else class="empty-state">
-      <p>상단에서 성적을 정정할 강의를 선택해 주세요.</p>
     </section>
   </MyPageContainer>
 </template>
@@ -458,20 +414,6 @@ onMounted(async () => {
   width: 100%;
   min-width: 0;
   max-width: 100%;
-}
-
-.section-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 20px;
-  padding: 4px 4px 14px;
-}
-
-.section-header h3 {
-  margin: 0;
-  color: #1a1f36;
-  font-size: 1.1rem;
 }
 
 .validation-alert {
@@ -534,8 +476,7 @@ onMounted(async () => {
 }
 
 .score-cell,
-.result-cell,
-.correction-controls {
+.result-cell {
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -557,7 +498,6 @@ onMounted(async () => {
   margin-top: 5px;
 }
 
-.student-cell span,
 .original-value,
 .result-cell span {
   color: #8a94a6;
@@ -574,8 +514,7 @@ onMounted(async () => {
   text-align: center;
 }
 
-.score-input:focus,
-.grade-select:focus {
+.score-input:focus {
   border-color: var(--primary-color);
   outline: none;
 }
@@ -587,55 +526,25 @@ onMounted(async () => {
 
 .result-cell strong {
   color: #1a1f36;
-  font-size: 0.95rem;
+  font-size: inherit;
+  font-weight: normal;
 }
 
-.mode-buttons {
+.grade-with-checkbox {
   display: flex;
-  overflow: hidden;
-  border: 1px solid #d8dee9;
-  border-radius: 6px;
+  align-items: center;
+  gap: 4px;
 }
 
-.mode-buttons button {
-  padding: 7px 9px;
-  border: 0;
-  border-right: 1px solid #d8dee9;
-  background: #fff;
-  color: #697386;
-  font-size: 0.75rem;
+.grade-with-checkbox input {
+  margin: 0;
   cursor: pointer;
-  white-space: nowrap;
-}
-
-.mode-buttons button:last-child {
-  border-right: 0;
-}
-
-.mode-buttons button.active {
-  background: var(--primary-color);
-  color: #fff;
-}
-
-.mode-buttons button:disabled {
-  background: #f3f4f6;
-  color: #9ca3af;
-  cursor: not-allowed;
-}
-
-.grade-select {
-  width: 100%;
-  height: 34px;
-  border: 1px solid #d8dee9;
-  border-radius: 5px;
-  background: #fff;
-  text-align: center;
 }
 
 .locked-text {
-  color: #8a94a6;
-  font-size: 0.72rem;
-  white-space: nowrap;
+  color: #c53030;
+  font-size: 0.75rem;
+  text-align: center;
 }
 
 .change-summary {
@@ -657,7 +566,7 @@ onMounted(async () => {
 }
 
 @media (max-width: 720px) {
-  .section-header {
+  .common-section-header {
     align-items: flex-start;
     flex-direction: column;
   }

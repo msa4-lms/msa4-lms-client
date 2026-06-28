@@ -38,8 +38,8 @@
     </MySearchFilter>
 
     <!-- 출결 관리 테이블 섹션 -->
-    <div v-if="selectedLectureId" class="attendance-section">
-      <div class="section-header">
+    <div class="attendance-section">
+      <div class="common-section-header">
         <h3>수강생 출결 관리</h3>
         <div class="control-buttons">
           <MyButton
@@ -87,12 +87,6 @@
       </div>
     </div>
 
-    <!-- 미선택 빈 화면 상태 -->
-    <div v-else class="welcome-section">
-      <div class="empty-state">
-        <p>상단에서 관리하실 강좌를 선택해 주세요.</p>
-      </div>
-    </div>
   </MyPageContainer>
 </template>
 
@@ -270,20 +264,7 @@ const handleSave = async () => {
   margin-top: 32px;
 }
 
-.section-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 16px;
-  padding: 0 4px;
-}
 
-.section-header h3 {
-  margin: 0;
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1e293b;
-}
 
 .control-buttons {
   display: flex;

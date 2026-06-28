@@ -124,7 +124,9 @@ const formatSchedule = (schedule) => {
 
     <!-- 주간 시간표 섹션 -->
     <section class="timetable-section">
-      <h3>주간 시간표</h3>
+      <div class="common-section-header">
+        <h3>주간 시간표</h3>
+      </div>
       <div class="timetable-grid">
         <div class="grid-cell header">시간</div>
         <div v-for="day in days" :key="day" class="grid-cell header">
@@ -166,7 +168,9 @@ const formatSchedule = (schedule) => {
 
     <!-- 수강 신청 목록 섹션 -->
     <section class="list-section">
-      <h3>수강 신청 목록</h3>
+      <div class="common-section-header">
+        <h3>수강 신청 목록</h3>
+      </div>
       <MyTable
         :columns="enrollmentColumns"
         :loading="enrollmentStore.loading"
@@ -213,13 +217,7 @@ const formatSchedule = (schedule) => {
   margin-bottom: 40px;
 }
 
-.timetable-section > h3 {
-  padding: 5px;
-}
 
-.list-section > h3 {
-  padding: 5px;
-}
 
 .grid-cell {
   border: 0.5px solid #eee;

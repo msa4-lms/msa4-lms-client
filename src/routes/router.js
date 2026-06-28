@@ -1,13 +1,13 @@
 import { createRouter, createWebHistory } from "vue-router";
-const GradePage = () => import("../pages/grade/GradePage.vue");
-const AttendancePage = () => import("../pages/attendance/AttendancePage.vue");
-const ExcuseRequestPage = () =>
-  import("../pages/attendance/ExcuseRequestPage.vue");
+const StudentGradePage = () => import("../pages/grade/StudentGradePage.vue");
+const StudentAttendancePage = () => import("../pages/attendance/StudentAttendancePage.vue");
+const StudentExcuseRequestPage = () =>
+  import("../pages/attendance/StudentExcuseRequestPage.vue");
 const Login = () => import("../pages/auth/Login.vue");
-const LectureList = () => import("../pages/lectures/LectureList.vue");
-const LectureEnrollment = () =>
-  import("../pages/enrollment/LectureEnrollment.vue");
-const EnrollmentList = () => import("../pages/enrollment/EnrollmentList.vue");
+const StudentLectureList = () => import("../pages/lectures/StudentLectureList.vue");
+const StudentLectureEnrollment = () =>
+  import("../pages/enrollment/StudentLectureEnrollment.vue");
+const StudentEnrollmentList = () => import("../pages/enrollment/StudentEnrollmentList.vue");
 import { useAuthStore } from "../store/auth/useAuthStore.js";
 import ProfessorGradeCorrect from "../pages/grade/ProfessorGradeCorrect.vue";
 const ProfileRouter = () => import("../pages/profile/ProfileRouter.vue");
@@ -18,8 +18,8 @@ const ProfessorGradeManage = () =>
   import("../pages/grade/ProfessorGradeManage.vue");
 const ProfessorExcuseApprovalPage = () =>
   import("../pages/attendance/ProfessorExcuseApprovalPage.vue");
-const LeaveReturnPage = () =>
-  import("../pages/leaveReturn/LeaveReturnPage.vue");
+const StudentLeaveReturnPage = () =>
+  import("../pages/leaveReturn/StudentLeaveReturnPage.vue");
 const ProfessorLeaveReturnPage = () =>
   import("../pages/leaveReturn/ProfessorLeaveReturnPage.vue");
 const ProfessorAttendancePage = () =>
@@ -47,26 +47,26 @@ const routes = [
   },
   {
     path: "/lectures",
-    name: "LectureList",
-    component: LectureList,
+    name: "StudentLectureList",
+    component: StudentLectureList,
     meta: setMeta(true, false),
   },
   {
     path: "/enrollments",
-    name: "EnrollmentList",
-    component: EnrollmentList,
+    name: "StudentEnrollmentList",
+    component: StudentEnrollmentList,
     meta: setMeta(true, false),
   },
   {
     path: "/registration",
     name: "Registration",
-    component: LectureEnrollment,
+    component: StudentLectureEnrollment,
     meta: setMeta(true, false),
   },
   {
     path: "/grade",
     name: "Grade",
-    component: GradePage,
+    component: StudentGradePage,
     meta: setMeta(true, false),
   },
   {
@@ -77,14 +77,14 @@ const routes = [
   },
   {
     path: "/attendance",
-    name: "AttendancePage",
-    component: AttendancePage,
+    name: "StudentAttendancePage",
+    component: StudentAttendancePage,
     meta: setMeta(true, false, ["STUDENT"]),
   },
   {
     path: "/excuses",
-    name: "ExcuseRequestPage",
-    component: ExcuseRequestPage,
+    name: "StudentExcuseRequestPage",
+    component: StudentExcuseRequestPage,
     meta: setMeta(true, false, ["STUDENT"]),
   },
   {
@@ -120,13 +120,13 @@ const routes = [
   {
     path: "/leave-return/general",
     name: "LeaveReturnGeneralPage",
-    component: LeaveReturnPage,
+    component: StudentLeaveReturnPage,
     meta: setMeta(true, false),
   },
   {
     path: "/leave-return/military",
     name: "LeaveReturnMilitaryPage",
-    component: LeaveReturnPage,
+    component: StudentLeaveReturnPage,
     meta: setMeta(true, false),
   },
   {

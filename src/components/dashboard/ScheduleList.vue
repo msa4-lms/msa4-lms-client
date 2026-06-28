@@ -9,7 +9,7 @@ defineProps({
 
 <template>
   <div class="schedule-section">
-    <div class="section-header">
+    <div class="common-section-header">
       <h3>학사일정</h3>
     </div>
     <div class="schedule-list">
@@ -40,17 +40,7 @@ defineProps({
   flex-direction: column;
 }
 
-.section-header {
-  margin-bottom: 16px;
-  padding: 0 4px;
-}
 
-.section-header h3 {
-  font-size: 1.25rem;
-  font-weight: 700;
-  color: #1a1f36;
-  margin: 0;
-}
 
 .schedule-list {
   background: #ffffff;

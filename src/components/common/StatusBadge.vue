@@ -40,10 +40,6 @@ const statusLabel = computed(() => {
       return "제출완료";
     case "OPENED":
       return "공개됨";
-    case "OBJECTION":
-      return "이의신청";
-    case "FINAL":
-      return "성적확정";
     default:
       return props.status;
   }
@@ -56,12 +52,10 @@ const statusClass = computed(() => {
     case "PRESENT":
     case "EXCUSED":
     case "OPENED":
-    case "FINAL":
       return "approved";
     case "REJECTED":
     case "DROPPED":
     case "ABSENT":
-    case "OBJECTION":
       return "rejected";
     case "UNENTERED":
       return "unentered";

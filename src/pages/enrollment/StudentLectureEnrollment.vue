@@ -222,7 +222,9 @@ onMounted(async () => {
     </MySearchFilter>
 
     <section class="lecture-search-section">
-      <h3>강의 조회</h3>
+      <div class="common-section-header">
+        <h3>강의 조회</h3>
+      </div>
       <MyTable
       :columns="lectureColumns"
       :loading="lectureStore.loading"
@@ -262,7 +264,9 @@ onMounted(async () => {
     </section>
 
     <section class="my-enrollments-section">
-      <h3>수강 신청 목록</h3>
+      <div class="common-section-header">
+        <h3>수강 신청 목록</h3>
+      </div>
       <div class="summary-card">
         <p>신청 과목 합계 학점: <strong>{{ enrollmentStore.totalCredits }}</strong> 학점</p>
       </div>
@@ -344,9 +348,4 @@ onMounted(async () => {
   margin-bottom: 20px;
 }
 
-h3 {
-  font-size: 1.2rem;
-  color: #1a1f36;
-  margin-bottom: 15px;
-}
 </style>
