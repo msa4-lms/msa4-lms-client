@@ -323,9 +323,6 @@ onMounted(async () => {
   <MyPageContainer :title="labels.pageTitle">
     <template v-if="isStudent">
       <section class="panel-top">
-        <div class="common-section-header">
-          <h3>{{ labels.pageTitle }}</h3>
-        </div>
         <form class="excuse-form" @submit.prevent="submitExcuse">
           <div class="search-group date-chip-field">
             <label>{{ labels.date }}</label>
