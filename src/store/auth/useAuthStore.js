@@ -34,6 +34,7 @@ export const useAuthStore = defineStore("authStore", () => {
           name: data.name,
           role: data.role,
           endYear: data.endYear,
+          startYear: data.startYear,
         };
         isLoggedIn.value = true;
       } else {
@@ -70,6 +71,7 @@ export const useAuthStore = defineStore("authStore", () => {
           name: data.name,
           role: data.role,
           endYear: data.endYear,
+          startYear: data.startYear,
         };
       isLoggedIn.value = true;
     } catch (error) {
