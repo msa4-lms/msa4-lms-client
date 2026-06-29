@@ -340,7 +340,8 @@ const handleSave = async () => {
     alert("성적이 정상적으로 임시저장되었습니다.");
     await loadGrades();
   } catch (error) {
-    alert("성적 저장 중 오류가 발생했습니다.");
+    alert(error.response?.data?.message || "성적 저장 중 오류가 발생했습니다.");
+    await loadGrades();
   }
 };
 
@@ -348,15 +349,19 @@ const handleSave = async () => {
 const handleSubmitGrades = async () => {
   if (!selectedLectureId.value) return;
 
+  // 점수 정규화: null/undefined/빈문자열은 null로, 그 외는 숫자로 변환하여 타입 차이("85" vs 85)로 인한 오탐 방지
+  const normScore = (v) =>
+    v === null || v === undefined || v === "" ? null : Number(v);
+
   // 수정된(저장되지 않은) 성적이 있는지 검사
   const hasUnsavedChanges = localGrades.value.some((localG) => {
     const originalG = gradeStore.grades.find((g) => g.id === localG.id);
     if (!originalG) return false;
     return (
-      localG.midtermScore !== originalG.midtermScore ||
-      localG.finalScore !== originalG.finalScore ||
-      localG.assignmentScore !== originalG.assignmentScore ||
-      localG.attendanceScore !== originalG.attendanceScore
+      normScore(localG.midtermScore) !== normScore(originalG.midtermScore) ||
+      normScore(localG.finalScore) !== normScore(originalG.finalScore) ||
+      normScore(localG.assignmentScore) !== normScore(originalG.assignmentScore) ||
+      normScore(localG.attendanceScore) !== normScore(originalG.attendanceScore)
     );
   });
 
@@ -379,7 +384,8 @@ const handleSubmitGrades = async () => {
     alert("성적 일괄 제출 완료");
     await loadGrades();
   } catch (error) {
-    alert("성적 제출 중 오류가 발생했습니다.");
+    alert(error.response?.data?.message || "성적 제출 중 오류가 발생했습니다.");
+    await loadGrades();
   }
 };
 
