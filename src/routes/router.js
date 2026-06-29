@@ -121,13 +121,13 @@ const routes = [
     path: "/leave-return/general",
     name: "LeaveReturnGeneralPage",
     component: StudentLeaveReturnPage,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["STUDENT"]),
   },
   {
     path: "/leave-return/military",
     name: "LeaveReturnMilitaryPage",
     component: StudentLeaveReturnPage,
-    meta: setMeta(true, false),
+    meta: setMeta(true, false, ["STUDENT"]),
   },
   {
     path: "/professor/leave-return",

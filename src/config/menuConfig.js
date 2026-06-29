@@ -11,7 +11,6 @@ export const MENU_TITLES = {
   "/lectures": { default: "강의 조회" },
   "/professor/grades/input": { default: "성적 입력" },
   "/professor/grades/correct": { default: "성적 정정" },
-  "/students": { default: "사용자 관리" },
   "/leave-return/general": { default: "일반휴학/복학 신청" },
   "/leave-return/military": { default: "군휴학 신청" },
   "/professor/leave-return": { default: "휴/복학 결재" },

@@ -32,10 +32,10 @@ export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
   };
 
   // 기존 점수 또는 최종 등급 정정
-  const correctGrades = async (lectureId, gradeList) => {
+  const correctGrades = async (lectureId, correctionList) => {
     try {
-      await myAxios.put(`/api/professor/grades/lectures/${lectureId}`, {
-        gradeList,
+      await myAxios.patch(`/api/professor/grades/lectures/${lectureId}/correction`, {
+        correctionList,
       });
     } catch (error) {
       console.error("성적 정정 실패:", error);
