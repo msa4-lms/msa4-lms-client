@@ -93,7 +93,7 @@ const openAttachment = async (request) => {
 
   try {
     const response = await myAxios.get(
-      `/api/student/academic/excuses/${request.id}/attachment`,
+      `/api/student/attendances/excuses/${request.id}/attachment`,
       { responseType: "blob" }
     );
     const blobUrl = URL.createObjectURL(response.data);
