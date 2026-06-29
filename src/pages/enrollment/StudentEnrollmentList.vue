@@ -25,7 +25,7 @@ const yearOptions = computed(() => {
 });
 
 const historyParams = ref({
-  year: 2026,
+  year: yearOptions.value[0],
   semester: 1,
 });
 

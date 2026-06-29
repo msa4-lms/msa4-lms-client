@@ -81,7 +81,7 @@ const loading = ref(false);
 // 선택한과목명
 const selectedCourseName = ref(""); 
 const searchParams = reactive({
-  year: 2026,
+  year: yearOptions.value[0],
   semester: 1,
 });
 

@@ -29,7 +29,7 @@ const yearOptions = computed(() => {
 });
 
 const searchParams = ref({
-  year: currentYear,
+  year: yearOptions.value[0],
   semester: currentSemester,
 });
 
