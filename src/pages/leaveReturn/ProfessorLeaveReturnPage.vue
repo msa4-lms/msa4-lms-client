@@ -30,7 +30,7 @@
                   color="deep-blue"
                   size="small"
                   content="승인"
-                  @click="handleApproveDirect(req)"
+                  @click="openApproveModal(req)"
                 />
                 <MyButton
                   color="error"
@@ -48,7 +48,7 @@
     <!-- 결재 처리 모달 -->
     <MyModal
       :isOpen="isModalOpen"
-      title="학적 변동 상세 및 반려 처리"
+      :title="modalMode === 'approve' ? '학적 변동 상세 및 승인 처리' : '학적 변동 상세 및 반려 처리'"
       @close="closeModal"
     >
       <div class="info-grid">
@@ -101,7 +101,7 @@
         </div>
       </div>
 
-      <div class="approval-form">
+      <div v-if="modalMode === 'reject'" class="approval-form">
         <label>반려 사유 (반려 시 필수)</label>
         <textarea
           v-model="rejectReason"
@@ -110,7 +110,7 @@
           placeholder="반려 사유를 입력하세요."
         ></textarea>
       </div>
-      
+
       <template #footer>
         <MyButton
           color="white"
@@ -119,6 +119,14 @@
           @click="closeModal"
         />
         <MyButton
+          v-if="modalMode === 'approve'"
+          color="deep-blue"
+          size="small"
+          content="승인 확인"
+          @click="handleProcess('APPROVED')"
+        />
+        <MyButton
+          v-else
           color="error"
           size="small"
           content="반려 확인"
@@ -155,6 +163,7 @@ const columns = [
 ];
 
 const isModalOpen = ref(false);
+const modalMode = ref("approve"); // 'approve' | 'reject'
 const activeReq = ref(null);
 const rejectReason = ref("");
 
@@ -200,30 +209,23 @@ const formatDate = (dateStr) => {
   return new Date(dateStr).toLocaleDateString("ko-KR");
 };
 
-const handleApproveDirect = async (req) => {
-  if (!confirm(`${req.studentName} 학생의 학적 변동 신청을 승인하시겠습니까?`)) return;
-
-  try {
-    await store.processRequest(req.id, {
-      status: "APPROVED",
-      rejectReason: null,
-    });
-    alert("승인 처리가 완료되었습니다.");
-    await store.fetchPendingRequests();
-  } catch (error) {
-    alert("처리 중 오류가 발생했습니다.");
-  }
+const openApproveModal = (req) => {
+  activeReq.value = req;
+  modalMode.value = "approve";
+  isModalOpen.value = true;
 };
 
 const openRejectModal = (req) => {
   activeReq.value = req;
   rejectReason.value = "";
+  modalMode.value = "reject";
   isModalOpen.value = true;
 };
 
 const closeModal = () => {
   isModalOpen.value = false;
   activeReq.value = null;
+  rejectReason.value = "";
 };
 
 const handleProcess = async (status) => {
@@ -232,14 +234,17 @@ const handleProcess = async (status) => {
     return;
   }
 
-  if (!confirm(`해당 신청을 반려 처리하시겠습니까?`)) return;
+  const confirmMsg = status === "APPROVED"
+    ? `${activeReq.value.studentName} 학생의 학적 변동 신청을 승인하시겠습니까?`
+    : "해당 신청을 반려 처리하시겠습니까?";
+  if (!confirm(confirmMsg)) return;
 
   try {
     await store.processRequest(activeReq.value.id, {
       status,
-      rejectReason: rejectReason.value,
+      rejectReason: status === "APPROVED" ? null : rejectReason.value,
     });
-    alert("반려 처리가 완료되었습니다.");
+    alert(status === "APPROVED" ? "승인 처리가 완료되었습니다." : "반려 처리가 완료되었습니다.");
     closeModal();
     await store.fetchPendingRequests();
   } catch (error) {
