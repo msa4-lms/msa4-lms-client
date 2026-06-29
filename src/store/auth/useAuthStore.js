@@ -33,6 +33,7 @@ export const useAuthStore = defineStore("authStore", () => {
           loginId: data.loginId,
           name: data.name,
           role: data.role,
+          endYear: data.endYear,
         };
         isLoggedIn.value = true;
       } else {
@@ -68,6 +69,7 @@ export const useAuthStore = defineStore("authStore", () => {
           loginId: data.loginId,
           name: data.name,
           role: data.role,
+          endYear: data.endYear,
         };
       isLoggedIn.value = true;
     } catch (error) {

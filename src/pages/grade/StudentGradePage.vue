@@ -11,11 +11,12 @@ const authStore = useAuthStore();
 
 const yearOptions = computed(() => {
   const cy = new Date().getFullYear();
+  const endYear = authStore.userInfo?.endYear || cy;
   const startYear = authStore.userInfo?.createdAt 
     ? parseInt(authStore.userInfo.createdAt.substring(0, 4)) 
-    : cy - 3;
+    : endYear - 3;
   const years = [];
-  for (let y = cy; y >= startYear; y--) {
+  for (let y = endYear; y >= startYear; y--) {
     years.push(y);
   }
   return years;
