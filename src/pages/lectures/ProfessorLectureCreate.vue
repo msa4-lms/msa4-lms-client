@@ -10,7 +10,6 @@ const router = useRouter();
 const lectureProfessorStore = useLectureProfessorStore();
 
 const form = reactive({
-  semesterId: 53,
   courseId: "",
   isNewCourse: false,
   newCourseName: "",
@@ -174,7 +173,6 @@ const handleSubmit = async () => {
     
     // 페이지 이동 대신 폼 데이터 초기화
     Object.assign(form, {
-      semesterId: 53,
       courseId: "",
       isNewCourse: false,
       newCourseName: "",
