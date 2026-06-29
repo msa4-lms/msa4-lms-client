@@ -107,7 +107,7 @@ const academicRows = computed(() => [
     <div class="info-grid">
       <article class="info-card">
         <div class="common-section-header">
-          <h3 style="display:flex; align-items:center; gap:8px;">
+          <h3 style="display: flex; align-items: center; gap: 8px">
             <span class="title-icon person" aria-hidden="true"></span>
             기본 정보
           </h3>
@@ -123,7 +123,7 @@ const academicRows = computed(() => [
 
       <article class="info-card">
         <div class="common-section-header">
-          <h3 style="display:flex; align-items:center; gap:8px;">
+          <h3 style="display: flex; align-items: center; gap: 8px">
             <span class="title-icon cap" aria-hidden="true"></span>
             학적 정보
           </h3>
@@ -201,7 +201,7 @@ const academicRows = computed(() => [
 .profile-image {
   width: 148px;
   height: 180px;
-  background-image: url("/student-profile.jpeg");
+  background-image: url("/profile.jpg");
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
