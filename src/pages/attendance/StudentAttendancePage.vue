@@ -11,6 +11,18 @@ import MyTable from "../../components/table/MyTable.vue";
 const academicStore = useAttendanceStore();
 const authStore = useAuthStore();
 
+const yearOptions = computed(() => {
+  const cy = new Date().getFullYear();
+  const startYear = authStore.userInfo?.createdAt 
+    ? parseInt(authStore.userInfo.createdAt.substring(0, 4)) 
+    : cy - 3;
+  const years = [];
+  for (let y = cy; y >= startYear; y--) {
+    years.push(y);
+  }
+  return years;
+});
+
 const labels = {
   pageStudent: "\uCD9C\uACB0 \uD604\uD669",
   rateTitle: "\uACFC\uBAA9\uBCC4 \uCD9C\uC11D\uB960",
@@ -174,10 +186,7 @@ onMounted(async () => {
         <div class="search-group compact">
           <label>{{ labels.year }}</label>
           <select v-model="searchParams.year">
-            <option :value="2026">2026{{ labels.yearSuffix }}</option>
-            <option :value="2025">2025{{ labels.yearSuffix }}</option>
-            <option :value="2024">2024{{ labels.yearSuffix }}</option>
-            <option :value="2023">2023{{ labels.yearSuffix }}</option>
+            <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}{{ labels.yearSuffix }}</option>
           </select>
         </div>
         <div class="search-group compact">

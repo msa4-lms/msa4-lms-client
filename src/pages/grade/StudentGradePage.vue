@@ -9,6 +9,18 @@ import MySearchFilter from "../../components/search/MySearchFilter.vue";
 const academicStore = useGradeStore();
 const authStore = useAuthStore();
 
+const yearOptions = computed(() => {
+  const cy = new Date().getFullYear();
+  const startYear = authStore.userInfo?.createdAt 
+    ? parseInt(authStore.userInfo.createdAt.substring(0, 4)) 
+    : cy - 3;
+  const years = [];
+  for (let y = cy; y >= startYear; y--) {
+    years.push(y);
+  }
+  return years;
+});
+
 const gradeColumns = [
   { key: "semester", label: "연도/학기" },
   { key: "courseCode", label: "과목코드" },
@@ -151,11 +163,7 @@ watch(
         <label>{{ labels.year }}</label>
         <select v-model="searchParams.year">
           <option value="">{{ labels.all }}</option>
-          <option :value="2026">2026{{ labels.yearSuffix }}</option>
-          <option :value="2025">2025{{ labels.yearSuffix }}</option>
-          <option :value="2024">2024{{ labels.yearSuffix }}</option>
-          <option :value="2023">2023{{ labels.yearSuffix }}</option>
-          <option :value="2022">2022{{ labels.yearSuffix }}</option>
+          <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}{{ labels.yearSuffix }}</option>
         </select>
       </div>
       <div class="search-group compact">

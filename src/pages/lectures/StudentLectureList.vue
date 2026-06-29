@@ -1,6 +1,7 @@
 <script setup>
-import { ref, onMounted } from "vue";
+import { ref, onMounted, computed } from "vue";
 import { useLectureStore } from "../../store/lecture/useLectureStore";
+import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyTable from "../../components/table/MyTable.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
@@ -12,6 +13,19 @@ const now = new Date();
 const currentYear = now.getFullYear();
 const currentMonth = now.getMonth() + 1;
 const currentSemester = currentMonth >= 1 && currentMonth <= 6 ? 1 : 2;
+
+const authStore = useAuthStore();
+const yearOptions = computed(() => {
+  const cy = now.getFullYear();
+  const startYear = authStore.userInfo?.createdAt 
+    ? parseInt(authStore.userInfo.createdAt.substring(0, 4)) 
+    : cy - 3;
+  const years = [];
+  for (let y = cy; y >= startYear; y--) {
+    years.push(y);
+  }
+  return years;
+});
 
 const searchParams = ref({
   year: currentYear,
@@ -48,10 +62,7 @@ onMounted(() => {
         <div class="search-group">
           <label>연도</label>
           <select v-model="searchParams.year">
-            <option :value="2026">2026년</option>
-            <option :value="2025">2025년</option>
-            <option :value="2024">2024년</option>
-            <option :value="2023">2023년</option>
+            <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}년</option>
           </select>
         </div>
 

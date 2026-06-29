@@ -1,5 +1,5 @@
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import { useEnrollmentStore } from "../../store/enrollment/useEnrollmentStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyButton from "../../components/button/MyButton.vue";
@@ -10,6 +10,18 @@ import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
 const days = ["월", "화", "수", "목", "금"];
+
+const yearOptions = computed(() => {
+  const cy = new Date().getFullYear();
+  const startYear = authStore.userInfo?.createdAt 
+    ? parseInt(authStore.userInfo.createdAt.substring(0, 4)) 
+    : cy - 3;
+  const years = [];
+  for (let y = cy; y >= startYear; y--) {
+    years.push(y);
+  }
+  return years;
+});
 
 const historyParams = ref({
   year: 2026,
@@ -100,10 +112,7 @@ const formatSchedule = (schedule) => {
       <div class="search-group">
         <label>조회 연도</label>
         <select v-model="historyParams.year">
-          <option :value="2026">2026년</option>
-          <option :value="2025">2025년</option>
-          <option :value="2024">2024년</option>
-          <option :value="2023">2023년</option>
+          <option v-for="y in yearOptions" :key="y" :value="y">{{ y }}년</option>
         </select>
       </div>
       <div class="search-group">
