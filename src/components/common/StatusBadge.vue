@@ -40,6 +40,8 @@ const statusLabel = computed(() => {
       return "제출완료";
     case "OPENED":
       return "공개됨";
+    case "FINAL":
+      return "최종확정";
     default:
       return props.status;
   }
@@ -64,6 +66,7 @@ const statusClass = computed(() => {
     case "DRAFT":
       return "pending";
     case "SUBMITTED":
+    case "FINAL":
       return "submitted";
     default:
       return "pending";
