@@ -121,7 +121,11 @@
         </td>
         <td>{{ calculateTotal(g) }}점</td>
         <td>
-          <span>{{ determineGrade(calculateTotal(g)) }}</span>
+          <span>{{
+            g.status === "DRAFT"
+              ? determineGrade(calculateTotal(g))
+              : g.grade || determineGrade(calculateTotal(g))
+          }}</span>
         </td>
         <td>
           <StatusBadge
