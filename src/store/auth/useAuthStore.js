@@ -20,9 +20,14 @@ export const useAuthStore = defineStore("authStore", () => {
     tabStore.clearTabs();
   };
 
-  const login = async (loginForm) => {
+  const login = async (loginForm, loginType = "student") => {
     try {
-      const url = "/api/auth/login";
+      const loginUrls = {
+        student: "/api/auth/student/login",
+        professor: "/api/auth/professor/login",
+        admin: "/api/auth/admin/login",
+      };
+      const url = loginUrls[loginType] || loginUrls.student;
 
       const res = await myAxios.post(url, loginForm);
       if (!res.data.code || res.data.code === "00") {

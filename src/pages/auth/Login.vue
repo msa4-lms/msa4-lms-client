@@ -69,11 +69,13 @@ const handleLogin = async () => {
   isLoading.value = true;
 
   try {
-    await authStore.login({
-      loginId: loginForm.loginId,
-      password: loginForm.password,
-      role: loginType.value.toUpperCase(),
-    });
+    await authStore.login(
+      {
+        loginId: loginForm.loginId,
+        password: loginForm.password,
+      },
+      loginType.value
+    );
 
     router.replace("/main");
   } catch (error) {
