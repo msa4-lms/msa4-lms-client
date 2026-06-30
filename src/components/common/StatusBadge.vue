@@ -33,7 +33,7 @@ const statusLabel = computed(() => {
     case "ABSENT":
       return "결석";
     case "EXCUSED":
-      return "공결";
+      return "출석인정";
     case "DRAFT":
       return "임시저장";
     case "SUBMITTED":

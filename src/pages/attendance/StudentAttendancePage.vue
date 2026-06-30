@@ -73,7 +73,7 @@ const attendanceStatusLabel = {
   ABSENT: "결석",
   LATE: "지각",
   TARDY: "지각",
-  EXCUSED: "공결",
+  EXCUSED: "출석인정",
 };
 
 const enrollments = ref([]);
