@@ -72,8 +72,8 @@ myAxios.interceptors.response.use(
     const originalUrl = error.config ? error.config.url : "";
     const suppressErrorAlert = Boolean(error.config?.suppressErrorAlert);
 
-    // reissue-token 요청이 실패한 경우는 조용히 넘김 (무한 루프 방지)
-    if (originalUrl.includes("/api/auth/reissue-token") && status === 401) {
+    // reissue-token 또는 login 요청이 실패한 경우는 글로벌 401 처리를 하지 않음 (무한 루프 방지 및 폼 에러 처리 위임)
+    if ((originalUrl.includes("/api/auth/reissue-token") || originalUrl.includes("/api/auth/login")) && status === 401) {
       return Promise.reject(error);
     }
 

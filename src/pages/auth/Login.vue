@@ -79,7 +79,7 @@ const handleLogin = async () => {
 
     router.replace("/main");
   } catch (error) {
-    errorMessage.value = error.message || "로그인에 실패했습니다.";
+    errorMessage.value = error.response?.data?.message || error.message || "로그인에 실패했습니다.";
   } finally {
     isLoading.value = false;
   }
