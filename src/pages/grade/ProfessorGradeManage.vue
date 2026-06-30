@@ -50,7 +50,7 @@
             <MyInput
               type="text"
               :modelValue="g.midtermScore"
-              :disabled="g.status !== 'DRAFT'"
+              :disabled="g.status === 'OPENED' || g.status === 'FINAL'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'midtermScore')"
             />
@@ -64,7 +64,7 @@
             <MyInput
               type="text"
               :modelValue="g.finalScore"
-              :disabled="g.status !== 'DRAFT'"
+              :disabled="g.status === 'OPENED' || g.status === 'FINAL'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'finalScore')"
             />
@@ -78,7 +78,7 @@
             <MyInput
               type="text"
               :modelValue="g.assignmentScore"
-              :disabled="g.status !== 'DRAFT'"
+              :disabled="g.status === 'OPENED' || g.status === 'FINAL'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'assignmentScore')"
             />
@@ -92,7 +92,7 @@
             <MyInput
               type="text"
               :modelValue="g.attendanceScore"
-              :disabled="g.status !== 'DRAFT'"
+              :disabled="g.status === 'OPENED' || g.status === 'FINAL'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'attendanceScore')"
             />
@@ -111,7 +111,7 @@
         </td>
         <td>
           <StatusBadge
-            :status="g.status === 'DRAFT' ? 'UNENTERED' : g.status"
+            :status="!g.status || g.status === 'DRAFT' ? 'UNENTERED' : g.status"
           />
         </td>
       </tr>
@@ -123,14 +123,14 @@
           color="gray"
           size="middle"
           content="임시저장"
-          :disabled="hasValidationError || isPublished"
+          :disabled="hasValidationError || !canSave"
           @click="handleSave"
         />
         <MyButton
           color="deep-blue"
           size="middle"
           content="성적 일괄 제출"
-          :disabled="hasValidationError || isFinalized"
+          :disabled="hasValidationError || !canSubmit"
           @click="handleSubmitGrades"
         />
       </div>
@@ -139,8 +139,7 @@
   </MyPageContainer>
 </template>
 <script setup>
-import { ref, computed, onMounted, watch } from "vue";
-import { useRoute } from "vue-router";
+import { ref, computed, onMounted } from "vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import MyTable from "../../components/table/MyTable.vue";
@@ -243,19 +242,22 @@ const hasValidationError = computed(() => {
   );
 });
 
-// 임시저장(공개) 이후 상태 - 성적 입력 및 임시저장 잠금 판별
-const isPublished = computed(() => {
-  if (localGrades.value.length === 0) return false;
-  return localGrades.value.every(
-    (g) => g.status === "OPENED" || g.status === "FINAL"
-  );
+// 현재 강의의 grade_status (localGrades의 첫 항목 기준)
+const currentGradeStatus = computed(() => {
+  if (localGrades.value.length === 0) return null;
+  return localGrades.value[0].status ?? null;
 });
 
-// 최종 제출(확정) 상태 - 입력/임시저장/정정 모두 잠금 판별
-const isFinalized = computed(() => {
-  if (localGrades.value.length === 0) return false;
-  return localGrades.value.every((g) => g.status === "FINAL");
-});
+// 임시저장 버튼 활성 조건: 백엔드 saveGrades 허용 범위(null, DRAFT)와 동일하게 맞춤
+// OPENED(이미 공개됨)와 FINAL(최종 확정)이 아닐 때만 활성
+const canSave = computed(() =>
+  localGrades.value.length > 0 &&
+  currentGradeStatus.value !== 'OPENED' &&
+  currentGradeStatus.value !== 'FINAL'
+);
+
+// 제출 버튼 활성 조건: 임시저장(학생 공개, OPENED) 이후에만 활성
+const canSubmit = computed(() => currentGradeStatus.value === "OPENED");
 
 
 onMounted(async () => {
@@ -267,10 +269,12 @@ onMounted(async () => {
 });
 
 const loadGrades = async () => {
+  gradeStore.clearGrades();
+  localGrades.value = [];
   if (!selectedLectureId.value) return;
   try {
     await gradeStore.fetchGrades(selectedLectureId.value);
-    localGrades.value = JSON.parse(JSON.stringify(gradeStore.grades)); // 딥카피하여 에디트 지원
+    localGrades.value = JSON.parse(JSON.stringify(gradeStore.grades));
   } catch (error) {
     console.error("성적 조회 실패:", error);
   }

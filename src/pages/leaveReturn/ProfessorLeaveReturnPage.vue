@@ -66,7 +66,7 @@
         </div>
         <div class="info-row">
           <span class="label">신청 유형</span>
-          <span class="value font-bold">{{
+          <span class="value">{{
             formatRequestType(activeReq.requestType)
           }}</span>
         </div>
@@ -270,7 +270,6 @@ const handleProcess = async (status) => {
   padding: 4px 10px;
   border-radius: 20px;
   font-size: 0.85rem;
-  font-weight: 600;
 }
 .type-badge.leave {
   background: #fffbeb;
@@ -322,7 +321,6 @@ const handleProcess = async (status) => {
   width: 100px;
   color: #64748b;
   font-size: 0.9rem;
-  font-weight: 600;
 }
 
 .info-row .value {
@@ -347,7 +345,6 @@ const handleProcess = async (status) => {
 
 .approval-form label {
   font-size: 0.9rem;
-  font-weight: 600;
   color: #1a1f36;
 }
 
