@@ -12,6 +12,14 @@ export const loginId = (val) => {
   return "";
 };
 
+export const currentPassword = (val) => {
+  if (!val) {
+    return "현재 비밀번호 입력은 필수입니다.";
+  }
+
+  return "";
+};
+
 export const password = (val) => {
   const regex = /^[0-9a-zA-Z!@#$%^&*()]{8,20}$/;
 

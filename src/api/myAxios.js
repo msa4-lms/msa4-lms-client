@@ -92,9 +92,9 @@ myAxios.interceptors.response.use(
       // 잘못된 요청 (Validation 에러 등)
       let msg = errorData?.message || "잘못된 요청입니다.";
       if (errorData?.data && typeof errorData.data === "object") {
-        msg += "\n" + Object.values(errorData.data).join("\n");
+        msg = Object.values(errorData.data).join("\n");
       } else if (errorData?.data && errorData.data !== errorData.message) {
-        msg += "\n" + errorData.data;
+        msg = errorData.data;
       }
       if (!suppressErrorAlert) {
         alert(msg);

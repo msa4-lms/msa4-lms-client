@@ -11,6 +11,7 @@ const authStore = useAuthStore();
 const router = useRouter();
 
 const passwordChangeData = reactive({
+  currentPassword: "",
   newPassword: "",
   confirmPassword: "",
 });
@@ -21,12 +22,14 @@ const openPasswordModal = () => {
 
 const closePasswordModal = () => {
   isPasswordModalOpen.value = false;
+  passwordChangeData.currentPassword = "";
   passwordChangeData.newPassword = "";
   passwordChangeData.confirmPassword = "";
 };
 
 const updatePassword = async () => {
   const validationList = [
+    passwordChangeValidator.currentPassword(passwordChangeData.currentPassword),
     passwordChangeValidator.newPassword(passwordChangeData.newPassword),
     passwordChangeValidator.confirmPassword(
       passwordChangeData.newPassword,
@@ -66,6 +69,12 @@ const updatePassword = async () => {
   <div v-if="isPasswordModalOpen" class="modal-backdrop">
     <form class="modal-box" @submit.prevent="updatePassword">
       <h2>비밀번호 변경</h2>
+
+      <MyInput
+        v-model="passwordChangeData.currentPassword"
+        type="password"
+        placeholder="현재 비밀번호"
+      />
 
       <MyInput
         v-model="passwordChangeData.newPassword"

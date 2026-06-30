@@ -2,7 +2,6 @@
 import { computed, onMounted } from "vue";
 import { useProfileStore } from "../../store/profile/useProfileStore";
 import PasswordChange from "./PasswordChange.vue";
-import MyInput from "../../components/input/MyInput.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 
 const profileStore = useProfileStore();

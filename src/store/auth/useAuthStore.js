@@ -14,7 +14,7 @@ export const useAuthStore = defineStore("authStore", () => {
     isLoggedIn.value = false;
     accessToken.value = "";
     userInfo.value = null;
-    
+
     // 로그아웃 시 남아있는 탭 비우기
     const tabStore = useTabStore();
     tabStore.clearTabs();
@@ -85,7 +85,7 @@ export const useAuthStore = defineStore("authStore", () => {
     try {
       const url = "/api/auth/password";
 
-      await myAxios.post(url, data);
+      await myAxios.patch(url, data);
 
       return;
     } catch (error) {
