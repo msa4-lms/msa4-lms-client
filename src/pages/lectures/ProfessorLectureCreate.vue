@@ -17,7 +17,6 @@ const form = reactive({
   newCourseCredits: 3,
   newCourseTargetGrade: 1,
   newCourseCompletionType: "GENERAL_ELECTIVE",
-  sectionNo: "01",
   capacity: 40,
   classroom: "",
   syllabus: "",
@@ -180,7 +179,6 @@ const handleSubmit = async () => {
       newCourseCredits: 3,
       newCourseTargetGrade: 1,
       newCourseCompletionType: "GENERAL_ELECTIVE",
-      sectionNo: "01",
       capacity: 40,
       classroom: "",
       syllabus: "",
@@ -338,21 +336,6 @@ const handleSubmit = async () => {
               </div>
 
               <div class="form-group">
-                <label for="sectionNo">분반 번호</label>
-                <select
-                  id="sectionNo"
-                  v-model="form.sectionNo"
-                  required
-                  class="form-input select-day"
-                >
-                  <option value="01">01 분반</option>
-                  <option value="02">02 분반</option>
-                  <option value="03">03 분반</option>
-                  <option value="04">04 분반</option>
-                </select>
-              </div>
-
-              <div class="form-group">
                 <label for="capacity">수강 정원 (명)</label>
                 <MyInput
                   type="number"
@@ -364,7 +347,7 @@ const handleSubmit = async () => {
                 />
               </div>
 
-              <div class="form-group full-width">
+              <div class="form-group">
                 <label for="classroom">강의실</label>
                 <MyInput
                   type="text"
