@@ -282,19 +282,8 @@ onMounted(async () => {
     </MySearchFilter>
 
     <section class="grade-section">
-      <div class="common-section-header">
-        <div>
-          <h3>수강생 성적 정정</h3>
-        </div>
-        <MyButton
-          color="deep-blue"
-          size="middle"
-          content="변경사항 저장"
-          :disabled="isSaving || !hasChanges || hasValidationError"
-          @click="saveCorrections"
-        />
-      </div>
-
+      <h3>수강생 성적 정정</h3>
+      
       <div v-if="hasValidationError" class="validation-alert">
         점수는 0점 이상 100점 이하로 입력해 주세요.
       </div>
@@ -366,8 +355,18 @@ onMounted(async () => {
           {{ changedCount }}명의 성적이 변경되었습니다.
         </div>
       </div>
+      <div class="common-section-header save-bar">
+        <MyButton
+          color="deep-blue"
+          size="middle"
+          content="변경사항 저장"
+          :disabled="isSaving || !hasChanges || hasValidationError"
+          @click="saveCorrections"
+        />
+      </div>
     </section>
   </MyPageContainer>
+
 </template>
 
 <style scoped>
@@ -380,6 +379,10 @@ onMounted(async () => {
   background: #fff;
   color: #1a1f36;
   font-size: 0.9rem;
+}
+
+.save-bar {
+  justify-content: flex-end;
 }
 
 .lecture-info {
@@ -555,8 +558,8 @@ onMounted(async () => {
 
 @media (max-width: 720px) {
   .common-section-header {
-    align-items: flex-start;
-    flex-direction: column;
+    align-items: flex-end;
+    justify-content: flex-end;
   }
 
   .form-select {

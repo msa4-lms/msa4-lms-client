@@ -30,26 +30,8 @@
     </div>
 
     <!-- 성적 관리 테이블 섹션 (하단 카드) -->
-    <div class="common-section-header">
-      <h3>수강생 성적 입력</h3>
-      <div class="control-buttons">
-        <MyButton
-          color="gray"
-          size="middle"
-          content="임시저장"
-          :disabled="hasValidationError || isPublished"
-          @click="handleSave"
-        />
-        <MyButton
-          color="deep-blue"
-          size="middle"
-          content="성적 일괄 제출"
-          :disabled="hasValidationError || isFinalized"
-          @click="handleSubmitGrades"
-        />
-      </div>
-    </div>
-
+    <h3>수강생 성적 입력</h3>
+    
     <div v-if="hasValidationError" class="validation-error-alert">
       입력된 성적 중 0점 미만이거나 100점을 초과한 점수가 존재합니다. (0 ~
       100점 사이로 정상 입력하셔야 저장이 가능합니다.)
@@ -134,6 +116,25 @@
         </td>
       </tr>
     </MyTable>
+
+    <div class="common-section-header">
+      <div class="control-buttons">
+        <MyButton
+          color="gray"
+          size="middle"
+          content="임시저장"
+          :disabled="hasValidationError || isPublished"
+          @click="handleSave"
+        />
+        <MyButton
+          color="deep-blue"
+          size="middle"
+          content="성적 일괄 제출"
+          :disabled="hasValidationError || isFinalized"
+          @click="handleSubmitGrades"
+        />
+      </div>
+    </div>
 
   </MyPageContainer>
 </template>
@@ -601,5 +602,10 @@ const handleSubmitGrades = async () => {
   gap: 8px;
   border-top: 1px solid #edf2f7;
   padding-top: 16px;
+}
+
+.common-section-header{
+  display: flex;
+  justify-content: end;
 }
 </style>
