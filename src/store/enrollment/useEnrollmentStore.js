@@ -1,6 +1,7 @@
 import { defineStore } from "pinia";
 import { ref } from "vue";
 import myAxios from "../../api/myAxios";
+import { notify, confirmDialog } from "../../composables/useDialog";
 
 export const useEnrollmentStore = defineStore("enrollment", () => {
   const myEnrollments = ref([]); // 수강 신청 과목 리스트
@@ -40,7 +41,7 @@ export const useEnrollmentStore = defineStore("enrollment", () => {
         lectureId,
       });
       if (res.data.code === "00") {
-        alert("수강 신청이 완료되었습니다.");
+        notify("수강 신청이 완료되었습니다.");
         await fetchMyEnrollments(
           currentViewYear.value,
           currentViewSemester.value
@@ -52,14 +53,14 @@ export const useEnrollmentStore = defineStore("enrollment", () => {
   };
 
   const cancelEnrollment = async (lectureId) => {
-    if (!confirm("정말 수강을 취소하시겠습니까?")) return;
+    if (!(await confirmDialog("정말 수강을 취소하시겠습니까?"))) return;
 
     try {
       const res = await myAxios.delete("/api/student/enrollments", {
         params: { lectureId },
       });
       if (res.data.code === "00") {
-        alert("수강 취소가 완료되었습니다.");
+        notify("수강 취소가 완료되었습니다.");
         await fetchMyEnrollments(
           currentViewYear.value,
           currentViewSemester.value
@@ -67,7 +68,7 @@ export const useEnrollmentStore = defineStore("enrollment", () => {
       }
     } catch (error) {
       console.error("수강 취소 실패:", error);
-      alert("수강 취소에 실패했습니다.");
+      notify("수강 취소에 실패했습니다.");
     }
   };
 

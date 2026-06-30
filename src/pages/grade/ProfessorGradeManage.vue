@@ -143,6 +143,7 @@ import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
+import { notify, confirmDialog } from "../../composables/useDialog";
 const gradeStore = useGradeProfessorStore();
 
 const selectedLectureId = ref(null);
@@ -256,7 +257,7 @@ onMounted(async () => {
   try {
     await gradeStore.getLectures();
   } catch (error) {
-    alert("개설 강좌를 불러오는 데 실패했습니다.");
+    notify("개설 강좌를 불러오는 데 실패했습니다.");
   }
 });
 
@@ -266,7 +267,7 @@ const loadGrades = async () => {
     await gradeStore.fetchGrades(selectedLectureId.value);
     localGrades.value = JSON.parse(JSON.stringify(gradeStore.grades)); // 딥카피하여 에디트 지원
   } catch (error) {
-    alert("성적 정보를 불러오는 데 실패했습니다.");
+    notify("성적 정보를 불러오는 데 실패했습니다.");
   }
 };
 
@@ -314,7 +315,7 @@ const handleSave = async () => {
       (g.attendanceScore !== null &&
         (g.attendanceScore < 0 || g.attendanceScore > 100))
     ) {
-      alert("성적 점수는 0점 이상 100점 이하로만 입력 가능합니다.");
+      notify("성적 점수는 0점 이상 100점 이하로만 입력 가능합니다.");
       return;
     }
   }
@@ -329,10 +330,10 @@ const handleSave = async () => {
 
   try {
     await gradeStore.saveGrades(selectedLectureId.value, payload);
-    alert("성적이 정상적으로 임시저장되었습니다.");
+    notify("성적이 정상적으로 임시저장되었습니다.");
     await loadGrades();
   } catch (error) {
-    alert(error.response?.data?.message || "성적 저장 중 오류가 발생했습니다.");
+    notify(error.response?.data?.message || "성적 저장 중 오류가 발생했습니다.");
     await loadGrades();
   }
 };
@@ -358,25 +359,25 @@ const handleSubmitGrades = async () => {
   });
 
   if (hasUnsavedChanges) {
-    alert(
+    notify(
       "수정된 성적이 있습니다. 먼저 [임시저장]을 눌러 변경사항을 저장한 후 제출해주세요."
     );
     return;
   }
 
   if (
-    !confirm(
+    !(await confirmDialog(
       "성적을 최종 제출하시겠습니까? 제출 후에는 성적 입력과 정정이 모두 불가능합니다."
-    )
+    ))
   )
     return;
 
   try {
     await gradeStore.updateGradesStatus(selectedLectureId.value, "FINAL");
-    alert("성적 일괄 제출 완료");
+    notify("성적 일괄 제출 완료");
     await loadGrades();
   } catch (error) {
-    alert(error.response?.data?.message || "성적 제출 중 오류가 발생했습니다.");
+    notify(error.response?.data?.message || "성적 제출 중 오류가 발생했습니다.");
     await loadGrades();
   }
 };

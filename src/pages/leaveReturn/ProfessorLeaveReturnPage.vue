@@ -144,6 +144,7 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyModal from "../../components/common/MyModal.vue";
 import myAxios from "../../api/myAxios";
 import { useLeaveReturnStore } from "../../store/leaveReturn/useLeaveReturnStore";
+import { notify, confirmDialog } from "../../composables/useDialog";
 
 defineOptions({ name: "ProfessorLeaveReturnPage" });
 
@@ -195,7 +196,7 @@ const openAttachment = async (request) => {
     URL.revokeObjectURL(blobUrl);
   } catch (error) {
     console.error("첨부파일 다운로드 실패:", error);
-    alert("첨부파일 다운로드에 실패했습니다.");
+    notify("첨부파일 다운로드에 실패했습니다.");
   }
 };
 
@@ -230,25 +231,25 @@ const closeModal = () => {
 
 const handleProcess = async (status) => {
   if (status === "REJECTED" && !rejectReason.value.trim()) {
-    alert("반려 시 반려 사유를 반드시 입력해야 합니다.");
+    notify("반려 시 반려 사유를 반드시 입력해야 합니다.");
     return;
   }
 
   const confirmMsg = status === "APPROVED"
     ? `${activeReq.value.studentName} 학생의 학적 변동 신청을 승인하시겠습니까?`
     : "해당 신청을 반려 처리하시겠습니까?";
-  if (!confirm(confirmMsg)) return;
+  if (!(await confirmDialog(confirmMsg))) return;
 
   try {
     await store.processRequest(activeReq.value.id, {
       status,
       rejectReason: status === "APPROVED" ? null : rejectReason.value,
     });
-    alert(status === "APPROVED" ? "승인 처리가 완료되었습니다." : "반려 처리가 완료되었습니다.");
+    notify(status === "APPROVED" ? "승인 처리가 완료되었습니다." : "반려 처리가 완료되었습니다.");
     closeModal();
     await store.fetchPendingRequests();
   } catch (error) {
-    alert("처리 중 오류가 발생했습니다.");
+    notify("처리 중 오류가 발생했습니다.");
   }
 };
 </script>

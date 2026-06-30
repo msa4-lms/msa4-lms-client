@@ -3,6 +3,7 @@ import { useRoute } from "vue-router";
 import Header from "./components/layout/Header.vue";
 import SideBar from "./components/layout/SideBar.vue";
 import TabBar from "./components/layout/TabBar.vue";
+import AppDialog from "./components/common/AppDialog.vue";
 import { useTabStore } from "./store/tab/useTabStore";
 
 const route = useRoute();
@@ -30,6 +31,7 @@ const tabStore = useTabStore();
         </main>
       </div>
     </div>
+    <AppDialog />
   </div>
 </template>
 

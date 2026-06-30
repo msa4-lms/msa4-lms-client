@@ -7,6 +7,7 @@ import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
+import { notify, confirmDialog } from "../../composables/useDialog";
 
 const gradeStore = useGradeProfessorStore();
 
@@ -159,7 +160,7 @@ const loadGrades = async () => {
     await gradeStore.fetchGrades(selectedLectureId.value);
     editableGrades.value = gradeStore.grades.map(createEditableGrade);
   } catch (error) {
-    alert("성적 정보를 불러오는 데 실패했습니다.");
+    notify("성적 정보를 불러오는 데 실패했습니다.");
   } finally {
     isLoading.value = false;
   }
@@ -204,9 +205,9 @@ const saveCorrections = async () => {
   if (!hasChanges.value || hasValidationError.value) return;
 
   if (
-    !confirm(
+    !(await confirmDialog(
       `${changedCount.value}명의 성적을 정정하시겠습니까? 저장 후 변경된 성적이 즉시 반영됩니다.`
-    )
+    ))
   ) {
     return;
   }
@@ -225,10 +226,10 @@ const saveCorrections = async () => {
   isSaving.value = true;
   try {
     await gradeStore.correctGrades(selectedLectureId.value, gradeList);
-    alert("성적 정정이 완료되었습니다.");
+    notify("성적 정정이 완료되었습니다.");
     await loadGrades();
   } catch (error) {
-    alert("성적 정정 중 오류가 발생했습니다.");
+    notify("성적 정정 중 오류가 발생했습니다.");
   } finally {
     isSaving.value = false;
   }
@@ -238,7 +239,7 @@ onMounted(async () => {
   try {
     await gradeStore.getLectures();
   } catch (error) {
-    alert("현재 학기 강의 목록을 불러오는 데 실패했습니다.");
+    notify("현재 학기 강의 목록을 불러오는 데 실패했습니다.");
   }
 });
 </script>

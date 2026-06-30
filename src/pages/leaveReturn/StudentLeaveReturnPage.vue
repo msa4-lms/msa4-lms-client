@@ -78,6 +78,7 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useLeaveReturnStore } from "../../store/leaveReturn/useLeaveReturnStore";
+import { notify, confirmDialog } from "../../composables/useDialog";
 
 defineOptions({ name: "StudentLeaveReturnPage" });
 
@@ -213,7 +214,7 @@ const formatDate = (dateStr) => {
 
 const handleSubmit = async () => {
   if (isMilitary.value && form.value.requestType === "MILITARY_LEAVE" && !attachedFile.value) {
-    alert("군휴학 신청 시 입영통지서 첨부는 필수입니다.");
+    notify("군휴학 신청 시 입영통지서 첨부는 필수입니다.");
     return;
   }
   
@@ -222,11 +223,11 @@ const handleSubmit = async () => {
   } else if (form.value.requestType.includes('RETURN')) {
     form.value.reason = "복학";
   } else if (!form.value.reason.trim()) {
-    alert("사유를 입력해주세요.");
+    notify("사유를 입력해주세요.");
     return;
   }
   
-  if (!confirm(`${formatRequestType(form.value.requestType)} 신청을 제출하시겠습니까?`)) return;
+  if (!(await confirmDialog(`${formatRequestType(form.value.requestType)} 신청을 제출하시겠습니까?`))) return;
 
   try {
     const formData = new FormData();
@@ -235,14 +236,14 @@ const handleSubmit = async () => {
       formData.append("file", attachedFile.value);
     }
     await store.submitRequest(formData);
-    alert("신청이 완료되었습니다.");
+    notify("신청이 완료되었습니다.");
     form.value.reason = "";
     attachedFile.value = null;
     if (fileInput.value) fileInput.value.value = "";
     await store.fetchMyRequests();
   } catch (error) {
     const serverMessage = error.response?.data?.message;
-    alert(serverMessage || "신청 중 오류가 발생했습니다.");
+    notify(serverMessage || "신청 중 오류가 발생했습니다.");
   }
 };
 </script>

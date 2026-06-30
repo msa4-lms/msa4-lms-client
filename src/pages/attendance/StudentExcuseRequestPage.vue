@@ -8,6 +8,7 @@ import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import MyInput from "../../components/input/MyInput.vue";
+import { notify } from "../../composables/useDialog";
 
 const academicStore = useAttendanceStore();
 const authStore = useAuthStore();
@@ -258,7 +259,7 @@ const submitExcuse = async () => {
     !excuseForm.lectureDate ||
     !excuseForm.reason.trim()
   ) {
-    alert("과목, 날짜, 사유를 입력해주세요.");
+    notify("과목, 날짜, 사유를 입력해주세요.");
     return;
   }
 
@@ -280,7 +281,7 @@ const submitExcuse = async () => {
     excuseForm.attachmentName = "";
     excuseForm.attachmentFile = null;
     if (attachmentInput.value) attachmentInput.value.value = "";
-    alert("공결 신청이 완료되었습니다.");
+    notify("공결 신청이 완료되었습니다.");
   } catch (error) {
     console.error("공결 신청 실패:", error);
   }

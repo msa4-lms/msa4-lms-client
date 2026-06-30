@@ -9,6 +9,7 @@ const StudentLectureEnrollment = () =>
   import("../pages/enrollment/StudentLectureEnrollment.vue");
 const StudentEnrollmentList = () => import("../pages/enrollment/StudentEnrollmentList.vue");
 import { useAuthStore } from "../store/auth/useAuthStore.js";
+import { notify } from "../composables/useDialog";
 import ProfessorGradeCorrect from "../pages/grade/ProfessorGradeCorrect.vue";
 const ProfileRouter = () => import("../pages/profile/ProfileRouter.vue");
 const Dashboard = () => import("../pages/dashboard/Dashboard.vue");
@@ -159,7 +160,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.roles && to.meta.roles.length > 0) {
     const userRole = authStore.userInfo?.role;
     if (!to.meta.roles.includes(userRole)) {
-      alert("접근 권한이 없습니다.");
+      notify("접근 권한이 없습니다.");
       return next("/main");
     }
   }

@@ -7,6 +7,7 @@ import MyTable from "../../components/table/MyTable.vue";
 import MyTabs from "../../components/common/MyTabs.vue";
 import MyModal from "../../components/common/MyModal.vue";
 import myAxios from "../../api/myAxios";
+import { notify, confirmDialog } from "../../composables/useDialog";
 
 defineOptions({ name: "ProfessorExcuseApprovalPage" });
 
@@ -58,7 +59,7 @@ const attachmentName = (request) => {
 
 const openAttachment = async (request) => {
   if (!request.attachmentOriginalName) {
-    alert("기존 신청에는 실제 첨부파일이 저장되어 있지 않습니다.");
+    notify("기존 신청에는 실제 첨부파일이 저장되어 있지 않습니다.");
     return;
   }
 
@@ -111,7 +112,7 @@ const loadRequests = async () => {
 };
 
 const approveRequest = async (request) => {
-  if (!window.confirm(`${request.studentName} 학생의 공결 신청을 승인하시겠습니까?`)) return;
+  if (!(await confirmDialog(`${request.studentName} 학생의 공결 신청을 승인하시겠습니까?`))) return;
 
   await academicStore.decideExcuseRequest(request.id, {
     status: "APPROVED",
@@ -132,7 +133,7 @@ const closeRejectModal = () => {
 const rejectRequest = async () => {
   const reason = rejectReason.value.trim();
   if (!reason) {
-    alert("반려 사유를 입력해주세요.");
+    notify("반려 사유를 입력해주세요.");
     return;
   }
 

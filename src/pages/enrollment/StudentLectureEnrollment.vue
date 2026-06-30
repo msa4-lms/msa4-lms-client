@@ -11,6 +11,7 @@ import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import CollegeDepartmentSelect from "../../components/search/CollegeDepartmentSelect.vue";
 import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
+import { notify, confirmDialog } from "../../composables/useDialog";
 
 const lectureStore = useLectureStore();
 const enrollmentStore = useEnrollmentStore();
@@ -115,11 +116,11 @@ const handleCancel = async (lectureId) => {
 
 const apply = async (lectureId) => {
   if (!authStore.isLoggedIn) {
-    alert("로그인이 필요한 서비스입니다.");
+    notify("로그인이 필요한 서비스입니다.");
     return;
   }
 
-  if (!confirm("해당 강의를 수강 신청하시겠습니까?")) {
+  if (!(await confirmDialog("해당 강의를 수강 신청하시겠습니까?"))) {
     return;
   }
 

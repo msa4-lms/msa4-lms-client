@@ -70,7 +70,7 @@
                   <option value="PRESENT">출석</option>
                   <option value="LATE">지각</option>
                   <option value="ABSENT">결석</option>
-                  <option value="EXCUSED">공결</option>
+                  <option value="EXCUSED">출석인정</option>
                 </select>
               </div>
             </td>
@@ -101,6 +101,7 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import { useAttendanceStore } from "../../store/attendance/useAttendanceStore";
 import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
+import { notify } from "../../composables/useDialog";
 
 defineOptions({ name: "ProfessorAttendancePage" });
 
@@ -147,7 +148,7 @@ const loadAttendances = async () => {
       status: item.status || "ABSENT" 
     }));
   } catch (error) {
-    alert("출결 내역을 불러오는데 실패했습니다.");
+    notify("출결 내역을 불러오는데 실패했습니다.");
   }
 };
 
@@ -175,10 +176,10 @@ const handleSave = async () => {
         });
       }
     }
-    alert("출결 정보가 성공적으로 저장되었습니다.");
+    notify("출결 정보가 성공적으로 저장되었습니다.");
     await loadAttendances(); // reload to get newly created ids
   } catch (error) {
-    alert("출결 저장 중 오류가 발생했습니다.");
+    notify("출결 저장 중 오류가 발생했습니다.");
   }
 };
 </script>

@@ -2,6 +2,7 @@
 import { ref } from "vue";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import { getMenuTitle } from "../../config/menuConfig";
+import { notify } from "../../composables/useDialog";
 
 const authStore = useAuthStore();
 
@@ -22,7 +23,7 @@ const toggleMenu = (menuKey) => {
 };
 
 const alertReady = () => {
-  alert("준비 중인 서비스입니다.");
+  notify("준비 중인 서비스입니다.");
 };
 </script>
 

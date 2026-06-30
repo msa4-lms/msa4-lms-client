@@ -3,6 +3,7 @@ import { ref } from "vue";
 import router from "../../routes/router";
 import { useAuthStore } from "../auth/useAuthStore";
 import { getMenuTitle } from "../../config/menuConfig";
+import { notify } from "../../composables/useDialog";
 export const useTabStore = defineStore("tab", () => {
   const tabs = ref([]);
   const activeTab = ref("");
@@ -17,7 +18,7 @@ export const useTabStore = defineStore("tab", () => {
       activeTab.value = route.path;
     } else {
       if (tabs.value.length >= 10) {
-        alert("탭은 최대 10개까지만 열 수 있습니다.");
+        notify("탭은 최대 10개까지만 열 수 있습니다.");
         // 최대 개수 제한(10개) 초과 시 가장 오래된 탭을 제거
         tabs.value.shift();
       }

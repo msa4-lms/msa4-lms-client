@@ -5,6 +5,7 @@ import MyInput from "../../components/input/MyInput.vue";
 import { useAuthStore } from "../../store/auth/useAuthStore.js";
 import passwordChangeValidator from "../../util/validator/domain/passwordChangeValidator.js";
 import { useRouter } from "vue-router";
+import { notify } from "../../composables/useDialog";
 
 const isPasswordModalOpen = ref(false);
 const authStore = useAuthStore();
@@ -40,14 +41,14 @@ const updatePassword = async () => {
   const errorList = validationList.filter((val) => val);
 
   if (errorList.length > 0) {
-    alert(errorList.join("\n"));
+    notify(errorList.join("\n"));
 
     return;
   }
 
   try {
     await authStore.passwordChange(passwordChangeData);
-    alert("비밀번호 변경이 완료되었습니다. 다시 로그인해 주세요.");
+    notify("비밀번호 변경이 완료되었습니다. 다시 로그인해 주세요.");
 
     await authStore.logout();
 

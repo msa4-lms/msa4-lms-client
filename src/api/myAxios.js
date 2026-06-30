@@ -2,6 +2,7 @@ import axios from "axios";
 import dayjs from "dayjs";
 import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "../store/auth/useAuthStore";
+import { notify } from "../composables/useDialog";
 
 const myAxios = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "",
@@ -79,14 +80,14 @@ myAxios.interceptors.response.use(
     if (status === 401) {
       // 인증 실패/세션 만료 → 로그아웃 후 로그인 화면으로
       if (!suppressErrorAlert) {
-        alert(errorData?.data || "세션이 만료되었습니다. 다시 로그인해주세요.");
+        notify(errorData?.data || "세션이 만료되었습니다. 다시 로그인해주세요.");
       }
       authStore.clearAuthStore();
       window.location.href = "/";
     } else if (status === 403) {
       // 권한 없는 요청 → 세션은 유지하고 안내만 표시
       if (!suppressErrorAlert) {
-        alert(errorData?.data || "접근 권한이 없습니다.");
+        notify(errorData?.data || "접근 권한이 없습니다.");
       }
     } else if (status === 400) {
       // 잘못된 요청 (Validation 에러 등)
@@ -97,13 +98,13 @@ myAxios.interceptors.response.use(
         msg = errorData.data;
       }
       if (!suppressErrorAlert) {
-        alert(msg);
+        notify(msg);
       }
     } else if (status === 500) {
       // 서버 에러 - 백엔드에서 보낸 상세 에러가 있다면 표시
       const detailMsg = errorData?.data || "서버 내부 오류가 발생했습니다.";
       if (!suppressErrorAlert) {
-        alert(`서버 오류: ${detailMsg}\n잠시 후 다시 시도해주세요.`);
+        notify(`서버 오류: ${detailMsg}\n잠시 후 다시 시도해주세요.`);
       }
     } else {
       // 네트워크 에러 등 기타 상황

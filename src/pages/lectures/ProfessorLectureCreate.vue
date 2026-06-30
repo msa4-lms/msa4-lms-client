@@ -5,6 +5,7 @@ import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
+import { notify } from "../../composables/useDialog";
 
 const router = useRouter();
 const lectureProfessorStore = useLectureProfessorStore();
@@ -78,7 +79,7 @@ const handlePastLectureSelect = () => {
     if (parsedSchedules.length > 0) {
       form.schedules = parsedSchedules;
     }
-    alert(
+    notify(
       "과거 강의 정보를 성공적으로 불러왔습니다. 필요한 경우 과목을 변경하실 수 있습니다."
     );
   }
@@ -135,7 +136,7 @@ const isFormSubmitable = computed(
 
 const addSchedule = () => {
   if (tempSchedule.startPeriod > tempSchedule.endPeriod) {
-    alert("시작 교시는 종료 교시보다 클 수 없습니다.");
+    notify("시작 교시는 종료 교시보다 클 수 없습니다.");
     return;
   }
   // 추가
@@ -159,17 +160,17 @@ const getDayLabel = (day) => {
 
 const handleSubmit = async () => {
   if (!isRatioValid.value) {
-    alert("성적 비율의 합계가 100%여야 합니다.");
+    notify("성적 비율의 합계가 100%여야 합니다.");
     return;
   }
   if (form.schedules.length === 0) {
-    alert("최소 1개 이상의 강의 시간표를 입력해 주세요.");
+    notify("최소 1개 이상의 강의 시간표를 입력해 주세요.");
     return;
   }
 
   try {
     await lectureProfessorStore.createLecture({ ...form });
-    alert("강의 개설 신청이 정상 처리되었습니다.");
+    notify("강의 개설 신청이 정상 처리되었습니다.");
     
     // 페이지 이동 대신 폼 데이터 초기화
     Object.assign(form, {
@@ -192,7 +193,7 @@ const handleSubmit = async () => {
     selectedPastLectureId.value = "";
     
   } catch (error) {
-    alert(
+    notify(
       error.response?.data?.message || "강의 개설 신청 중 오류가 발생했습니다."
     );
   }
