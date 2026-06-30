@@ -148,7 +148,7 @@ const loadAttendances = async () => {
       status: item.status || "ABSENT" 
     }));
   } catch (error) {
-    notify("출결 내역을 불러오는데 실패했습니다.");
+    console.error("출결 내역 조회 실패:", error);
   }
 };
 
@@ -179,7 +179,7 @@ const handleSave = async () => {
     notify("출결 정보가 성공적으로 저장되었습니다.");
     await loadAttendances(); // reload to get newly created ids
   } catch (error) {
-    notify("출결 저장 중 오류가 발생했습니다.");
+    console.error("출결 저장 실패:", error);
   }
 };
 </script>

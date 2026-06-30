@@ -257,7 +257,7 @@ onMounted(async () => {
   try {
     await gradeStore.getLectures();
   } catch (error) {
-    notify("개설 강좌를 불러오는 데 실패했습니다.");
+    console.error("개설 강좌 조회 실패:", error);
   }
 });
 
@@ -267,7 +267,7 @@ const loadGrades = async () => {
     await gradeStore.fetchGrades(selectedLectureId.value);
     localGrades.value = JSON.parse(JSON.stringify(gradeStore.grades)); // 딥카피하여 에디트 지원
   } catch (error) {
-    notify("성적 정보를 불러오는 데 실패했습니다.");
+    console.error("성적 조회 실패:", error);
   }
 };
 
@@ -333,7 +333,7 @@ const handleSave = async () => {
     notify("성적이 정상적으로 임시저장되었습니다.");
     await loadGrades();
   } catch (error) {
-    notify(error.response?.data?.message || "성적 저장 중 오류가 발생했습니다.");
+    console.error("성적 저장 실패:", error);
     await loadGrades();
   }
 };
@@ -377,7 +377,7 @@ const handleSubmitGrades = async () => {
     notify("성적 일괄 제출 완료");
     await loadGrades();
   } catch (error) {
-    notify(error.response?.data?.message || "성적 제출 중 오류가 발생했습니다.");
+    console.error("성적 제출 실패:", error);
     await loadGrades();
   }
 };

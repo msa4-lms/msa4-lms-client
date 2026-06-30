@@ -68,7 +68,6 @@ export const useEnrollmentStore = defineStore("enrollment", () => {
       }
     } catch (error) {
       console.error("수강 취소 실패:", error);
-      notify("수강 취소에 실패했습니다.");
     }
   };
 

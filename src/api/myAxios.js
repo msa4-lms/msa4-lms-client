@@ -65,7 +65,7 @@ myAxios.interceptors.response.use(
     // 200번대 응답은 그대로 반환
     return response;
   },
-  (error) => {
+  async (error) => {
     const authStore = useAuthStore();
     const status = error.response ? error.response.status : null;
     const errorData = error.response ? error.response.data : null;
@@ -77,37 +77,36 @@ myAxios.interceptors.response.use(
       return Promise.reject(error);
     }
 
+    const isBlobResponse = error.config?.responseType === "blob";
+
+    // 백엔드 GlobalRes(code/message/data)에서 사용자용 메시지 추출
+    const buildMessage = () => {
+      if (errorData && typeof errorData.data === "object" && errorData.data !== null) {
+        // 필드 검증 에러(E21) 등: 값들을 줄바꿈으로 합침
+        return Object.values(errorData.data).join("\n");
+      }
+      if (errorData?.message) return errorData.message;
+      if (typeof errorData?.data === "string") return errorData.data;
+      if (status && status >= 500) return "서버 오류가 발생했습니다. 잠시 후 다시 시도해주세요.";
+      return "요청을 처리하지 못했습니다.";
+    };
+
+    // blob 다운로드 등은 에러 본문이 JSON이 아니므로 인터셉터에서 알리지 않고 호출부에 위임
+    const canAlert = !suppressErrorAlert && !isBlobResponse;
+
     if (status === 401) {
       // 인증 실패/세션 만료 → 로그아웃 후 로그인 화면으로
-      if (!suppressErrorAlert) {
-        notify(errorData?.data || "세션이 만료되었습니다. 다시 로그인해주세요.");
+      if (canAlert) {
+        await notify(errorData?.message || "세션이 만료되었습니다. 다시 로그인해주세요.");
       }
       authStore.clearAuthStore();
       window.location.href = "/";
-    } else if (status === 403) {
-      // 권한 없는 요청 → 세션은 유지하고 안내만 표시
-      if (!suppressErrorAlert) {
-        notify(errorData?.data || "접근 권한이 없습니다.");
-      }
-    } else if (status === 400) {
-      // 잘못된 요청 (Validation 에러 등)
-      let msg = errorData?.message || "잘못된 요청입니다.";
-      if (errorData?.data && typeof errorData.data === "object") {
-        msg = Object.values(errorData.data).join("\n");
-      } else if (errorData?.data && errorData.data !== errorData.message) {
-        msg = errorData.data;
-      }
-      if (!suppressErrorAlert) {
-        notify(msg);
-      }
-    } else if (status === 500) {
-      // 서버 에러 - 백엔드에서 보낸 상세 에러가 있다면 표시
-      const detailMsg = errorData?.data || "서버 내부 오류가 발생했습니다.";
-      if (!suppressErrorAlert) {
-        notify(`서버 오류: ${detailMsg}\n잠시 후 다시 시도해주세요.`);
-      }
+    } else if (error.response) {
+      // 그 외 모든 에러 응답(403/404/409/413/500 등): 백엔드 메시지로 일원화
+      if (canAlert) await notify(buildMessage());
     } else {
-      // 네트워크 에러 등 기타 상황
+      // 응답 없음(네트워크/타임아웃 등)
+      if (canAlert) await notify("네트워크 연결을 확인해주세요. 잠시 후 다시 시도해주세요.");
       console.error("API 통신 에러:", error);
     }
 

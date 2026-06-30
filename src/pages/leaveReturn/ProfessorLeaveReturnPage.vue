@@ -249,7 +249,7 @@ const handleProcess = async (status) => {
     closeModal();
     await store.fetchPendingRequests();
   } catch (error) {
-    notify("처리 중 오류가 발생했습니다.");
+    console.error("학적 변동 처리 실패:", error);
   }
 };
 </script>

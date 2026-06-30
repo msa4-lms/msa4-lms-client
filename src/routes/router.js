@@ -160,7 +160,7 @@ router.beforeEach(async (to, from, next) => {
   if (to.meta.roles && to.meta.roles.length > 0) {
     const userRole = authStore.userInfo?.role;
     if (!to.meta.roles.includes(userRole)) {
-      notify("접근 권한이 없습니다.");
+      await notify("접근 권한이 없습니다.");
       return next("/main");
     }
   }

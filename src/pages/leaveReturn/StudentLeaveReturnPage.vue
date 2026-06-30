@@ -242,8 +242,7 @@ const handleSubmit = async () => {
     if (fileInput.value) fileInput.value.value = "";
     await store.fetchMyRequests();
   } catch (error) {
-    const serverMessage = error.response?.data?.message;
-    notify(serverMessage || "신청 중 오류가 발생했습니다.");
+    console.error("학적 변동 신청 실패:", error);
   }
 };
 </script>

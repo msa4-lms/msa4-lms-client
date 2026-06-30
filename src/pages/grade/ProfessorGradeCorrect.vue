@@ -160,7 +160,7 @@ const loadGrades = async () => {
     await gradeStore.fetchGrades(selectedLectureId.value);
     editableGrades.value = gradeStore.grades.map(createEditableGrade);
   } catch (error) {
-    notify("성적 정보를 불러오는 데 실패했습니다.");
+    console.error("성적 조회 실패:", error);
   } finally {
     isLoading.value = false;
   }
@@ -229,7 +229,7 @@ const saveCorrections = async () => {
     notify("성적 정정이 완료되었습니다.");
     await loadGrades();
   } catch (error) {
-    notify("성적 정정 중 오류가 발생했습니다.");
+    console.error("성적 정정 실패:", error);
   } finally {
     isSaving.value = false;
   }
@@ -239,7 +239,7 @@ onMounted(async () => {
   try {
     await gradeStore.getLectures();
   } catch (error) {
-    notify("현재 학기 강의 목록을 불러오는 데 실패했습니다.");
+    console.error("강의 목록 조회 실패:", error);
   }
 });
 </script>

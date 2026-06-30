@@ -41,14 +41,14 @@ const updatePassword = async () => {
   const errorList = validationList.filter((val) => val);
 
   if (errorList.length > 0) {
-    notify(errorList.join("\n"));
+    await notify(errorList.join("\n"));
 
     return;
   }
 
   try {
     await authStore.passwordChange(passwordChangeData);
-    notify("비밀번호 변경이 완료되었습니다. 다시 로그인해 주세요.");
+    await notify("비밀번호 변경이 완료되었습니다. 다시 로그인해 주세요.");
 
     await authStore.logout();
 

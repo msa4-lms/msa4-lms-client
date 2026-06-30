@@ -193,9 +193,7 @@ const handleSubmit = async () => {
     selectedPastLectureId.value = "";
     
   } catch (error) {
-    notify(
-      error.response?.data?.message || "강의 개설 신청 중 오류가 발생했습니다."
-    );
+    console.error("강의 개설 신청 실패:", error);
   }
 };
 </script>
