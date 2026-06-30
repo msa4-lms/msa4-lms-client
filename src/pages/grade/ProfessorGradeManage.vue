@@ -37,14 +37,14 @@
           color="gray"
           size="middle"
           content="임시저장"
-          :disabled="hasValidationError || isAllSubmitted"
+          :disabled="hasValidationError || isPublished"
           @click="handleSave"
         />
         <MyButton
           color="deep-blue"
           size="middle"
           content="성적 일괄 제출"
-          :disabled="hasValidationError || isAllSubmitted"
+          :disabled="hasValidationError || isFinalized"
           @click="handleSubmitGrades"
         />
       </div>
@@ -68,7 +68,7 @@
             <MyInput
               type="text"
               :modelValue="g.midtermScore"
-              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              :disabled="g.status !== 'DRAFT'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'midtermScore')"
             />
@@ -82,7 +82,7 @@
             <MyInput
               type="text"
               :modelValue="g.finalScore"
-              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              :disabled="g.status !== 'DRAFT'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'finalScore')"
             />
@@ -96,7 +96,7 @@
             <MyInput
               type="text"
               :modelValue="g.assignmentScore"
-              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              :disabled="g.status !== 'DRAFT'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'assignmentScore')"
             />
@@ -110,7 +110,7 @@
             <MyInput
               type="text"
               :modelValue="g.attendanceScore"
-              :disabled="g.status !== 'DRAFT' || isGradeSaved(g)"
+              :disabled="g.status !== 'DRAFT'"
               class="table-input"
               @input="(e) => handleStrictInput(e, g, 'attendanceScore')"
             />
@@ -125,11 +125,7 @@
         </td>
         <td>
           <StatusBadge
-            :status="
-              g.status === 'DRAFT' && !isGradeSaved(g)
-                ? 'UNENTERED'
-                : g.status
-            "
+            :status="g.status === 'DRAFT' ? 'UNENTERED' : g.status"
           />
         </td>
       </tr>
@@ -152,19 +148,6 @@ const gradeStore = useGradeProfessorStore();
 const selectedLectureId = ref(null);
 const localGrades = ref([]);
 
-
-// 기존 DB에 성적이 하나라도 입력된 적 있는지 확인 (임시저장 후 잠금 판별용)
-const isGradeSaved = (g) => {
-  if (!gradeStore.grades) return false;
-  const originalG = gradeStore.grades.find((og) => og.id === g.id);
-  if (!originalG) return false;
-  return (
-    originalG.midtermScore !== null ||
-    originalG.finalScore !== null ||
-    originalG.assignmentScore !== null ||
-    originalG.attendanceScore !== null
-  );
-};
 
 // 성적 입력 시 즉각적인 100점 제한 및 3자리수 제한 로직
 const handleStrictInput = (event, obj, field) => {
@@ -254,9 +237,18 @@ const hasValidationError = computed(() => {
   );
 });
 
-const isAllSubmitted = computed(() => {
+// 임시저장(공개) 이후 상태 - 성적 입력 및 임시저장 잠금 판별
+const isPublished = computed(() => {
   if (localGrades.value.length === 0) return false;
-  return localGrades.value.every((g) => g.status && g.status !== "DRAFT");
+  return localGrades.value.every(
+    (g) => g.status === "OPENED" || g.status === "FINAL"
+  );
+});
+
+// 최종 제출(확정) 상태 - 입력/임시저장/정정 모두 잠금 판별
+const isFinalized = computed(() => {
+  if (localGrades.value.length === 0) return false;
+  return localGrades.value.every((g) => g.status === "FINAL");
 });
 
 
@@ -374,13 +366,13 @@ const handleSubmitGrades = async () => {
 
   if (
     !confirm(
-      "성적을 최종 제출하시겠습니까? 제출 후 학생 공개 여부 결정 전까지만 수정 가능합니다."
+      "성적을 최종 제출하시겠습니까? 제출 후에는 성적 입력과 정정이 모두 불가능합니다."
     )
   )
     return;
 
   try {
-    await gradeStore.updateGradesStatus(selectedLectureId.value, "SUBMITTED");
+    await gradeStore.updateGradesStatus(selectedLectureId.value, "FINAL");
     alert("성적 일괄 제출 완료");
     await loadGrades();
   } catch (error) {

@@ -118,26 +118,13 @@ const resolvedGrade = (grade) => {
 const displayScore = (score) =>
   score === null || score === undefined || score === "" ? "-" : score;
 
-const hasSavedScore = (grade) =>
-  scoreFields.some(
-    (field) =>
-      grade[field.key] !== null &&
-      grade[field.key] !== undefined &&
-      grade[field.key] !== ""
-  );
+const displayStatus = (grade) =>
+  grade.status === "OPENED" || grade.status === "FINAL"
+    ? grade.status
+    : "UNENTERED";
 
-const displayStatus = (grade) => {
-  if ((grade.status === "DRAFT" || !grade.status) && !hasSavedScore(grade)) {
-    return "UNENTERED";
-  }
-  return grade.status || "DRAFT";
-};
-
-const isUnentered = (grade) => displayStatus(grade) === "UNENTERED";
-
-const canCorrect = (grade) =>
-  !isUnentered(grade) &&
-  (grade.status === "DRAFT" || (!grade.status && hasSavedScore(grade)));
+// 학생에게 공개된(OPENED) 성적만 정정 가능. 미입력(DRAFT)/최종확정(FINAL)은 정정 불가.
+const canCorrect = (grade) => grade.status === "OPENED";
 
 const termLabel = (term) => {
   if (term === "FIRST" || term === 1 || term === "1") return "1학기";
