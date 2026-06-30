@@ -5,21 +5,26 @@ import myAxios from "../../api/myAxios";
 export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
   const grades = ref([]);
   const lectures = ref([]);
+  const gradeStatus = ref(null); // null | 'DRAFT' | 'OPENED' | 'FINAL'
 
-  // 특정 강좌의 수강생 성적 조회
   const fetchGrades = async (lectureId) => {
     try {
       const res = await myAxios.get(
         `/api/professor/grades/lectures/${lectureId}`
       );
       grades.value = res.data.data;
+      gradeStatus.value = grades.value.length > 0 ? grades.value[0].status : null;
     } catch (error) {
       console.error("수강생 성적 조회 실패:", error);
       throw error;
     }
   };
 
-  // 성적 임시 저장
+  const clearGrades = () => {
+    grades.value = [];
+    gradeStatus.value = null;
+  };
+
   const saveGrades = async (lectureId, gradeList) => {
     try {
       await myAxios.put(`/api/professor/grades/lectures/${lectureId}`, {
@@ -31,7 +36,6 @@ export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
     }
   };
 
-  // 기존 점수 또는 최종 등급 정정
   const correctGrades = async (lectureId, correctionList) => {
     try {
       await myAxios.patch(`/api/professor/grades/lectures/${lectureId}/correction`, {
@@ -43,7 +47,6 @@ export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
     }
   };
 
-  // 성적 상태 변경 (DRAFT -> SUBMITTED, SUBMITTED -> OPENED 등)
   const updateGradesStatus = async (lectureId, status) => {
     try {
       await myAxios.patch(
@@ -55,8 +58,6 @@ export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
     }
   };
 
-
-  // 교수 현재 강의 조회
   const getLectures = async () => {
     try {
       const url = "/api/professor/grades/lectures";
@@ -75,7 +76,9 @@ export const useGradeProfessorStore = defineStore("gradeProfessor", () => {
   return {
     grades,
     lectures,
+    gradeStatus,
     fetchGrades,
+    clearGrades,
     saveGrades,
     correctGrades,
     updateGradesStatus,

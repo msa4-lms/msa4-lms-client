@@ -279,7 +279,6 @@ const handleSubmit = async () => {
 
 .form-group label {
   font-size: 0.9rem;
-  font-weight: 600;
   color: #4f566b;
 }
 
