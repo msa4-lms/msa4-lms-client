@@ -1,7 +1,18 @@
 :root {
-  --primary-color: #4f46e5;
+  --primary-color: #0b3d91;
+  --secondary-blue: #2563eb;
+  --accent-color: #60a5fa;
   --secondary-color: #64748b;
   --bg-color: #f8fafc;
+  --personal-color-gray: #b1b1b1;
+  --personal-color-white: #ffffff;
+  --personal-color-black: #000000;
+  --personal-color-red: #ef4444;
+  --personal-color-green: #3a9d4f;
+  --primary-text-color: #1a1f36;
+  --secondary-text-color: #263244;
+  color-scheme: light;
+  font-synthesis: none;
 }
 
 * {
@@ -12,5 +23,46 @@
 
 body {
   background-color: var(--bg-color);
-  font-family: 'Pretendard', sans-serif;
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+  -webkit-font-smoothing: antialiased;
 }
+
+button,
+input {
+  font: inherit;
+}
+
+.page-header {
+  margin-bottom: 24px;
+}
+.page-header h2 {
+  color: #1a1f36;
+  font-size: 1.5rem;
+}
+
+.summary-card {
+  background-color: #ffffff;
+  padding: 15px;
+  border-radius: 8px;
+  margin-bottom: 15px;
+  border-left: 5px solid #0b3d91;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+textarea {
+  font-family: Pretendard, "Noto Sans KR", "Apple SD Gothic Neo", sans-serif;
+}
+
+.common-section-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 5px;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.common-section-header h3 {
+  color: #1a1f36;
+}
+
