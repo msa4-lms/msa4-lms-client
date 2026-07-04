@@ -3,6 +3,7 @@ import { computed, onMounted, ref } from "vue";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import { useEnrollmentStore } from "../../store/enrollment/useEnrollmentStore";
 import { useLectureStore } from "../../store/lecture/useLectureStore";
+import { getCurrentSemester } from "../../constants/semester";
 import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import MyPagination from "../../components/pagination/MyPagination.vue";
@@ -17,14 +18,18 @@ const lectureStore = useLectureStore();
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
 
+const now = new Date();
+const currentYear = now.getFullYear();
+const currentSemester = getCurrentSemester(now);
+
 const searchParams = ref({
   courseName: "",
   professorName: "",
   departmentName: "",
   collegeName: "",
   targetGrade: "",
-  year: 2026,
-  semester: 1,
+  year: currentYear,
+  semester: currentSemester,
   page: 1,
   size: 10,
 });

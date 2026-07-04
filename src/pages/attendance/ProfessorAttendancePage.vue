@@ -27,7 +27,7 @@
           class="form-input"
         />
       </div>
-      
+
       <div v-if="selectedLectureId" class="current-semester-info">
         <span class="label">강의 정보</span>
         <span class="value">
@@ -92,6 +92,7 @@
 
 <script setup>
 import { ref, computed, onMounted } from "vue";
+import { getCurrentSemesterLabel } from "../../constants/semester";
 import { getMenuTitle } from "../../config/menuConfig";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
@@ -114,7 +115,7 @@ const selectedDate = ref(new Date().toISOString().split("T")[0]);
 const localAttendances = ref([]);
 
 const currentYear = computed(() => new Date().getFullYear());
-const currentTerm = computed(() => new Date().getMonth() + 1 <= 6 ? "1학기" : "2학기");
+const currentTerm = computed(() => getCurrentSemesterLabel());
 
 const currentLecture = computed(() => {
   return lectures.value.find((l) => l.id === selectedLectureId.value);
@@ -142,10 +143,10 @@ const loadAttendances = async () => {
       selectedDate.value
     );
     // clone data for local editing, preserving original status and defaulting empty status to ABSENT
-    localAttendances.value = (data || []).map((item) => ({ 
-      ...item, 
-      originalStatus: item.status, 
-      status: item.status || "ABSENT" 
+    localAttendances.value = (data || []).map((item) => ({
+      ...item,
+      originalStatus: item.status,
+      status: item.status || "ABSENT"
     }));
   } catch (error) {
     console.error("출결 내역 조회 실패:", error);

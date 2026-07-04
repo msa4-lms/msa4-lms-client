@@ -42,7 +42,7 @@ onUnmounted(() => {
           <h2>{{ title }}</h2>
         </slot>
       </div>
-      
+
       <div class="modal-body">
         <slot></slot>
       </div>

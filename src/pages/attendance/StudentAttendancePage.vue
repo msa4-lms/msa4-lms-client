@@ -3,6 +3,7 @@ import { computed, onMounted, reactive, ref } from "vue";
 import myAxios from "../../api/myAxios";
 import { useAttendanceStore } from "../../store/attendance/useAttendanceStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
+import { getCurrentSemester } from "../../constants/semester";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import MyButton from "../../components/button/MyButton.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
@@ -14,8 +15,8 @@ const authStore = useAuthStore();
 const yearOptions = computed(() => {
   const cy = new Date().getFullYear();
   const endYear = authStore.userInfo?.endYear || cy;
-  const startYear = authStore.userInfo?.startYear 
-    ? authStore.userInfo.startYear 
+  const startYear = authStore.userInfo?.startYear
+    ? authStore.userInfo.startYear
     : endYear - 3;
   const years = [];
   for (let y = endYear; y >= startYear; y--) {
@@ -79,10 +80,10 @@ const attendanceStatusLabel = {
 const enrollments = ref([]);
 const loading = ref(false);
 // 선택한과목명
-const selectedCourseName = ref(""); 
+const selectedCourseName = ref("");
 const searchParams = reactive({
   year: yearOptions.value[0],
-  semester: 1,
+  semester: getCurrentSemester(),
 });
 
 const isStudent = computed(() => authStore.userInfo?.role === "STUDENT");
@@ -120,7 +121,7 @@ const clearSelectedCourse = () => {
   selectedCourseName.value = "";
 };
 // 해당학기 수강내역 조회
-const loadEnrollments = async () => { 
+const loadEnrollments = async () => {
   try {
     const res = await myAxios.get("/api/student/enrollments/my", {
       params: {
@@ -134,7 +135,7 @@ const loadEnrollments = async () => {
     enrollments.value = [];
     console.error("수강 내역 조회 실패:", error);
   }
-};  
+};
 // 출석률, 출석내역 조회
 const loadStudentData = async () => {
   loading.value = true;
