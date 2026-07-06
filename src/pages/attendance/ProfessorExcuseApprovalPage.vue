@@ -8,6 +8,7 @@ import MyTabs from "../../components/common/MyTabs.vue";
 import MyModal from "../../components/common/MyModal.vue";
 import myAxios from "../../api/myAxios";
 import { notify, confirmDialog } from "../../composables/useDialog";
+import { BLOB_REVOKE_DELAY_MS } from "../../constants/app";
 
 defineOptions({ name: "ProfessorExcuseApprovalPage" });
 
@@ -81,7 +82,7 @@ const openAttachment = async (request) => {
       } else {
         window.open(blobUrl, "_blank", "noopener,noreferrer");
       }
-      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), BLOB_REVOKE_DELAY_MS);
       return;
     }
 

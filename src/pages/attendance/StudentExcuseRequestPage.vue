@@ -9,6 +9,9 @@ import MyTable from "../../components/table/MyTable.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import { notify } from "../../composables/useDialog";
+import { DAY_LABELS_KO, DAY_LABELS_KO_SHORT, DAY_CODES_EN } from "../../constants/day";
+import { getCurrentSemester } from "../../constants/semester";
+import { BLOB_REVOKE_DELAY_MS } from "../../constants/app";
 
 const academicStore = useAttendanceStore();
 const authStore = useAuthStore();
@@ -45,21 +48,15 @@ const pendingExcuseColumns = [
   { key: "status", label: "상태" },
 ];
 
-const dayNames = [
-  "일요일",
-  "월요일",
-  "화요일",
-  "수요일",
-  "목요일",
-  "금요일",
-  "토요일",
-];
-const shortDayNames = ["일", "월", "화", "수", "목", "금", "토"];
-
 const enrollments = ref([]);
 const loading = ref(false);
 const attachmentInput = ref(null);
-const searchParams = reactive({ year: 2026, semester: 1 });
+// 현재 학기: 1~6월은 1학기, 7~12월은 2학기
+const now = new Date();
+const searchParams = reactive({
+  year: now.getFullYear(),
+  semester: getCurrentSemester(now),
+});
 const excuseForm = reactive({
   enrollmentId: "",
   lectureDate: "",
@@ -106,7 +103,7 @@ const openAttachment = async (request) => {
       } else {
         window.open(blobUrl, "_blank", "noopener,noreferrer");
       }
-      window.setTimeout(() => URL.revokeObjectURL(blobUrl), 60000);
+      window.setTimeout(() => URL.revokeObjectURL(blobUrl), BLOB_REVOKE_DELAY_MS);
       return;
     }
 
@@ -136,16 +133,15 @@ const selectedDateLabel = computed(() => {
   const year = selectedDate.value.getFullYear();
   const month = String(selectedDate.value.getMonth() + 1).padStart(2, "0");
   const date = String(selectedDate.value.getDate()).padStart(2, "0");
-  return `${year}.${month}.${date} ${shortDayNames[selectedDayIndex.value]}`;
+  return `${year}.${month}.${date} ${DAY_LABELS_KO_SHORT[selectedDayIndex.value]}`;
 });
 
 const scheduleMatchesSelectedDate = (schedule) => {
   if (selectedDayIndex.value === null || !schedule) return false;
 
-  const dayName = dayNames[selectedDayIndex.value];
-  const shortDayName = shortDayNames[selectedDayIndex.value];
-  const englishDayMap = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
-  const englishDayName = englishDayMap[selectedDayIndex.value];
+  const dayName = DAY_LABELS_KO[selectedDayIndex.value];
+  const shortDayName = DAY_LABELS_KO_SHORT[selectedDayIndex.value];
+  const englishDayName = DAY_CODES_EN[selectedDayIndex.value];
 
   return schedule
     .split(",")

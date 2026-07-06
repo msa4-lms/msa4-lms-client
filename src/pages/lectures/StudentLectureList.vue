@@ -2,6 +2,7 @@
 import { ref, onMounted, computed } from "vue";
 import { useLectureStore } from "../../store/lecture/useLectureStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
+import { getCurrentSemester } from "../../constants/semester";
 import MyTable from "../../components/table/MyTable.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
@@ -11,15 +12,14 @@ const lectureStore = useLectureStore();
 
 const now = new Date();
 const currentYear = now.getFullYear();
-const currentMonth = now.getMonth() + 1;
-const currentSemester = currentMonth >= 1 && currentMonth <= 6 ? 1 : 2;
+const currentSemester = getCurrentSemester(now);
 
 const authStore = useAuthStore();
 const yearOptions = computed(() => {
   const cy = now.getFullYear();
   const endYear = authStore.userInfo?.endYear || cy;
-  const startYear = authStore.userInfo?.startYear 
-    ? authStore.userInfo.startYear 
+  const startYear = authStore.userInfo?.startYear
+    ? authStore.userInfo.startYear
     : endYear - 3;
   const years = [];
   for (let y = endYear; y >= startYear; y--) {

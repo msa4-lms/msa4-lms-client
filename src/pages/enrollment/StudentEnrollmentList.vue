@@ -6,16 +6,19 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyTable from "../../components/table/MyTable.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
+import { DAY_LABELS_KO_SHORT } from "../../constants/day";
+import { getCurrentSemester } from "../../constants/semester";
 
 const enrollmentStore = useEnrollmentStore();
 const authStore = useAuthStore();
-const days = ["월", "화", "수", "목", "금"];
+// 시간표 컬럼용 월~금 (일요일 제외)
+const days = DAY_LABELS_KO_SHORT.slice(1, 6);
 
 const yearOptions = computed(() => {
   const cy = new Date().getFullYear();
   const endYear = authStore.userInfo?.endYear || cy;
-  const startYear = authStore.userInfo?.startYear 
-    ? authStore.userInfo.startYear 
+  const startYear = authStore.userInfo?.startYear
+    ? authStore.userInfo.startYear
     : endYear - 3;
   const years = [];
   for (let y = endYear; y >= startYear; y--) {
@@ -26,7 +29,7 @@ const yearOptions = computed(() => {
 
 const historyParams = ref({
   year: yearOptions.value[0],
-  semester: 1,
+  semester: getCurrentSemester(),
 });
 
 const onSearchHistory = () => {
