@@ -220,6 +220,7 @@ watch(
 
       <MyTable
         :columns="gradeColumns"
+        :loading="academicStore.loading"
         :empty="displayedGrades.length === 0"
         emptyMessage="조회된 성적 내역이 없습니다."
       >

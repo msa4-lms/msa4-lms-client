@@ -71,6 +71,9 @@ const alertReady = () => {
             >
           </div>
           <div class="submenu-list" v-show="activeMenus.studentCourse">
+            <router-link to="/lectures" class="submenu-item">{{
+              getMenuTitle("/lectures")
+            }}</router-link>
             <router-link to="/enrollments" class="submenu-item">{{
               getMenuTitle("/enrollments")
             }}</router-link>
@@ -93,6 +96,9 @@ const alertReady = () => {
           <div class="submenu-list" v-show="activeMenus.studentGrade">
             <router-link to="/grade" class="submenu-item">{{
               getMenuTitle("/grade")
+            }}</router-link>
+            <router-link to="/evaluations" class="submenu-item">{{
+              getMenuTitle("/evaluations")
             }}</router-link>
           </div>
         </div>

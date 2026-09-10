@@ -190,7 +190,7 @@ const formatSchedule = (schedule) => {
         :empty="enrollmentStore.myEnrollments.length === 0"
         emptyMessage="신청 내역이 없습니다."
       >
-        <tr v-for="item in enrollmentStore.myEnrollments" :key="item.id">
+        <tr v-for="item in enrollmentStore.myEnrollments" :key="item.enrollmentId">
           <td>{{ item.courseCode }}</td>
           <td>{{ item.courseName }}</td>
           <td>{{ item.professorName }}</td>
