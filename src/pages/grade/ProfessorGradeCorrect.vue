@@ -8,6 +8,7 @@ import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
 import { notify, confirmDialog } from "../../composables/useDialog";
+import { DEFAULT_GRADE_RATIOS, termLabel } from "../../constants/grade";
 
 const gradeStore = useGradeProfessorStore();
 
@@ -27,7 +28,7 @@ const scoreFields = [
 const lectures = computed(() => gradeStore.lectures);
 const currentLecture = computed(() =>
   lectures.value.find(
-    (lecture) => String(lecture.id) === String(selectedLectureId.value)
+    (lecture) => lecture.id === selectedLectureId.value
   )
 );
 
@@ -41,14 +42,8 @@ const getRatio = (type) => {
     assignment: "assignmentRatio",
     attendance: "attendanceRatio",
   };
-  const defaults = {
-    midterm: 30,
-    final: 30,
-    assignment: 30,
-    attendance: 10,
-  };
 
-  return Number(lecture[ratioKeys[type]] ?? defaults[type]);
+  return Number(lecture[ratioKeys[type]] ?? DEFAULT_GRADE_RATIOS[type]);
 };
 
 // [수정됨] 이름 컬럼 라벨 변경 및 '+ 부여' 컬럼 제거
@@ -127,12 +122,6 @@ const displayStatus = (grade) =>
 // 학생에게 공개된(OPENED) 성적만 정정 가능. 미입력(DRAFT)/최종확정(FINAL)은 정정 불가.
 const canCorrect = (grade) => grade.status === "OPENED";
 
-const termLabel = (term) => {
-  if (term === "FIRST" || term === 1 || term === "1") return "1학기";
-  if (term === "SECOND" || term === 2 || term === "2") return "2학기";
-  return term || "";
-};
-
 const createEditableGrade = (grade) => {
   const original = Object.fromEntries(
     scoreFields.map((field) => [field.key, grade[field.key]])
@@ -169,7 +158,7 @@ const loadGrades = async () => {
 const handleScoreInput = (grade, fieldKey, value) => {
   if (!canCorrect(grade)) return;
   grade[fieldKey] = value === "" ? "" : Number(value);
-  
+
   const newTotal = calculateTotal(grade);
   const autoGrade = determineGrade(newTotal);
   grade.hasPlus = autoGrade.includes('+');
@@ -283,7 +272,7 @@ onMounted(async () => {
 
     <section class="grade-section">
       <h3>수강생 성적 정정</h3>
-      
+
       <div v-if="hasValidationError" class="validation-alert">
         점수는 0점 이상 100점 이하로 입력해 주세요.
       </div>

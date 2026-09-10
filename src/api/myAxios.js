@@ -3,6 +3,7 @@ import dayjs from "dayjs";
 import { jwtDecode } from "jwt-decode";
 import { useAuthStore } from "../store/auth/useAuthStore";
 import { notify } from "../composables/useDialog";
+import { TOKEN_REFRESH_MARGIN_MINUTES, LOGIN_PATH } from "../constants/app";
 
 const myAxios = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || "",
@@ -36,7 +37,7 @@ myAxios.interceptors.request.use(async (config) => {
   if (accessToken && authStore.isLoggedIn) {
     const claims = jwtDecode(accessToken);
     const now = dayjs().unix();
-    const expTime = dayjs.unix(claims.exp).add(-5, "minute").unix();
+    const expTime = dayjs.unix(claims.exp).add(-TOKEN_REFRESH_MARGIN_MINUTES, "minute").unix();
 
     if (now >= expTime) {
       try {
@@ -100,7 +101,7 @@ myAxios.interceptors.response.use(
         await notify(errorData?.message || "세션이 만료되었습니다. 다시 로그인해주세요.");
       }
       authStore.clearAuthStore();
-      window.location.href = "/";
+      window.location.href = LOGIN_PATH;
     } else if (error.response) {
       // 그 외 모든 에러 응답(403/404/409/413/500 등): 백엔드 메시지로 일원화
       if (canAlert) await notify(buildMessage());

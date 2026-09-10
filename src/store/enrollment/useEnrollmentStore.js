@@ -2,15 +2,14 @@ import { defineStore } from "pinia";
 import { ref } from "vue";
 import myAxios from "../../api/myAxios";
 import { notify, confirmDialog } from "../../composables/useDialog";
+import { getCurrentSemester } from "../../constants/semester";
 
 export const useEnrollmentStore = defineStore("enrollment", () => {
   const myEnrollments = ref([]); // 수강 신청 과목 리스트
   const totalCredits = ref(0); // 이번 학기 총 신청 학점 합계
   const loading = ref(false);
   const currentViewYear = ref(new Date().getFullYear());
-  const currentViewSemester = ref(
-    new Date().getMonth() + 1 >= 1 && new Date().getMonth() + 1 <= 6 ? 1 : 2
-  );
+  const currentViewSemester = ref(getCurrentSemester());
 
   const toTerm = (semester) => {
     if (semester === "FIRST" || semester === "SECOND") return semester;
@@ -47,12 +46,14 @@ export const useEnrollmentStore = defineStore("enrollment", () => {
         },
       });
 
-      const enrollments = Array.isArray(res.data.data) ? res.data.data : [];
+      const responseData = res.data.data;
+      const enrollments = Array.isArray(responseData)
+        ? responseData
+        : responseData?.enrollments || [];
       myEnrollments.value = enrollments.map(normalizeEnrollment);
-      totalCredits.value = myEnrollments.value.reduce(
-        (sum, item) => sum + Number(item.credits || 0),
-        0
-      );
+      totalCredits.value =
+        responseData?.totalCredits ??
+        myEnrollments.value.reduce((sum, item) => sum + Number(item.credits || 0), 0);
     } catch (error) {
       console.error("수강 내역을 불러오는 중 오류가 발생했습니다:", error);
     } finally {

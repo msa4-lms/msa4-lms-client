@@ -6,9 +6,16 @@ import MyButton from "../../components/button/MyButton.vue";
 import MyInput from "../../components/input/MyInput.vue";
 import { useLectureProfessorStore } from "../../store/lecture/useLectureProfessorStore";
 import { notify } from "../../composables/useDialog";
+import { DAY_LABELS_KO, DAY_CODES_EN } from "../../constants/day";
+import { termLabel } from "../../constants/grade";
 
 const router = useRouter();
 const lectureProfessorStore = useLectureProfessorStore();
+
+// 한글 요일명 <-> 영문 코드 매핑 (공용 요일 상수 기반)
+const KO_LABEL_TO_EN_CODE = Object.fromEntries(
+  DAY_CODES_EN.map((code, i) => [DAY_LABELS_KO[i], code])
+);
 
 const form = reactive({
   courseId: "",
@@ -33,7 +40,7 @@ const form = reactive({
       let str = String(newVal).replace(/[^0-9]/g, '');
       if (str.length > 3) str = str.slice(0, 3);
       let finalVal = str === '' ? '' : Number(str);
-      
+
       if (finalVal !== '' && finalVal > 100) {
         finalVal = 100;
       }
@@ -87,13 +94,6 @@ const handlePastLectureSelect = () => {
 const parseScheduleString = (scheduleStr) => {
   if (!scheduleStr) return [];
   const items = scheduleStr.split(", ");
-  const dayMap = {
-    월요일: "MON",
-    화요일: "TUE",
-    수요일: "WED",
-    목요일: "THU",
-    금요일: "FRI",
-  };
   const parsed = [];
 
   items.forEach((item) => {
@@ -103,7 +103,7 @@ const parseScheduleString = (scheduleStr) => {
       const startTime = parts[1];
       const endTime = parts[3];
 
-      const dayOfWeek = dayMap[dayLabel];
+      const dayOfWeek = KO_LABEL_TO_EN_CODE[dayLabel];
       const startHour = parseInt(startTime.split(":")[0], 10);
       const endHour = parseInt(endTime.split(":")[0], 10);
 
@@ -146,16 +146,7 @@ const removeSchedule = (index) => {
   form.schedules.splice(index, 1);
 };
 
-const getDayLabel = (day) => {
-  const map = {
-    MON: "월요일",
-    TUE: "화요일",
-    WED: "수요일",
-    THU: "목요일",
-    FRI: "금요일",
-  };
-  return map[day] || day;
-};
+const getDayLabel = (day) => DAY_LABELS_KO[DAY_CODES_EN.indexOf(day)] || day;
 
 const handleSubmit = async () => {
   if (!isRatioValid.value) {
@@ -170,7 +161,7 @@ const handleSubmit = async () => {
   try {
     await lectureProfessorStore.createLecture({ ...form });
     notify("강의 개설 신청이 정상 처리되었습니다.");
-    
+
     // 페이지 이동 대신 폼 데이터 초기화
     Object.assign(form, {
       courseId: "",
@@ -189,7 +180,7 @@ const handleSubmit = async () => {
       schedules: [],
     });
     selectedPastLectureId.value = "";
-    
+
   } catch (error) {
     console.error("강의 개설 신청 실패:", error);
   }
@@ -234,7 +225,7 @@ const handleSubmit = async () => {
                       :value="l.id"
                     >
                       [{{ l.academicYear }}학년도
-                      {{ l.term === "FIRST" ? "1학기" : "2학기" }}]
+                      {{ termLabel(l.term) }}]
                       {{ l.courseName }}
                     </option>
                   </select>

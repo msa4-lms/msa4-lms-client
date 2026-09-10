@@ -35,7 +35,7 @@ export const useTabStore = defineStore("tab", () => {
     const index = tabs.value.findIndex((tab) => tab.path === path);
     if (index !== -1) {
       tabs.value.splice(index, 1);
-      
+
       // 현재 활성화된 탭을 닫은 경우 다른 탭으로 이동
       if (activeTab.value === path) {
         if (tabs.value.length > 0) {

@@ -23,7 +23,7 @@
           <span class="value">
             정원: {{ currentLecture?.capacity }}명 |
             {{ currentLecture?.academicYear }}학년도
-            {{ currentLecture?.term === "FIRST" ? "1학기" : "2학기" }}
+            {{ termLabel(currentLecture?.term) }}
           </span>
         </div>
       </MySearchFilter>
@@ -31,7 +31,7 @@
 
     <!-- 성적 관리 테이블 섹션 (하단 카드) -->
     <h3>수강생 성적 입력</h3>
-    
+
     <div v-if="hasValidationError" class="validation-error-alert">
       입력된 성적 중 0점 미만이거나 100점을 초과한 점수가 존재합니다. (0 ~
       100점 사이로 정상 입력하셔야 저장이 가능합니다.)
@@ -148,6 +148,7 @@ import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import StatusBadge from "../../components/common/StatusBadge.vue";
 import { useGradeProfessorStore } from "../../store/grade/useGradeProfessorStore";
 import { notify, confirmDialog } from "../../composables/useDialog";
+import { termLabel } from "../../constants/grade";
 const gradeStore = useGradeProfessorStore();
 
 const selectedLectureId = ref(null);
