@@ -8,6 +8,7 @@ const StudentLectureList = () => import("../pages/lectures/StudentLectureList.vu
 const StudentLectureEnrollment = () =>
   import("../pages/enrollment/StudentLectureEnrollment.vue");
 const StudentEnrollmentList = () => import("../pages/enrollment/StudentEnrollmentList.vue");
+const StudentLectureEvaluation = () => import("../pages/grade/StudentLectureEvaluation.vue");
 import { useAuthStore } from "../store/auth/useAuthStore.js";
 import { notify } from "../composables/useDialog";
 import ProfessorGradeCorrect from "../pages/grade/ProfessorGradeCorrect.vue";
@@ -69,6 +70,12 @@ const routes = [
     name: "Grade",
     component: StudentGradePage,
     meta: setMeta(true, false),
+  },
+  {
+    path: "/evaluations",
+    name: "StudentLectureEvaluation",
+    component: StudentLectureEvaluation,
+    meta: setMeta(true, false, ["STUDENT"]),
   },
   {
     path: "/profile",

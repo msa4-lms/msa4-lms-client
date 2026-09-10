@@ -1,13 +1,18 @@
 <script setup>
 import { ref, onMounted, computed } from "vue";
+import { useEnrollmentStore } from "../../store/enrollment/useEnrollmentStore";
 import { useLectureStore } from "../../store/lecture/useLectureStore";
 import { useAuthStore } from "../../store/auth/useAuthStore";
 import MyTable from "../../components/table/MyTable.vue";
 import MyPageContainer from "../../components/layout/MyPageContainer.vue";
 import ScheduleViewer from "../../components/formatters/ScheduleViewer.vue";
 import MySearchFilter from "../../components/search/MySearchFilter.vue";
+import MyButton from "../../components/button/MyButton.vue";
+import { useRouter } from "vue-router";
 
+const enrollmentStore = useEnrollmentStore();
 const lectureStore = useLectureStore();
+const router = useRouter();
 
 const now = new Date();
 const currentYear = now.getFullYear();
@@ -33,8 +38,26 @@ const searchParams = ref({
   semester: currentSemester,
 });
 
+const isProfessor = computed(() => authStore.userInfo?.role === "PROFESSOR");
+const pageTitle = computed(() => (isProfessor.value ? "나의 강의 조회" : "강의 조회"));
+const pageSubtitle = computed(() =>
+  isProfessor.value
+    ? "담당 강의를 학기별로 확인합니다."
+    : "현재 백엔드에서 조회 가능한 본인 수강 강의를 학기별로 확인합니다."
+);
+const loading = computed(() =>
+  isProfessor.value ? lectureStore.loading : enrollmentStore.loading
+);
+const displayedLectures = computed(() =>
+  isProfessor.value ? lectureStore.lectures : enrollmentStore.myEnrollments
+);
+
 const onSearch = () => {
-  lectureStore.fetchMyLectures(searchParams.value);
+  if (isProfessor.value) {
+    lectureStore.fetchMyLectures(searchParams.value);
+    return;
+  }
+  enrollmentStore.fetchMyEnrollments(searchParams.value.year, searchParams.value.semester);
 };
 
 const lectureColumns = [
@@ -47,17 +70,19 @@ const lectureColumns = [
   { key: "classroom", label: "강의실", class: "col-classroom" },
   { key: "schedule", label: "시간", class: "col-time" },
   { key: "capacity", label: "정원", class: "col-capacity" },
+  { key: "detail", label: "상세" },
 ];
 
 onMounted(() => {
-  lectureStore.lectures = [];
-  lectureStore.totalCount = 0;
-  lectureStore.fetchMyLectures(searchParams.value);
+  onSearch();
 });
 </script>
 
 <template>
-  <MyPageContainer title="나의 강의 조회">
+  <MyPageContainer
+    :title="pageTitle"
+    :subtitle="pageSubtitle"
+  >
 
     <MySearchFilter @search="onSearch">
         <div class="search-group">
@@ -78,11 +103,11 @@ onMounted(() => {
 
     <MyTable
       :columns="lectureColumns"
-      :loading="lectureStore.loading"
-      :empty="lectureStore.lectures.length === 0"
+      :loading="loading"
+      :empty="displayedLectures.length === 0"
       emptyMessage="조회된 강의가 없습니다."
     >
-      <tr v-for="lecture in lectureStore.lectures" :key="lecture.id">
+      <tr v-for="lecture in displayedLectures" :key="lecture.enrollmentId || lecture.id">
         <td>{{ lecture.courseCode }}</td>
         <td>{{ lecture.departmentName }}</td>
         <td class="course-name">{{ lecture.courseName }}</td>
@@ -94,6 +119,17 @@ onMounted(() => {
           <ScheduleViewer :schedule="lecture.schedule" />
         </td>
         <td>{{ lecture.capacity }}명</td>
+        <td>
+          <MyButton
+            v-if="!isProfessor"
+            btnType="button"
+            color="deep-blue"
+            size="small"
+            content="상세"
+            @click="router.push({ path: '/evaluations', query: { enrollmentId: lecture.enrollmentId } })"
+          />
+          <span v-else>-</span>
+        </td>
       </tr>
     </MyTable>
   </MyPageContainer>

@@ -109,8 +109,8 @@ const totalPages = computed(() =>
   Math.ceil(lectureStore.totalCount / searchParams.value.size)
 );
 
-const handleCancel = async (lectureId) => {
-  await enrollmentStore.cancelEnrollment(lectureId);
+const handleCancel = async (enrollmentId) => {
+  await enrollmentStore.cancelEnrollment(enrollmentId);
   lectureStore.fetchLectures(searchParams.value);
 };
 
@@ -292,7 +292,7 @@ onMounted(async () => {
               color="red"
               size="small"
               content="취소"
-              @click="handleCancel(item.lectureId)"
+              @click="handleCancel(item.enrollmentId)"
             />
           </td>
         </tr>
